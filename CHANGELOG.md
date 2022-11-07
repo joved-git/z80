@@ -1,3 +1,6 @@
+# 0.0.6
+Add class for 8-bit registers.
+
 # 0.0.5
 Add compilation instruction into README.md file.
 

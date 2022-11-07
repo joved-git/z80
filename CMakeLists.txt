@@ -22,7 +22,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__FILENAME__='\"$(subst ${CMAKE_SOURCE
 #find_package(rbc-data-model)
 #find_package(Poco COMPONENTS Util Foundation)
 
-set(SRC_FILES src/z80.cpp)       
+set(SRC_FILES src/z80.cpp
+    src/Register_8bits.cpp)       
 
 #add_definitions(-DQT_DEPRECATED_WARNINGS)
 
