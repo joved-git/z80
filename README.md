@@ -8,8 +8,7 @@ See ya !
 1. Clone the repo.
 
 `$ cd <bla>
-
-$ git clone ...`
+	$ git clone ...`
 
 2. Go to inside and create the build directory.
 
@@ -22,7 +21,6 @@ $ cd build
 3. Compile the soft
 
 `$ cmake ..
-
 $ make`
 
 4. Enjoy !
