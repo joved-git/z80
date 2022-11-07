@@ -29,7 +29,9 @@ $ make
 
 4. Enjoy !
 
-`$ ./z80`
+```
+$ ./z80
+```
 
 # Compilation under Windows
 1. Clone the repo.
