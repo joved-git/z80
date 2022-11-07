@@ -16,9 +16,7 @@ $ git clone ...
 
 ```
 $ cd z80
-
 $ mkdir build
-
 $ cd build
 ```
 
@@ -42,8 +40,8 @@ Open the cloned folder (z80)
 
 3. Compile the soft
 
-Open src/z80.cpp
+Open **src/z80.cpp**
 
-Execute Terminal/Run Build Task... then choose g++
+Execute **Terminal/Run Build Task...** then choose g++
 
 4. Enjoy !
