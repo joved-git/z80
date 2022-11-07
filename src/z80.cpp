@@ -1,11 +1,13 @@
 #include <iostream>
+#include "../inc/version.hpp"
 
 int main(int argc, char *argv[])
 {
     bool exit=false;
     char c;
 
-    std::cout << "Hello Z80 world !" << std::endl << std::endl;
+    std::cout << "Hello Z80 world !" << std::endl;
+    std::cout << "Version: " << VERSION << std::endl << std::endl;
     std::cout << "Type h if your want some help..." << std::endl << std::endl;
 
     while (!exit)

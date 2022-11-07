@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(z80)
 
 #include($ENV{HOME}/.cmake/CommonIncludes.cmake)
+#include(inc/version.hpp)
 
 #configure_file(src/Version.hpp.in ${CMAKE_BINARY_DIR}/Version.hpp)
 
