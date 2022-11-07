@@ -7,9 +7,8 @@ See ya !
 # Compilation under Linux
 1. Clone the repo.
 
-$ cd <bla>
-
-$ git clone ...
+'$ cd <bla>
+$ git clone ...'
 
 2. Go to inside and create the build directory.
 
