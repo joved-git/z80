@@ -1,3 +1,8 @@
+# 0.0.9
+Change the way to display register.
+Add A and F and binary representation for F.
+Add examples into help screen.
+
 # 0.0.8
 Add a Makefile for Windows. See REAMDE.md file for the compilation instruction.
 

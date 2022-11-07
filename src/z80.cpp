@@ -1,9 +1,25 @@
 #include <iostream>
-#include "../inc/version.hpp"
+#include <cstring>
 
+#include "../inc/version.hpp"
 #include "../inc/Register_8bits.h"
 
 #define EOL '\n'
+
+/* Byte to binay function	*/
+const char *byteToBinary(uint8_t x)
+{
+    static char b[9];
+    b[0] = '\0';
+
+    int z;
+    for (z = 128; z > 0; z >>= 1)
+    {
+        strcat(b, ((x & z) == z) ? "1" : "0");
+    }
+
+    return b;
+}
 
 int main(int argc, char *argv[])
 {
@@ -18,12 +34,15 @@ int main(int argc, char *argv[])
     Register_8bits regE;
     Register_8bits regH;
     Register_8bits regL;
+	Register_8bits regA;
+    Register_8bits regF;
 
 	regB.setValue(0x01);
 	regC.setValue(0xAA);
 	regD.setValue(0x0C);
 	regE.setValue(0x10);
 	regL.setValue(0xC8);
+	regF.setValue(0b01101111);
 
 	/* Display the invitational message	*/
     std::cout << "Hello Z80 world !" << std::endl;
@@ -46,8 +65,10 @@ int main(int argc, char *argv[])
         
 			/* OK, display help	*/
 			case 'h':
-            	printf("\na <code>: translate <code> in assembly langage\n");
+            	printf("\na <code>: translate <code> to assembly langage\n");
+				printf("  Example: ld c,b gives 0x41\n");
             	printf("m <cmd>: translate <cmd> in machine code\n");
+				printf("  Example: cb22 gives sla d\n");
             	printf("r: display main registers\n");
             	printf("rr: display all registers\n");
             	printf("x: exit me\n");
@@ -64,9 +85,11 @@ int main(int argc, char *argv[])
 			/* Display registers	*/
 			case 'r':
 				printf("\n");
-				printf("[%02X] B | C [%02X]\n", regB.getValue(), regC.getValue());
-				printf("[%02X] D | E [%02X]\n", regD.getValue(), regE.getValue());
-				printf("[%02X] H | L [%02X]\n", regH.getValue(), regL.getValue());
+				printf("B: [%02X]    C: [%02X]\n", regB.getValue(), regC.getValue());
+				printf("E: [%02X]    E: [%02X]\n", regD.getValue(), regE.getValue());
+				printf("H: [%02X]    L: [%02X]\n", regH.getValue(), regL.getValue());
+				printf("A: [%02X]    F: [%02X] [%s]\n", regA.getValue(), regF.getValue(), byteToBinary(regF.getValue()));
+
 			break;
         }
     }
