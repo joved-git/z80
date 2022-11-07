@@ -1,3 +1,6 @@
+# 0.0.5
+Add compilation instruction into README.md file.
+
 # 0.0.4
 Add the 'z>' prompt.
 Add the 'x' command in the help.
