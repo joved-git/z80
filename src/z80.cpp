@@ -13,6 +13,8 @@ int main(int argc, char *argv[])
     /* Define registers	*/
     Register_8bits regA;
 
+    //regA.setValue(;)
+
     std::cout << "Hello Z80 world !" << std::endl;
     std::cout << "Version: " << VERSION << std::endl << std::endl;
     std::cout << "Type h if your want some help..." << std::endl << std::endl;
