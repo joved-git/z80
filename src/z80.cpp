@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 	/* Display the invitational message	*/
     std::cout << "Hello Z80 world !" << std::endl;
     std::cout << "Version: " << VERSION << std::endl << std::endl;
-    std::cout << "Type h if your want some help..." << std::endl << std::endl;
+    std::cout << "Type h if you want some help..." << std::endl << std::endl;
     std::cout << "z> ";
 
 	/* Do what you do or quit !	*/
