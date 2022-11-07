@@ -8,6 +8,7 @@ See ya !
 1. Clone the repo.
 
 `$ cd <bla>
+
 $ git clone ...`
 
 2. Go to inside and create the build directory.
@@ -20,20 +21,20 @@ $ cd build
 
 3. Compile the soft
 
-$ cmake ..
+`$ cmake ..
 
-$ make
+$ make`
 
 4. Enjoy !
 
-$ ./z80
+`$ ./z80`
 
 # Compilation under Windows
 1. Clone the repo.
 
 2. Open the solution with Visual Studio Code
 
-Open folder <bla>/z80
+Open the cloned folder (z80)
 
 3. Compile the soft
 
