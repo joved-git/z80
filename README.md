@@ -40,10 +40,18 @@ $ ./z80
 
 Open the cloned folder (z80)
 
-3. Compile the soft
+3. Compile the soft with Visual Studio Code
 
-Open **src/z80.cpp**
+Open a **Terminal**
 
-Execute **Terminal/Run Build Task...** then choose g++
+Go to the **clone** directory.
+
+Compile with make:
+
+```
+c:\make
+```
+
+The executable is into the build directory.
 
 4. Enjoy !

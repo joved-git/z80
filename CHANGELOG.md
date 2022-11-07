@@ -1,5 +1,9 @@
+# 0.0.8
+Add a Makefile for Windows. See REAMDE.md file for the compilation instruction.
+
 # 0.0.7
 Add the 'r' function and display only 8-bit registers.
+
 # 0.0.6
 Add class for 8-bit registers.
 
