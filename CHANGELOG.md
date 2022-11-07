@@ -1,3 +1,5 @@
+# 0.0.7
+Add the 'r' function and display only 8-bit registers.
 # 0.0.6
 Add class for 8-bit registers.
 

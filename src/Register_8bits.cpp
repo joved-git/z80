@@ -2,7 +2,7 @@
 
 Register_8bits::Register_8bits()
 {
-    mValue=0;
+    mValue=255;
 }
 
 Register_8bits::~Register_8bits()
