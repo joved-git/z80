@@ -7,21 +7,27 @@ See ya !
 # Compilation under Linux
 1. Clone the repo.
 
-`$ cd <bla>
-	$ git clone ...`
+```
+$ cd <bla>
+$ git clone ...
+```
 
 2. Go to inside and create the build directory.
 
+```
 $ cd z80
 
 $ mkdir build
 
 $ cd build
+```
 
 3. Compile the soft
 
-`$ cmake ..
-$ make`
+```
+$ cmake ..
+$ make
+```
 
 4. Enjoy !
 
