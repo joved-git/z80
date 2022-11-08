@@ -10,4 +10,12 @@
 #define TRUE	1
 #define MAX_LEN	256
 
+enum typeOfEntry
+    {
+        NOTHING=0,
+        COMMAND,
+        INSTRUCTION,
+        CODE
+    };
+
 #endif

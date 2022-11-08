@@ -1,3 +1,7 @@
+# 0.1.0
+First version with definitive core.
+Add Command class. Code refactoring.
+
 # 0.0.9
 Change the way to display register.
 Add A and F and binary representation for F.

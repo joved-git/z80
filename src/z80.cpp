@@ -61,10 +61,8 @@ int main(int argc, char *argv[])
 	/* Do what you do or quit !	*/
     while (!exit)
     {
-		printf("avant");
-        c=getchar();
-		printf("apres");
-        /* printf("%d-", c);    */
+	    c=getchar();
+		/* printf("%d-", c);    */
 
 		/* Read the command	*/
 		while (c!=EOL)
@@ -82,62 +80,18 @@ int main(int argc, char *argv[])
 
 		command[i]='\0';
 		i=0;
-		printf("command=<%s>\n", command);
+		//printf("command=<%s>\n", command);
 		
 		/* Handle the command	*/ 
 		newCommand.setEntry(command);
-		//newCommand.analyse();
+		exit=newCommand.analyse();
 		//newCommand.getResult();
 		//
 		//cmd=newCommand.getInstruction();
 		//attr1=newCommand.getFirstAttribute();
 		//attr2=newCommand.getSecondAttribute();
 
-		switch (c) {
-			/* I have to exit	*/
-            case 'x':
-				if (firstChar) 
-				{
-                	exit=true;
-				}
-
-				break;
-        
-			/* OK, display help	*/
-			case 'h':
-				printf("\na <code>: translate <code> to assembly langage\n");
-				printf("  Example: ld c,b gives 0x41\n");
-            	printf("m <cmd>: translate <cmd> in machine code\n");
-				printf("  Example: cb22 gives sla d\n");
-            	printf("r: display main registers\n");
-            	printf("R: display all registers\n");
-            	printf("x: exit me\n");
-            	printf("\n");
-            	printf("<cmd>: execute the command\n");
-            	printf("<code>: execute the code\n");
-				break;
-
-			/* Display the prompt after a line	*/
-			case EOL:
-            	std::cout << std::endl << "z> ";
-				
-				/* Read the entry	*/
-				command[i]='\0';
-				printf("command=<%s>\n", command);
-
-				break;
-
-			/* Display registers	*/
-			case 'r':
-				printf("\n");
-				printf("B: [%02X]    C: [%02X]\n", regB.getValue(), regC.getValue());
-				printf("E: [%02X]    E: [%02X]\n", regD.getValue(), regE.getValue());
-				printf("H: [%02X]    L: [%02X]\n", regH.getValue(), regL.getValue());
-				printf("A: [%02X]    F: [%02X] [%s]\n", regA.getValue(), regF.getValue(), byteToBinary(regF.getValue()));
-
-			break;
-        }
-
+		std::cout << "z> ";
 		firstChar=FALSE;
     }
 
