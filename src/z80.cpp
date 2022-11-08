@@ -2,9 +2,10 @@
 #include <cstring>
 
 #include "../inc/version.hpp"
-#include "../inc/Register_8bits.h"
 
-#define EOL '\n'
+#include "../inc/common_values.h"
+#include "../inc/Register_8bits.h"
+#include "../inc/Command.h"
 
 /* Byte to binay function	*/
 const char *byteToBinary(uint8_t x)
@@ -25,7 +26,14 @@ int main(int argc, char *argv[])
 {
 	/* Variables definition	*/
     bool exit=false;
-    char c;
+    char c=0;
+	bool firstChar=TRUE;
+	char command[MAX_LEN];
+	uint16_t i=0;
+	Command newCommand;
+
+	/* Init the values	*/
+	command[0]='\0';
 
     /* Define registers	*/
     Register_8bits regB;
@@ -53,24 +61,56 @@ int main(int argc, char *argv[])
 	/* Do what you do or quit !	*/
     while (!exit)
     {
+		printf("avant");
         c=getchar();
+		printf("apres");
         /* printf("%d-", c);    */
 
-		/* Handle strings	*/ 
+		/* Read the command	*/
+		while (c!=EOL)
+		{
+			if (i<MAX_LEN-1)
+			{
+				command[i++]=c;		
+				c=getchar();
+			}
+			else 
+			{
+				c=EOL;
+			}
+		}
+
+		command[i]='\0';
+		i=0;
+		printf("command=<%s>\n", command);
+		
+		/* Handle the command	*/ 
+		newCommand.setEntry(command);
+		//newCommand.analyse();
+		//newCommand.getResult();
+		//
+		//cmd=newCommand.getInstruction();
+		//attr1=newCommand.getFirstAttribute();
+		//attr2=newCommand.getSecondAttribute();
+
 		switch (c) {
 			/* I have to exit	*/
             case 'x':
-                exit=true;
+				if (firstChar) 
+				{
+                	exit=true;
+				}
+
 				break;
         
 			/* OK, display help	*/
 			case 'h':
-            	printf("\na <code>: translate <code> to assembly langage\n");
+				printf("\na <code>: translate <code> to assembly langage\n");
 				printf("  Example: ld c,b gives 0x41\n");
             	printf("m <cmd>: translate <cmd> in machine code\n");
 				printf("  Example: cb22 gives sla d\n");
             	printf("r: display main registers\n");
-            	printf("rr: display all registers\n");
+            	printf("R: display all registers\n");
             	printf("x: exit me\n");
             	printf("\n");
             	printf("<cmd>: execute the command\n");
@@ -80,6 +120,11 @@ int main(int argc, char *argv[])
 			/* Display the prompt after a line	*/
 			case EOL:
             	std::cout << std::endl << "z> ";
+				
+				/* Read the entry	*/
+				command[i]='\0';
+				printf("command=<%s>\n", command);
+
 				break;
 
 			/* Display registers	*/
@@ -92,6 +137,8 @@ int main(int argc, char *argv[])
 
 			break;
         }
+
+		firstChar=FALSE;
     }
 
     return 0;

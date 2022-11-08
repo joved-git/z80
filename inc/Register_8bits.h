@@ -3,6 +3,8 @@
 
 #include <inttypes.h>
 
+#include "../inc/common_values.h"
+
 class Register_8bits 
 {
 public:
