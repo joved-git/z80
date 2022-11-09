@@ -47,7 +47,6 @@ Z80Machine::~Z80Machine()
 /* Byte to binay function	*/
 const char *Z80Machine::byteToBinary(uint8_t x)
 {
-    printf("btb=%d ", x);
     static char b[9];
     b[0] = '\0';
 
@@ -177,8 +176,12 @@ uint8_t Z80Machine::interpretCode(char *pCode)
         printf("%s\n", byteToBinary(codeInHexa));
         op1=EXTRACT(codeInHexa, 3, 3);
         op2=EXTRACT(codeInHexa, 0, 3);
-        printf("%d %d\n", op1, op2);
-        printf("\n[%02X] is LD %s,%s\n", codeInHexa, byteToBinary(op1), byteToBinary(op2));
+        char sop1[10], sop2[10];
+        strcpy(sop1, byteToBinary(op1));
+        strcpy(sop2, byteToBinary(op2));
+        //printf("%d %s\n", op1, byteToBinary(op1));
+        //printf("%d %s\n", op2, byteToBinary(op2));
+        printf("\n[%02X] is LD %s,%s\n", codeInHexa, sop1, sop2);
     }
 
     return 0;
