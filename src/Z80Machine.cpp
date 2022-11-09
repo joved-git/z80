@@ -3,7 +3,7 @@
 /* The constructor  */
 Z80Machine::Z80Machine()
 {
-    mCommandIsEntered=FALSE;
+    mCommandIsEntered=false;
     mEntry=NULL;
 
     /* Define the type of the 16-bit registers  */
@@ -35,9 +35,7 @@ Z80Machine::Z80Machine()
 	mRegisterPack.regL.setValue(0xC8);
 	mRegisterPack.regF.setValue(0b01101111);
     mRegisterPack.regPC.setValue(0x1234);
-
-    
-   
+    mRegisterPack.regHL.setValue(0xFE14);
 }
 
 /* The destructor  */
@@ -65,7 +63,7 @@ const char *Z80Machine::byteToBinary(uint8_t x)
 bool Z80Machine::isACode()
 {
     bool code=true;
-    bool cont=TRUE;
+    bool cont=true;
     uint16_t i=0;
 
     if (strlen(mEntry)<=8)
@@ -74,14 +72,14 @@ bool Z80Machine::isACode()
         {
             if (mEntry[i]=='\0')
             {
-                cont=FALSE;
+                cont=false;
             }
             else 
             {
                 if (!((mEntry[i]>='A' && mEntry[i]<='F') || (mEntry[i]>='0' && mEntry[i]<='9')))
                 {
-                    code=FALSE;
-                    cont=FALSE;
+                    code=false;
+                    cont=false;
                 }
             }
 
@@ -135,11 +133,11 @@ void Z80Machine::setEntry(char *pEntry)
 
     if (strlen(mEntry) && mEntry) 
     {
-        mCommandIsEntered=TRUE;
+        mCommandIsEntered=true;
     }
     else
     {
-        mCommandIsEntered=FALSE;
+        mCommandIsEntered=false;
     }
 }
 
@@ -147,7 +145,7 @@ void Z80Machine::setEntry(char *pEntry)
 bool Z80Machine::analyse()
 {
     typeOfEntry type;
-    bool retValue=FALSE;
+    bool retValue=false;
 
     if (mCommandIsEntered)
     {
@@ -160,7 +158,7 @@ bool Z80Machine::analyse()
 
                 /* I have to exit	*/
                 case 'x':
-                    retValue=TRUE;
+                    retValue=true;
                     break;
             
                 /* OK, display help	*/
@@ -181,16 +179,20 @@ bool Z80Machine::analyse()
                 case 'r':
                     //printf("--- Registers ---\n\n");
                     printf("\n");
-                    printf("B: [%02X]    C: [%02X]\n", mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue());
-                    printf("D: [%02X]    E: [%02X]\n", mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue());
-                    printf("H: [%02X]    L: [%02X]\n", mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue());
-                    printf("A: [%02X]    F: [%02X] [%s]\n", mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
+                    printf("B:  [%02X]      C: [%02X]\n", mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue());
+                    printf("D:  [%02X]      E: [%02X]\n", mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue());
+                    printf("H:  [%02X]      L: [%02X]\n", mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue());
+                    printf("A:  [%02X]      F: [%02X] [%s]\n", mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
                         byteToBinary(mRegisterPack.regF.getValue()));
 
                     printf("\n");
-                    printf("BC: [%04X]\n", mRegisterPack.regBC.getValue());
-                    printf("PC: [%04X]\n", mRegisterPack.regPC.getValue());
+                    printf("BC: [%04X]    DE [%04X]\n", mRegisterPack.regBC.getValue(), mRegisterPack.regDE.getValue());
+                    printf("HL: [%04X]\n", mRegisterPack.regHL.getValue());
 
+                    printf("\n");
+                    printf("PC: [%04X]    SP [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());
+                   
+                    //mRegisterPack.regBC.setValue(0xcb08);
 
                 break;
             }

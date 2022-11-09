@@ -1,3 +1,7 @@
+# 0.2.2
+Add the setValue() for 16-bit registers.
+Adjust display of registers (align them all).
+
 # 0.2.1
 Add 16-bit registers and handle half (example BC) and full (like PC) types.
 

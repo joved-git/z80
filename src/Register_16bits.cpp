@@ -39,4 +39,9 @@ if (mFullRegister)
     {
         mValue=pValue;
     }
+    else 
+    {
+        mValueH->setValue(pValue / 0X100);
+        mValueL->setValue(pValue % 0X100);
+    }
 }
