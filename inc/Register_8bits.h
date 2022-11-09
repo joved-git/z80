@@ -2,9 +2,9 @@
 #define REGISTER_8_BITS_H
 
 #include <inttypes.h>
+#include <stdio.h>
 
 #include "../inc/common_values.h"
-#include <stdio.h>
 
 class Register_8bits 
 {

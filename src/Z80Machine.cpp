@@ -6,13 +6,38 @@ Z80Machine::Z80Machine()
     mCommandIsEntered=FALSE;
     mEntry=NULL;
 
+    /* Define the type of the 16-bit registers  */
+    mRegisterPack.regBC.set16bitsRegisterType(HALF);
+    mRegisterPack.regBC.setHightLowRegister(&mRegisterPack.regB, &mRegisterPack.regC);
+    mRegisterPack.regDE.set16bitsRegisterType(HALF);
+    mRegisterPack.regDE.setHightLowRegister(&mRegisterPack.regD, &mRegisterPack.regE);
+    mRegisterPack.regHL.set16bitsRegisterType(HALF);
+    mRegisterPack.regHL.setHightLowRegister(&mRegisterPack.regH, &mRegisterPack.regL);
+
+    mRegisterPack.regSP.set16bitsRegisterType(FULL);
+    mRegisterPack.regPC.set16bitsRegisterType(FULL);
+
+     /* Initialize registers to 0 exept SP  */
+    mRegisterPack.regB.setValue(0x00);
+	mRegisterPack.regC.setValue(0x00);
+	mRegisterPack.regD.setValue(0x00);
+	mRegisterPack.regE.setValue(0x00);
+	mRegisterPack.regL.setValue(0x00);
+	mRegisterPack.regF.setValue(0b00000000);
+    mRegisterPack.regPC.setValue(0x0000);
+    mRegisterPack.regSP.setValue(INITIAL_STACK_POINTER);
+
+     /* Initialize some registers (for test)   */
     mRegisterPack.regB.setValue(0x01);
-	mRegisterPack.regC.setValue(0xAA);
 	mRegisterPack.regC.setValue(0xAA);
 	mRegisterPack.regD.setValue(0x0C);
 	mRegisterPack.regE.setValue(0x10);
 	mRegisterPack.regL.setValue(0xC8);
 	mRegisterPack.regF.setValue(0b01101111);
+    mRegisterPack.regPC.setValue(0x1234);
+
+    
+   
 }
 
 /* The destructor  */
@@ -161,6 +186,12 @@ bool Z80Machine::analyse()
                     printf("H: [%02X]    L: [%02X]\n", mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue());
                     printf("A: [%02X]    F: [%02X] [%s]\n", mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
                         byteToBinary(mRegisterPack.regF.getValue()));
+
+                    printf("\n");
+                    printf("BC: [%04X]\n", mRegisterPack.regBC.getValue());
+                    printf("PC: [%04X]\n", mRegisterPack.regPC.getValue());
+
+
                 break;
             }
             break;

@@ -1,3 +1,6 @@
+# 0.2.1
+Add 16-bit registers and handle half (example BC) and full (like PC) types.
+
 # 0.2.0
 Change class Command to Z80Machine.
 
