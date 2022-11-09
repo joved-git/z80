@@ -4,8 +4,7 @@
 #include "../inc/version.hpp"
 
 #include "../inc/common_values.h"
-//#include "../inc/Register_8bits.h"
-#include "../inc/Command.h"
+#include "../inc/Z80Machine.h"
 
 int main(int argc, char *argv[])
 {
@@ -14,25 +13,10 @@ int main(int argc, char *argv[])
     char c=0;
 	char command[MAX_LEN];
 	uint16_t i=0;
-	Command newCommand;
+	Z80Machine machine;
 	
 	/* Init the values	*/
 	command[0]='\0';
-
-/* Define Registers	Pack structure	*/
-	/*RegisterPack regPack;
-	regPack.regB=new(Register_8bits);
-	regPack.regC=new(Register_8bits);
-
-	regPack.regB->setValue(0x01);
-	regPack.regC->setValue(0xAA);
-
-	regPack.regC.setValue(0xAA);
-	regPack.regD.setValue(0x0C);
-	regPack.regE.setValue(0x10);
-	regPack.regL.setValue(0xC8);
-	regPack.regF.setValue(0b01101111);
-	*/
 
 	/* Display the invitational message	*/
     std::cout << "Hello Z80 world !" << std::endl;
@@ -68,8 +52,8 @@ int main(int argc, char *argv[])
 		//printf("command=<%s>\n", command);
 		
 		/* Handle the command	*/ 
-		newCommand.setEntry(command);
-		exit=newCommand.analyse();
+		machine.setEntry(command);
+		exit=machine.analyse();
 		//printf("*** 2");
 		//newCommand.getResult();
 		//
