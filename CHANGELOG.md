@@ -1,3 +1,6 @@
+# 0.1.1
+
+
 # 0.1.0
 First version with definitive core.
 Add Command class. Code refactoring.
