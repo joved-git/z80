@@ -40,6 +40,14 @@ private:
     /// @brief  Convert the Uint8 value into a binary string.
     /// @param  The converted binary string. 
     const char *byteToBinary(uint8_t);
+
+    /// @brief  
+    /// @param
+    uint8_t interpretCode(char *);
+
+    /// @brief  
+    /// @param
+    uint32_t toHexa(char *, uint8_t *);
 };	
 
 #endif

@@ -18,6 +18,13 @@ int main(int argc, char *argv[])
 	/* Init the values	*/
 	command[0]='\0';
 
+	uint8_t a=0x41;
+	uint8_t res;
+	res=EXTRACT(a, 2, 3);
+	printf("%02x\n", res);
+	res=~(0b111111111<<3);
+	printf("%02x\n", res);
+
 	/* Display the invitational message	*/
     std::cout << "Hello Z80 world !" << std::endl;
     std::cout << "Version: " << VERSION << std::endl << std::endl;

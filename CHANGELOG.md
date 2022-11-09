@@ -1,3 +1,6 @@
+# 0.2.3
+Decode the LD r,r' instruction.
+
 # 0.2.2
 Add the setValue() for 16-bit registers.
 Adjust display of registers (align them all).

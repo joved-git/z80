@@ -47,6 +47,7 @@ Z80Machine::~Z80Machine()
 /* Byte to binay function	*/
 const char *Z80Machine::byteToBinary(uint8_t x)
 {
+    printf("btb=%d ", x);
     static char b[9];
     b[0] = '\0';
 
@@ -141,7 +142,50 @@ void Z80Machine::setEntry(char *pEntry)
     }
 }
 
-// Analyse the command  */
+
+/* Transform the instruction into real number  */
+uint32_t Z80Machine::toHexa(char *pCode, uint8_t *pLen)
+{
+    uint32_t hexaValue;
+
+    *pLen=strlen(pCode);
+
+    hexaValue=(pCode[0]>'9'?pCode[0]-55:pCode[0]-'0') * 0x10 + (pCode[1]>'9'?pCode[1]-55:pCode[1]-'0');
+
+    return hexaValue;
+}          
+
+/* Interpret the machine code   */
+uint8_t Z80Machine::interpretCode(char *pCode)
+{
+    uint32_t codeInHexa;
+    uint8_t len;
+    uint8_t op1, op2;
+
+    codeInHexa=toHexa(pCode, &len);                     /* Transform the instruction into real number  */
+
+    if (codeInHexa == CODE_NOP && len == ONE_BYTE)                  /* This is a NOP    */
+    {
+        printf("\n[00] is NOP\n");
+    }
+
+    //printf("code=%02x\n", codeInHexa);
+    //printf("%02x %02x\n", (codeInHexa & MASK_LDRR), CODE_LDRR);     /* This is a LD r,r'  */
+    
+    if ((codeInHexa & MASK_LDRR)==CODE_LDRR && len == ONE_BYTE)
+    {
+        printf("%s\n", byteToBinary(codeInHexa));
+        op1=EXTRACT(codeInHexa, 3, 3);
+        op2=EXTRACT(codeInHexa, 0, 3);
+        printf("%d %d\n", op1, op2);
+        printf("\n[%02X] is LD %s,%s\n", codeInHexa, byteToBinary(op1), byteToBinary(op2));
+    }
+
+    return 0;
+}
+
+
+/* Analyse the command  */
 bool Z80Machine::analyse()
 {
     typeOfEntry type;
@@ -199,10 +243,7 @@ bool Z80Machine::analyse()
             break;
 
             case CODE:
-                if (!strcmp(mEntry, "00"))
-                {
-                    printf("\n[00] is NOP\n");
-                }
+                interpretCode(mEntry);
                 break;
         }
     }

@@ -5,6 +5,8 @@
 #ifndef COMMON_VALUES_H
 #define COMMON_VALUES_H
 
+#include "opcode.h"
+
 #define EOL                 	'\n'            /* The user has typed Enter                                 */
 //#define FALSE	            	0               /* Not true                                                 */
 //#define TRUE	            	1               /* Not false                                                */
@@ -14,7 +16,7 @@
 #define HALF					false			/* A 16-bit register made of 2 4-bit registers (example BC)	*/
 #define FULL					true			/* A full 16-bit register (example, PC or SP)				*/
 
-#define INITIAL_STACK_POINTER	(0xDFF0)		/* Initial value for the Stack Pointer	*/
+#define INITIAL_STACK_POINTER	(0xDFF0)		/* Initial value for the Stack Pointer	*					*/
 
 enum typeOfEntry
     {
