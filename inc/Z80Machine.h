@@ -1,5 +1,5 @@
-#ifndef COMMAND_H
-#define COMMAND_H
+#ifndef Z80MACHINE_H
+#define Z80MACHINE_H
 
 #include <inttypes.h>
 
@@ -10,11 +10,11 @@
 #include "../inc/common_values.h"
 #include "../inc/RegisterPack.h"
 
-class Command 
+class Z80Machine 
 {
 public:
-    Command();
-    ~Command();
+    Z80Machine();
+    ~Z80Machine();
 
     /// @brief  This method is used to enter the command that will be analysed.
     /// @param  The command that was entered in command line.  

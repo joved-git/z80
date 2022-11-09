@@ -1,5 +1,8 @@
-# 0.1.1
+# 0.2.0
+Change class Comman to Z80Machine.
 
+# 0.1.1
+Add register pack into the machine.
 
 # 0.1.0
 First version with definitive core.

@@ -1,7 +1,7 @@
-#include "../inc/Command.h"
+#include "../inc/Z80Machine.h"
 
 /* The constructor  */
-Command::Command()
+Z80Machine::Z80Machine()
 {
     mCommandIsEntered=FALSE;
     mEntry=NULL;
@@ -16,13 +16,13 @@ Command::Command()
 }
 
 /* The destructor  */
-Command::~Command()
+Z80Machine::~Z80Machine()
 {
     
 }
 
 /* Byte to binay function	*/
-const char *Command::byteToBinary(uint8_t x)
+const char *Z80Machine::byteToBinary(uint8_t x)
 {
     static char b[9];
     b[0] = '\0';
@@ -37,7 +37,7 @@ const char *Command::byteToBinary(uint8_t x)
 }
 
 /* Verify if the entry is an hexa number    */
-bool Command::isACode()
+bool Z80Machine::isACode()
 {
     bool code=true;
     bool cont=TRUE;
@@ -68,7 +68,7 @@ bool Command::isACode()
 }
 
 /* Internal method to find the entry type   */
-typeOfEntry Command::findEntryType()
+typeOfEntry Z80Machine::findEntryType()
 {
     /* The default type is COMMAND  */
     typeOfEntry type=NOTHING;
@@ -102,7 +102,7 @@ typeOfEntry Command::findEntryType()
 }
 
 /* Give a command to be analysed    */
-void Command::setEntry(char *pEntry)
+void Z80Machine::setEntry(char *pEntry)
 {
     mEntry=pEntry;
 
@@ -119,7 +119,7 @@ void Command::setEntry(char *pEntry)
 }
 
 // Analyse the command  */
-bool Command::analyse()
+bool Z80Machine::analyse()
 {
     typeOfEntry type;
     bool retValue=FALSE;
@@ -143,7 +143,7 @@ bool Command::analyse()
                     printf("\na <code>\ttranslate <code> to assembly langage.\n");
                     printf("\t\tExample: ld c,b gives 0x41\n");
                     printf("m <cmd>\t\ttranslate <cmd> in machine code.\n");
-                    printf("\t\tExample: cb22 gives sla d\n");
+                    printf("\t\tExample: cb22 gives SLA D\n");
                     printf("r\t\tdisplay main registers.\n");
                     printf("R\t\tdisplay all registers.\n");
                     printf("x\t\texit me.\n");

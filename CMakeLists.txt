@@ -24,7 +24,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__FILENAME__='\"$(subst ${CMAKE_SOURCE
 
 set(SRC_FILES src/z80.cpp
     src/Register_8bits.cpp
-    src/Command.cpp)       
+    src/Z80Machine.cpp)       
 
 #add_definitions(-DQT_DEPRECATED_WARNINGS)
 
