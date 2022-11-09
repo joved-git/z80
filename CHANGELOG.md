@@ -1,5 +1,5 @@
 # 0.2.0
-Change class Comman to Z80Machine.
+Change class Command to Z80Machine.
 
 # 0.1.1
 Add register pack into the machine.
