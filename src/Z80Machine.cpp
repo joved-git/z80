@@ -203,14 +203,25 @@ void Z80Machine::setEntry(char *pEntry)
 
 
 /* Transform the instruction into real number  */
-uint32_t Z80Machine::toHexa(char *pCode, uint8_t *pLen)
+uint32_t Z80Machine::toValue(char *pCode, uint8_t *pLen)
 {
-    uint32_t hexaValue;
+    uint32_t hexaValue=0;
 
     *pLen=strlen(pCode);
     //printf("c0=%1X val=%1X\n", pCode[0], (pCode[0]>'9'?pCode[0]-55:pCode[0]-'0'));
     //printf("c1=%1X val=%1X\n", pCode[1], (pCode[1]>'9'?pCode[1]-55:pCode[1]-'0'));
 
+    //printf("code=%s\n", pCode);
+
+    for (int i=0; i<*pLen; i++)
+    {
+        hexaValue=hexaValue*0x10+(pCode[i]>'9'?pCode[i]-55:pCode[i]-'0');
+        //printf("c=%c\n", pCode[i]);
+        //printf("th=<%08X>\n", hexaValue);
+    }
+
+    
+    /*
     if (*pLen==ONE_BYTE)
     {
         hexaValue=(pCode[0]>'9'?pCode[0]-55:pCode[0]-'0') * 0x10 + (pCode[1]>'9'?pCode[1]-55:pCode[1]-'0');
@@ -223,9 +234,24 @@ uint32_t Z80Machine::toHexa(char *pCode, uint8_t *pLen)
                         (pCode[2]>'9'?pCode[2]-55:pCode[2]-'0') * 0x10 + (pCode[3]>'9'?pCode[3]-55:pCode[3]-'0');
         }
     }
+    */
 
     return hexaValue;
-}          
+}      
+
+
+/* Transform the instruction into hex number  */
+uint32_t Z80Machine::toDec(char *pCode)
+{
+    uint32_t decValue=0;
+
+    for (int i=0; i<strlen(pCode); i++)
+    {
+        decValue=decValue*10+(pCode[i]>'9'?pCode[i]-55:pCode[i]-'0');
+    }
+
+    return decValue;
+}      
 
 /* Give the address of a register defined by its binary code    */
 Register_8bits *Z80Machine::get8bitsRegisterAddress(uint8_t pReg)
@@ -279,7 +305,7 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
     char sop1[MAX_OP_LENGTH], sop2[MAX_OP_LENGTH];
 
     //printf("code=<%s>\n", pCode);
-    codeInHexa=toHexa(pCode, &len);                     /* Transform the instruction into real number  */
+    codeInHexa=toValue(pCode, &len);                     /* Transform the instruction into real number  */
     
     /* This is a NOP    */
     if ((codeInHexa & MASK_NOP)==CODE_NOP && len == ONE_BYTE)                  
@@ -460,7 +486,9 @@ bool Z80Machine::analyse()
                     printf("\t\tExample: cb22 gives SLA D\n");
                     printf("r\t\tdisplay main registers.\n");
                     printf("R\t\tdisplay all registers.\n");
-                    printf("x\t\texit me.\n");
+                    printf("x <dec>\tconvert <dec> to hexa.\n");
+                    printf("d <hex>\tconvert <hex> to decimal.\n");
+                    printf("q\t\texit me.\n");
                     printf("\n");
                     printf("<cmd>\t\texecute the command.\n");
                     printf("<code>\t\texecute the code.\n");
@@ -491,6 +519,22 @@ bool Z80Machine::analyse()
                     mEntry+=2;
                     //printf("DISPLAY=%s\n", mEntry);
                     interpretCode(mEntry, INTP_DISPLAY);
+                    
+                    break;
+                
+                case CMD_TOHEXA:
+                    mEntry+=2;
+                    mEntry[8]='\0';
+                    uint8_t l;
+               
+                    printf("\n0x%s = %ud\n", mEntry, toValue(mEntry, &l));
+
+                    break;
+
+                case CMD_TODEC:
+                    mEntry+=2;
+                                 
+                    printf("\n%sd = 0x%X\n", mEntry, toDec(mEntry));
                     
                     break;
             }

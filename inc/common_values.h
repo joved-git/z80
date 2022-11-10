@@ -29,9 +29,11 @@
 
 #define CMD_HELP                'h'
 #define CMD_MACHINECODE         'm'
-#define CMD_EXIT                'x'
+#define CMD_EXIT                'q'
 #define CMD_REGISTER            'r'
 #define CMD_ASSEMBLYCODE        'a'
+#define CMD_TOHEXA              'x'
+#define CMD_TODEC               'd'
 
 #define ERR_NO_REGISTER         (1)
  

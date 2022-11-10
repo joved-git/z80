@@ -59,7 +59,12 @@ private:
     /// @param  The string to convert.
     /// @param  In return, the length of the convertio (in digit, 2 digits = 1 byte).
     /// @return The converted value.
-    uint32_t toHexa(char *, uint8_t *);
+    uint32_t toValue(char *, uint8_t *);
+
+/// @brief  Convert the string into dec value.
+    /// @param  The string to convert.
+    /// @return The converted value.
+    uint32_t toDec(char *);
 
     /// @brief  Convert a string into uppercase.
     /// @param  The string to convert (as an input and an ouput).

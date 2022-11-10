@@ -1,3 +1,7 @@
+# 0.4.2
+Add hex and dec converters (command 'x' and 'd').
+Change command 'x' to 'q'.
+
 # 0.4.1
 Add LD r,n instruction.
 
