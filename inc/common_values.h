@@ -15,6 +15,9 @@
 #define HALF					false			/* A 16-bit register made of 2 4-bit registers (example BC)	*/
 #define FULL					true			/* A full 16-bit register (example, PC or SP)				*/
 
+#define I_AM_NAN                (1)
+#define I_AM_NUMBER             (2)
+
 #define INITIAL_STACK_POINTER	(0xDFF0)		/* Initial value for the Stack Pointer	*					*/
 
 #define STRING_REG_UNDEFINED    "?"

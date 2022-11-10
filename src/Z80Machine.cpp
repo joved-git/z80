@@ -203,36 +203,38 @@ void Z80Machine::setEntry(char *pEntry)
 
 
 /* Transform the instruction into real number  */
-uint32_t Z80Machine::toValue(char *pCode, uint8_t *pLen)
+uint32_t Z80Machine::toValue(char *pCode, uint8_t *pLen, uint8_t *pLenEffective)
 {
     uint32_t hexaValue=0;
+    uint8_t i=0;
 
     *pLen=strlen(pCode);
+    *pLenEffective=*pLen;
+
     //printf("c0=%1X val=%1X\n", pCode[0], (pCode[0]>'9'?pCode[0]-55:pCode[0]-'0'));
     //printf("c1=%1X val=%1X\n", pCode[1], (pCode[1]>'9'?pCode[1]-55:pCode[1]-'0'));
 
-    //printf("code=%s\n", pCode);
+    while (i<strlen(pCode))
+    {
+        if (pCode[i]<'0' || pCode[i]>'F' || (pCode[i]>'9') && pCode[i]<'A')
+        {
+            *pLenEffective=i;
+            i=10;
+        }
+        else
+        {
+            hexaValue=hexaValue*0x10+(pCode[i]>'9'?pCode[i]-55:pCode[i]-'0');
+        }
 
+        i++;
+    }
+
+    /*
     for (int i=0; i<*pLen; i++)
     {
         hexaValue=hexaValue*0x10+(pCode[i]>'9'?pCode[i]-55:pCode[i]-'0');
         //printf("c=%c\n", pCode[i]);
         //printf("th=<%08X>\n", hexaValue);
-    }
-
-    
-    /*
-    if (*pLen==ONE_BYTE)
-    {
-        hexaValue=(pCode[0]>'9'?pCode[0]-55:pCode[0]-'0') * 0x10 + (pCode[1]>'9'?pCode[1]-55:pCode[1]-'0');
-    }
-    else
-    {
-        if (*pLen==TWO_BYTES)
-        {
-            hexaValue=  (pCode[0]>'9'?pCode[0]-55:pCode[0]-'0') * 0x1000 + (pCode[1]>'9'?pCode[1]-55:pCode[1]-'0') * 0x100 + 
-                        (pCode[2]>'9'?pCode[2]-55:pCode[2]-'0') * 0x10 + (pCode[3]>'9'?pCode[3]-55:pCode[3]-'0');
-        }
     }
     */
 
@@ -241,13 +243,24 @@ uint32_t Z80Machine::toValue(char *pCode, uint8_t *pLen)
 
 
 /* Transform the instruction into hex number  */
-uint32_t Z80Machine::toDec(char *pCode)
+int32_t Z80Machine::toDec(char *pCode)
 {
-    uint32_t decValue=0;
+    int64_t decValue=0;
+    uint8_t i=0;
 
-    for (int i=0; i<strlen(pCode); i++)
+    while (i<strlen(pCode))
     {
-        decValue=decValue*10+(pCode[i]>'9'?pCode[i]-55:pCode[i]-'0');
+        if (pCode[i]>'9' || pCode[i]<'0')
+        {
+            decValue=-1;
+            i=10;
+        }
+        else
+        {
+            decValue=decValue*10+(pCode[i]-'0');
+        }
+
+        i++;
     }
 
     return decValue;
@@ -295,7 +308,8 @@ Register_8bits *Z80Machine::get8bitsRegisterAddress(uint8_t pReg)
 uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
 {
     uint32_t codeInHexa;
-    uint8_t len;
+    uint8_t len=0;
+    uint8_t lenEff=0;
     uint8_t op1, op2;
     uint8_t instruction=CODE_NOINSTRUCTION;
     Register_8bits *reg1=NULL;
@@ -305,7 +319,7 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
     char sop1[MAX_OP_LENGTH], sop2[MAX_OP_LENGTH];
 
     //printf("code=<%s>\n", pCode);
-    codeInHexa=toValue(pCode, &len);                     /* Transform the instruction into real number  */
+    codeInHexa=toValue(pCode, &len, &lenEff);                     /* Transform the instruction into real number  */
     
     /* This is a NOP    */
     if ((codeInHexa & MASK_NOP)==CODE_NOP && len == ONE_BYTE)                  
@@ -462,6 +476,10 @@ bool Z80Machine::analyse()
 {
     typeOfEntry type;
     bool retValue=false;
+    uint8_t lenValue=0;
+    uint8_t lenEff=0;
+    int32_t valDec=0; 
+    uint32_t value=0;
 
     if (mCommandIsEntered)
     {
@@ -517,7 +535,6 @@ bool Z80Machine::analyse()
 
                 case CMD_ASSEMBLYCODE:
                     mEntry+=2;
-                    //printf("DISPLAY=%s\n", mEntry);
                     interpretCode(mEntry, INTP_DISPLAY);
                     
                     break;
@@ -525,16 +542,32 @@ bool Z80Machine::analyse()
                 case CMD_TODEC:
                     mEntry+=2;
                     mEntry[8]='\0';
-                    uint8_t l;
-               
-                    printf("\n0x%s = %ud\n", mEntry, toValue(mEntry, &l));
+                    value=toValue(mEntry, &lenValue, &lenEff);
 
+                    if (lenEff<lenValue)
+                    {
+                        printf("\nNot a hexa number\n");
+                    }
+                    else
+                    {
+                        printf("\n0x%s = %ud\n", mEntry, value);
+                    }
+                    
                     break;
 
                 case CMD_TOHEXA:
                     mEntry+=2;
-                                 
-                    printf("\n%sd = 0x%X\n", mEntry, toDec(mEntry));
+
+                    valDec=toDec(mEntry);
+
+                    if (valDec>0)
+                    {
+                        printf("\n%sd = 0x%X\n", mEntry, valDec);
+                    }
+                    else
+                    {
+                        printf("\nNot a decimal number\n");
+                    }
                     
                     break;
             }

@@ -1,3 +1,6 @@
+# 0.4.4
+Add check content into toValue() and toHexa() methods.
+
 # 0.4.3 
 Invert 'x' and 'd' commands
 
