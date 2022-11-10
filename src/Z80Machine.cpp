@@ -96,9 +96,10 @@ typeOfEntry Z80Machine::findEntryType()
     /* The default type is COMMAND  */
     typeOfEntry type=NOTHING;
 
-    if (strlen(mEntry)==1)
+    if (strlen(mEntry)==1 || (strlen(mEntry)>1 && mEntry[1]==' '))
     {
         type=COMMAND;
+        printf(">>> CMD\n");
     }
     else 
     {
