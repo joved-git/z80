@@ -53,6 +53,10 @@ private:
     /// @brief  
     /// @param
     uint32_t toHexa(char *, uint8_t *);
+
+    /// @brief  
+    /// @param
+    void toUpper(char *);
 };	
 
 #endif

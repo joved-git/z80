@@ -26,11 +26,13 @@
 #define STRING_REGE             "E"
 #define STRING_REGH             "H"
 #define STRING_REGL             "L"
+#define STRING_REGHL            "(HL)"
 
 #define CMD_HELP                'h'
 #define CMD_MACHINECODE         'm'
 #define CMD_EXIT                'x'
 #define CMD_REGISTER            'r'
+#define CMD_ASSEMBLYCODE        'a'
 
 #define ERR_NO_REGISTER         (1)
  

@@ -13,11 +13,14 @@ Z80Machine::Z80Machine()
     mRegisterPack.regDE.setHightLowRegister(&mRegisterPack.regD, &mRegisterPack.regE);
     mRegisterPack.regHL.set16bitsRegisterType(HALF);
     mRegisterPack.regHL.setHightLowRegister(&mRegisterPack.regH, &mRegisterPack.regL);
+    mRegisterPack.regAF.set16bitsRegisterType(HALF);
+    mRegisterPack.regAF.setHightLowRegister(&mRegisterPack.regA, &mRegisterPack.regF);
 
     mRegisterPack.regSP.set16bitsRegisterType(FULL);
     mRegisterPack.regPC.set16bitsRegisterType(FULL);
 
      /* Initialize registers to 0 exept SP  */
+    mRegisterPack.regA.setValue(0x00);
     mRegisterPack.regB.setValue(0x00);
 	mRegisterPack.regC.setValue(0x00);
 	mRegisterPack.regD.setValue(0x00);
@@ -64,8 +67,6 @@ uint8_t Z80Machine::bitToRegister(uint8_t pBit, char *pRetChar)
 {
     uint8_t ret=0;
 
-    printf("btr=%d\n", pBit);
-
     switch (pBit)
     {
         case REGA:
@@ -96,12 +97,29 @@ uint8_t Z80Machine::bitToRegister(uint8_t pBit, char *pRetChar)
             strcpy(pRetChar, STRING_REGL);
             break;
 
+        case REGHL:
+            strcpy(pRetChar, STRING_REGHL);
+            break;
+
         default:
             strcpy(pRetChar, STRING_REG_UNDEFINED);
             ret=ERR_NO_REGISTER;
     }
 
     return ret;
+}
+
+
+/* Change lowercase to uppercase into the entry */
+void Z80Machine::toUpper(char *pEntry)
+{
+        for (int i = 0; pEntry[i]!='\0'; i++) 
+        {
+            if(pEntry[i]>='a' && pEntry[i]<='z') 
+            {
+                pEntry[i]-=32;
+            }
+        }
 }
 
 /* Verify if the entry is an hexa number    */
@@ -144,18 +162,15 @@ typeOfEntry Z80Machine::findEntryType()
     if (strlen(mEntry)==1 || (strlen(mEntry)>1 && mEntry[1]==' '))
     {
         type=COMMAND;
+
+        /* Convert string into uppercase but not the first car of the command   */
+        toUpper(mEntry+1);
     }
     else 
     {
         /* Convert string into uppercase    */
-        for (int i = 0; mEntry[i]!='\0'; i++) 
-        {
-            if(mEntry[i]>='a' && mEntry[i]<='z') 
-            {
-                mEntry[i]-=32;
-            }
-        }
-
+        toUpper(mEntry);
+        
         if (isACode())
         {
             type=CODE;
@@ -193,6 +208,8 @@ uint32_t Z80Machine::toHexa(char *pCode, uint8_t *pLen)
     uint32_t hexaValue;
 
     *pLen=strlen(pCode);
+    //printf("c0=%1X val=%1X\n", pCode[0], (pCode[0]>'9'?pCode[0]-55:pCode[0]-'0'));
+    //printf("c1=%1X val=%1X\n", pCode[1], (pCode[1]>'9'?pCode[1]-55:pCode[1]-'0'));
 
     hexaValue=(pCode[0]>'9'?pCode[0]-55:pCode[0]-'0') * 0x10 + (pCode[1]>'9'?pCode[1]-55:pCode[1]-'0');
 
@@ -207,16 +224,19 @@ uint8_t Z80Machine::interpretCode(char *pCode)
     uint8_t op1, op2;
 
     codeInHexa=toHexa(pCode, &len);                     /* Transform the instruction into real number  */
-
-    if (codeInHexa == CODE_NOP && len == ONE_BYTE)                  /* This is a NOP    */
+    
+    /* This is a NOP    */
+    if (codeInHexa == CODE_NOP && len == ONE_BYTE)                  
     {
         printf("\n[00] is NOP\n");
     }
 
-    //printf("code=%02x\n", codeInHexa);
-    //printf("%02x %02x\n", (codeInHexa & MASK_LDRR), CODE_LDRR);     /* This is a LD r,r'  */
+    //printf("%02x %02x\n", (codeInHexa & MASK_LDRR), CODE_LDRR);     
     
-    if ((codeInHexa & MASK_LDRR)==CODE_LDRR && len == ONE_BYTE)
+    /* This is a LD r,r' a LD r,(HL) or a LD (HL),r  */
+    if (    (   (codeInHexa & MASK_LDRR)==CODE_LDRR && len == ONE_BYTE) 
+            || ((codeInHexa & MASK_LDRHL)==CODE_LDRHL && len == ONE_BYTE)
+            || ((codeInHexa & MASK_LDHLR)==CODE_LDHLR && len == ONE_BYTE))
     {
         char sop1[10], sop2[10];
         uint8_t ret;
@@ -230,10 +250,6 @@ uint8_t Z80Machine::interpretCode(char *pCode)
         ret=bitToRegister(op1, sop1);
         ret=bitToRegister(op2, sop2);
 
-        //strcpy(sop1, byteToBinary(op1));
-        //strcpy(sop2, byteToBinary(op2));
-        //printf("%d %s\n", op1, byteToBinary(op1));
-        //printf("%d %s\n", op2, byteToBinary(op2));
         printf("\n[%02X] is LD %s,%s\n", codeInHexa, sop1, sop2);
     }
 
@@ -264,8 +280,9 @@ bool Z80Machine::analyse()
                 /* OK, display help	*/
                 case CMD_HELP:
                     printf("\na <code>\ttranslate <code> to assembly langage.\n");
+                    printf("\t\tExample: cb22 gives SLA D\n");
+                    printf("m <cmd>\t\ttranslate <cmd> to machine code.\n");
                     printf("\t\tExample: ld c,b gives 0x41\n");
-                    printf("m <cmd>\t\ttranslate <cmd> in machine code.\n");
                     printf("\t\tExample: cb22 gives SLA D\n");
                     printf("r\t\tdisplay main registers.\n");
                     printf("R\t\tdisplay all registers.\n");
@@ -287,7 +304,7 @@ bool Z80Machine::analyse()
 
                     printf("\n");
                     printf("BC: [%04X]    DE [%04X]\n", mRegisterPack.regBC.getValue(), mRegisterPack.regDE.getValue());
-                    printf("HL: [%04X]\n", mRegisterPack.regHL.getValue());
+                    printf("HL: [%04X]    AF [%04X]\n", mRegisterPack.regHL.getValue(), mRegisterPack.regAF.getValue());
 
                     printf("\n");
                     printf("PC: [%04X]    SP [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());
@@ -296,10 +313,11 @@ bool Z80Machine::analyse()
 
                     break;
 
-                case CMD_MACHINECODE:
+                case CMD_ASSEMBLYCODE:
                     mEntry+=2;
+                    //printf("ASS=%s\n", mEntry);
                     interpretCode(mEntry);
-
+                    
                     break;
 
             }
