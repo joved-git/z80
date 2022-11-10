@@ -22,6 +22,7 @@ struct RegisterPack
         Register_16bits regBC;
         Register_16bits regDE;
         Register_16bits regHL;
+		Register_16bits regAF;
 	};
 
 #endif

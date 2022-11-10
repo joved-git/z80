@@ -1,5 +1,13 @@
+# 0.3.1
+Add the AF register (HALF).
+Invert 'a' and 'm' command.
+Change the help message ('a' and 'm' had bad inverted example).
+Add the entry (HL) as a register.
+Add the LD r,(HL) and LD (HL), r instructions.
+Correct a bug. The command should be translat in uppercase but not the first character. Example: 'a 4e' must be turn into 'a 4E' and 'x' must stay 'x'.
+
 # 0.3.0
-Add the 'm' command.
+Add the 'a' command.
 Full encoding of the LD r,r' instrcution.
 
 # 0.2.3
