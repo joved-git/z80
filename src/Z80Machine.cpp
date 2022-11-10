@@ -211,7 +211,18 @@ uint32_t Z80Machine::toHexa(char *pCode, uint8_t *pLen)
     //printf("c0=%1X val=%1X\n", pCode[0], (pCode[0]>'9'?pCode[0]-55:pCode[0]-'0'));
     //printf("c1=%1X val=%1X\n", pCode[1], (pCode[1]>'9'?pCode[1]-55:pCode[1]-'0'));
 
-    hexaValue=(pCode[0]>'9'?pCode[0]-55:pCode[0]-'0') * 0x10 + (pCode[1]>'9'?pCode[1]-55:pCode[1]-'0');
+    if (*pLen==ONE_BYTE)
+    {
+        hexaValue=(pCode[0]>'9'?pCode[0]-55:pCode[0]-'0') * 0x10 + (pCode[1]>'9'?pCode[1]-55:pCode[1]-'0');
+    }
+    else
+    {
+        if (*pLen==TWO_BYTES)
+        {
+            hexaValue=  (pCode[0]>'9'?pCode[0]-55:pCode[0]-'0') * 0x1000 + (pCode[1]>'9'?pCode[1]-55:pCode[1]-'0') * 0x100 + 
+                        (pCode[2]>'9'?pCode[2]-55:pCode[2]-'0') * 0x10 + (pCode[3]>'9'?pCode[3]-55:pCode[3]-'0');
+        }
+    }
 
     return hexaValue;
 }          
@@ -267,6 +278,7 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
     uint8_t ret;
     char sop1[MAX_OP_LENGTH], sop2[MAX_OP_LENGTH];
 
+    //printf("code=<%s>\n", pCode);
     codeInHexa=toHexa(pCode, &len);                     /* Transform the instruction into real number  */
     
     /* This is a NOP    */
@@ -314,6 +326,20 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
         op2=EXTRACT(codeInHexa, 0, 3);
     }
 
+    /* This is a LD r,n  */
+    if ((codeInHexa>>8 & MASK_LDRN)==CODE_LDRN && len == TWO_BYTES)
+    {
+        instruction=CODE_LDRN;
+        
+        /* Extract the value of the register (in bits)    */
+        op1=EXTRACT(codeInHexa, 11, 3);
+        op2=codeInHexa & 0xFF;
+
+        //printf("cih=%02X (%d)", codeInHexa, codeInHexa);
+        //printf("op1=%s\n", byteToBinary(op1));
+        //printf("n=%d\n", op2);
+    }
+
     switch (instruction)
     {
         case CODE_NOP:                  /* This is a NOP    */
@@ -339,8 +365,6 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
                 reg2=get8bitsRegisterAddress(op2);
 
                 reg1->setValue(reg2->getValue());
-
-                /* Do not forget the flags  */
             }
             
             if (pMode==INTP_DISPLAY)
@@ -352,6 +376,25 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
             }
             break;
 
+        case CODE_LDRN:   
+            if (pMode==INTP_EXECUTE)
+            {
+                ret=bitToRegister(op1, sop1);
+                printf("LD %s,#%02X was executed\n", sop1, op2);
+
+                reg1=get8bitsRegisterAddress(op1);
+                
+                reg1->setValue(op2);
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                ret=bitToRegister(op1, sop1);
+
+                printf("\n[%04X] is LD %s,#%02X\n", codeInHexa, sop1, op2);
+            }
+            break;
+        
         case CODE_LDRHL:   
             if (pMode==INTP_EXECUTE)
             {

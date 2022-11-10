@@ -1,3 +1,6 @@
+# 0.4.1
+Add LD r,n instruction.
+
 # 0.4.0
 Add get8bitsRegisterAddress() method in Z80Machine.
 LD r,r' is executable. Try it, it's cool ;) !!!
