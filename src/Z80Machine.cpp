@@ -217,42 +217,130 @@ uint32_t Z80Machine::toHexa(char *pCode, uint8_t *pLen)
 }          
 
 /* Interpret the machine code   */
-uint8_t Z80Machine::interpretCode(char *pCode)
+uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
 {
     uint32_t codeInHexa;
     uint8_t len;
     uint8_t op1, op2;
+    uint8_t instruction;
+
+    uint8_t ret;
+    char sop1[MAX_OP_LENGTH], sop2[MAX_OP_LENGTH];
 
     codeInHexa=toHexa(pCode, &len);                     /* Transform the instruction into real number  */
     
     /* This is a NOP    */
-    if (codeInHexa == CODE_NOP && len == ONE_BYTE)                  
+    if ((codeInHexa & MASK_NOP)==CODE_NOP && len == ONE_BYTE)                  
     {
-        printf("\n[00] is NOP\n");
+        //printf("\n[00] is NOP\n");
+        instruction=CODE_NOP;
     }
 
     //printf("%02x %02x\n", (codeInHexa & MASK_LDRR), CODE_LDRR);     
     
     /* This is a LD r,r' a LD r,(HL) or a LD (HL),r  */
-    if (    (   (codeInHexa & MASK_LDRR)==CODE_LDRR && len == ONE_BYTE) 
+    if (       ((codeInHexa & MASK_LDRR)==CODE_LDRR && len == ONE_BYTE) 
             || ((codeInHexa & MASK_LDRHL)==CODE_LDRHL && len == ONE_BYTE)
             || ((codeInHexa & MASK_LDHLR)==CODE_LDHLR && len == ONE_BYTE))
     {
-        char sop1[10], sop2[10];
-        uint8_t ret;
-        
+        instruction=CODE_LDRR;
+               
         //printf("%s\n", byteToBinary(codeInHexa));
 
         /* Extract the value of the register (in bits)    */
         op1=EXTRACT(codeInHexa, 3, 3);
         op2=EXTRACT(codeInHexa, 0, 3);
         
-        ret=bitToRegister(op1, sop1);
-        ret=bitToRegister(op2, sop2);
-
-        printf("\n[%02X] is LD %s,%s\n", codeInHexa, sop1, sop2);
+        //ret=bitToRegister(op1, sop1);
+        //ret=bitToRegister(op2, sop2);
+        //printf("\n[%02X] is LD %s,%s\n", codeInHexa, sop1, sop2);
     }
 
+    /* This is a LD (HL),r  */
+    if ((codeInHexa & MASK_LDHLR)==CODE_LDHLR && len == ONE_BYTE)
+    {
+        instruction=CODE_LDHLR;
+        
+        /* Extract the value of the register (in bits)    */
+        op1=EXTRACT(codeInHexa, 3, 3);
+        op2=EXTRACT(codeInHexa, 0, 3);
+    }
+
+    /* This is a LD r,(HL)  */
+    if ((codeInHexa & MASK_LDRHL)==CODE_LDRHL && len == ONE_BYTE)
+    {
+        instruction=CODE_LDRHL;
+        
+        /* Extract the value of the register (in bits)    */
+        op1=EXTRACT(codeInHexa, 3, 3);
+        op2=EXTRACT(codeInHexa, 0, 3);
+    }
+
+    switch (instruction)
+    {
+        case CODE_NOP:                  /* This is a NOP    */
+            if (pMode==INTP_EXECUTE)
+            {
+                printf("\nNOP was executed\n");
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[00] is NOP\n");
+            }
+            break;
+
+        case CODE_LDRR:   
+            if (pMode==INTP_EXECUTE)
+            {
+                ret=bitToRegister(op1, sop1);
+                ret=bitToRegister(op2, sop2);
+                printf("LD %s,%s was executed\n", sop1, sop2);
+                /* Do the LD r,r' here      */
+                /* Do not forget the flags  */
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                ret=bitToRegister(op1, sop1);
+                ret=bitToRegister(op2, sop2);
+
+                printf("\n[%02X] is LD %s,%s\n", codeInHexa, sop1, sop2);
+            }
+            break;
+
+        case CODE_LDRHL:   
+            if (pMode==INTP_EXECUTE)
+            {
+                /* Do the LD r,(HL) here        */
+                /* Do not forget the flags      */
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                ret=bitToRegister(op1, sop1);
+                ret=bitToRegister(op2, sop2);
+
+                printf("\n[%02X] is LD %s,%s\n", codeInHexa, sop1, sop2);
+            }
+            break;
+
+        case CODE_LDHLR:   
+            if (pMode==INTP_EXECUTE)
+            {
+                /* Do the LD (HL),r here        */
+                /* Do not forget the flags      */
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                ret=bitToRegister(op1, sop1);
+                ret=bitToRegister(op2, sop2);
+
+                printf("\n[%02X] is LD %s,%s\n", codeInHexa, sop1, sop2);
+            }
+            break;
+    }
     return 0;
 }
 
@@ -315,16 +403,16 @@ bool Z80Machine::analyse()
 
                 case CMD_ASSEMBLYCODE:
                     mEntry+=2;
-                    //printf("ASS=%s\n", mEntry);
-                    interpretCode(mEntry);
+                    //printf("DISPLAY=%s\n", mEntry);
+                    interpretCode(mEntry, INTP_DISPLAY);
                     
                     break;
-
             }
             break;
 
             case CODE:
-                interpretCode(mEntry);
+                //printf("EXECUTE=%s\n", mEntry);
+                interpretCode(mEntry, INTP_EXECUTE);
                 break;
         }
     }

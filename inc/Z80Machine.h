@@ -48,7 +48,7 @@ private:
 
     /// @brief  
     /// @param
-    uint8_t interpretCode(char *);
+    uint8_t interpretCode(char *, uint8_t);
 
     /// @brief  
     /// @param
@@ -57,6 +57,14 @@ private:
     /// @brief  
     /// @param
     void toUpper(char *);
+
+    /// @brief  
+    /// @param
+    void displayCode(char *);
+
+    /// @brief  
+    /// @param
+    void executeCode(char *);
 };	
 
 #endif
