@@ -216,13 +216,53 @@ uint32_t Z80Machine::toHexa(char *pCode, uint8_t *pLen)
     return hexaValue;
 }          
 
+/* Give the address of a register defined by its binary code    */
+Register_8bits *Z80Machine::get8bitsRegisterAddress(uint8_t pReg)
+{
+    Register_8bits *regReturn;
+
+    switch (pReg)
+    {
+        case REGA:
+            regReturn=&(mRegisterPack.regA);
+            break;
+
+        case REGB:
+            regReturn=&(mRegisterPack.regB);
+            break;
+        
+        case REGC:
+            regReturn=&(mRegisterPack.regC);
+            break;
+
+        case REGD:
+            regReturn=&(mRegisterPack.regD);
+            break;
+        
+        case REGE:
+            regReturn=&(mRegisterPack.regE);
+            break;
+        
+        case REGH:
+            regReturn=&(mRegisterPack.regH);
+            break;
+
+        case REGL:
+            regReturn=&(mRegisterPack.regL);
+            break;
+    }
+
+    return(regReturn);
+}
 /* Interpret the machine code   */
 uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
 {
     uint32_t codeInHexa;
     uint8_t len;
     uint8_t op1, op2;
-    uint8_t instruction;
+    uint8_t instruction=CODE_NOINSTRUCTION;
+    Register_8bits *reg1=NULL;
+    Register_8bits *reg2=NULL;
 
     uint8_t ret;
     char sop1[MAX_OP_LENGTH], sop2[MAX_OP_LENGTH];
@@ -248,7 +288,7 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
         /* Extract the value of the register (in bits)    */
         op1=EXTRACT(codeInHexa, 3, 3);
         op2=EXTRACT(codeInHexa, 0, 3);
-        
+
         //ret=bitToRegister(op1, sop1);
         //ret=bitToRegister(op2, sop2);
         //printf("\n[%02X] is LD %s,%s\n", codeInHexa, sop1, sop2);
@@ -294,7 +334,12 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
                 ret=bitToRegister(op1, sop1);
                 ret=bitToRegister(op2, sop2);
                 printf("LD %s,%s was executed\n", sop1, sop2);
-                /* Do the LD r,r' here      */
+
+                reg1=get8bitsRegisterAddress(op1);
+                reg2=get8bitsRegisterAddress(op2);
+
+                reg1->setValue(reg2->getValue());
+
                 /* Do not forget the flags  */
             }
             

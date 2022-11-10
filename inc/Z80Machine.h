@@ -31,14 +31,17 @@ private:
 
     /// @brief  This method find the type of the entry command.
     /// @param  Nothing. 
+    /// @return The type of the entre (NOTHING, COMMAND, INSTRUCTION OR CODE).
     typeOfEntry findEntryType();
 
     /// @brief  Verify is the string is an hexa number.
     /// @param  Nothing. 
+    /// @return True if an entry is a code in hexa (up to 4 bytes).
     bool isACode();
 
     /// @brief  Convert the Uint8 value into a binary string.
     /// @param  The converted binary string. 
+    /// @return The binary string converted.
     const char *byteToBinary(uint8_t);
 
     /// @brief  Convert the Uint8 value into the name of the register.
@@ -46,25 +49,27 @@ private:
     /// @return The result of the command (see opcode.h).
     uint8_t bitToRegister(uint8_t, char *);
 
-    /// @brief  
-    /// @param
+    /// @brief  Interpret the entry (hexa), tranlate it in machine code then display or execute it.
+    /// @param  The entry code to be interpreted.
+    /// @param  The mode: INTP_DISPLAY or INTP_EXECUTE.
+    /// @return Always 0 for now even if there is a uint8_t.
     uint8_t interpretCode(char *, uint8_t);
 
-    /// @brief  
-    /// @param
+    /// @brief  Convert the string into hexa value.
+    /// @param  The string to convert.
+    /// @param  In return, the length of the convertio (in digit, 2 digits = 1 byte).
+    /// @return The converted value.
     uint32_t toHexa(char *, uint8_t *);
 
-    /// @brief  
-    /// @param
+    /// @brief  Convert a string into uppercase.
+    /// @param  The string to convert (as an input and an ouput).
+    /// @return Nothing.
     void toUpper(char *);
 
-    /// @brief  
-    /// @param
-    void displayCode(char *);
-
-    /// @brief  
-    /// @param
-    void executeCode(char *);
+    /// @brief  Return a pointer to the register defined by its binary code.
+    /// @param  The binary value of the register.
+    /// @return A pointer to a 8-bit Register (A, B, C, D, E, F, H, or L).
+    Register_8bits *get8bitsRegisterAddress(uint8_t);
 };	
 
 #endif

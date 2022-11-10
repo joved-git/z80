@@ -1,3 +1,7 @@
+# 0.4.0
+Add get8bitsRegisterAddress() method in Z80Machine.
+LD r,r' is executable. Try it, it's cool ;) !!!
+
 # 0.3.2
 Change interpretCode() : use mode to display or execute instruction.
 Ready to add first execution instruction (probably LD r,r').
