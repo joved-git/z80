@@ -522,7 +522,7 @@ bool Z80Machine::analyse()
                     
                     break;
                 
-                case CMD_TOHEXA:
+                case CMD_TODEC:
                     mEntry+=2;
                     mEntry[8]='\0';
                     uint8_t l;
@@ -531,7 +531,7 @@ bool Z80Machine::analyse()
 
                     break;
 
-                case CMD_TODEC:
+                case CMD_TOHEXA:
                     mEntry+=2;
                                  
                     printf("\n%sd = 0x%X\n", mEntry, toDec(mEntry));
