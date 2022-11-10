@@ -44,7 +44,7 @@ Z80Machine::~Z80Machine()
     
 }
 
-/* Byte to binay function	*/
+/* Byte to binary function	*/
 const char *Z80Machine::byteToBinary(uint8_t x)
 {
     static char b[9];
@@ -57,6 +57,51 @@ const char *Z80Machine::byteToBinary(uint8_t x)
     }
 
     return b;
+}
+
+/* Bit to register function */
+uint8_t Z80Machine::bitToRegister(uint8_t pBit, char *pRetChar)
+{
+    uint8_t ret=0;
+
+    printf("btr=%d\n", pBit);
+
+    switch (pBit)
+    {
+        case REGA:
+            strcpy(pRetChar, STRING_REGA);
+            break;
+
+        case REGB:
+            strcpy(pRetChar, STRING_REGB);
+            break;
+        
+        case REGC:
+            strcpy(pRetChar, STRING_REGC);
+            break;
+        
+        case REGD:
+            strcpy(pRetChar, STRING_REGD);
+            break;
+
+        case REGE:
+            strcpy(pRetChar, STRING_REGE);
+            break;
+
+        case REGH:
+            strcpy(pRetChar, STRING_REGH);
+            break;
+
+        case REGL:
+            strcpy(pRetChar, STRING_REGL);
+            break;
+
+        default:
+            strcpy(pRetChar, STRING_REG_UNDEFINED);
+            ret=ERR_NO_REGISTER;
+    }
+
+    return ret;
 }
 
 /* Verify if the entry is an hexa number    */
@@ -99,7 +144,6 @@ typeOfEntry Z80Machine::findEntryType()
     if (strlen(mEntry)==1 || (strlen(mEntry)>1 && mEntry[1]==' '))
     {
         type=COMMAND;
-        printf(">>> CMD\n");
     }
     else 
     {
@@ -174,12 +218,20 @@ uint8_t Z80Machine::interpretCode(char *pCode)
     
     if ((codeInHexa & MASK_LDRR)==CODE_LDRR && len == ONE_BYTE)
     {
-        printf("%s\n", byteToBinary(codeInHexa));
+        char sop1[10], sop2[10];
+        uint8_t ret;
+        
+        //printf("%s\n", byteToBinary(codeInHexa));
+
+        /* Extract the value of the register (in bits)    */
         op1=EXTRACT(codeInHexa, 3, 3);
         op2=EXTRACT(codeInHexa, 0, 3);
-        char sop1[10], sop2[10];
-        strcpy(sop1, byteToBinary(op1));
-        strcpy(sop2, byteToBinary(op2));
+        
+        ret=bitToRegister(op1, sop1);
+        ret=bitToRegister(op2, sop2);
+
+        //strcpy(sop1, byteToBinary(op1));
+        //strcpy(sop2, byteToBinary(op2));
         //printf("%d %s\n", op1, byteToBinary(op1));
         //printf("%d %s\n", op2, byteToBinary(op2));
         printf("\n[%02X] is LD %s,%s\n", codeInHexa, sop1, sop2);
@@ -205,12 +257,12 @@ bool Z80Machine::analyse()
                 switch (mEntry[0]) {
 
                 /* I have to exit	*/
-                case 'x':
+                case CMD_EXIT:
                     retValue=true;
                     break;
             
                 /* OK, display help	*/
-                case 'h':
+                case CMD_HELP:
                     printf("\na <code>\ttranslate <code> to assembly langage.\n");
                     printf("\t\tExample: ld c,b gives 0x41\n");
                     printf("m <cmd>\t\ttranslate <cmd> in machine code.\n");
@@ -224,7 +276,7 @@ bool Z80Machine::analyse()
                     break;
           
                 /* Display registers	*/
-                case 'r':
+                case CMD_REGISTER:
                     //printf("--- Registers ---\n\n");
                     printf("\n");
                     printf("B:  [%02X]      C: [%02X]\n", mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue());
@@ -242,7 +294,14 @@ bool Z80Machine::analyse()
                    
                     //mRegisterPack.regBC.setValue(0xcb08);
 
-                break;
+                    break;
+
+                case CMD_MACHINECODE:
+                    mEntry+=2;
+                    interpretCode(mEntry);
+
+                    break;
+
             }
             break;
 

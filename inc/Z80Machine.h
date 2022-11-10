@@ -41,6 +41,11 @@ private:
     /// @param  The converted binary string. 
     const char *byteToBinary(uint8_t);
 
+    /// @brief  Convert the Uint8 value into the name of the register.
+    /// @param  The converted register in a char * (ready to be printed). 
+    /// @return The result of the command (see opcode.h).
+    uint8_t bitToRegister(uint8_t, char *);
+
     /// @brief  
     /// @param
     uint8_t interpretCode(char *);
