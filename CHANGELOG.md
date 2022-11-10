@@ -1,3 +1,7 @@
+# 0.3.0
+Add the 'm' command.
+Full encoding of the LD r,r' instrcution.
+
 # 0.2.3
 Decode the LD r,r' instruction.
 

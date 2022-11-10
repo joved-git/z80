@@ -18,6 +18,22 @@
 
 #define INITIAL_STACK_POINTER	(0xDFF0)		/* Initial value for the Stack Pointer	*					*/
 
+#define STRING_REG_UNDEFINED    "?"
+#define STRING_REGA             "A"
+#define STRING_REGB             "B"
+#define STRING_REGC             "C"
+#define STRING_REGD             "D"
+#define STRING_REGE             "E"
+#define STRING_REGH             "H"
+#define STRING_REGL             "L"
+
+#define CMD_HELP                'h'
+#define CMD_MACHINECODE         'm'
+#define CMD_EXIT                'x'
+#define CMD_REGISTER            'r'
+
+#define ERR_NO_REGISTER         (1)
+ 
 enum typeOfEntry
     {
         NOTHING=0,
