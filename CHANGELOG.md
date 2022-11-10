@@ -1,3 +1,7 @@
+# 0.3.2
+Change interpretCode() : use mode to display or execute instruction.
+Ready to add first execution instruction (probably LD r,r').
+
 # 0.3.1
 Add the AF register (HALF).
 Invert 'a' and 'm' command.

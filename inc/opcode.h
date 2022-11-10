@@ -8,6 +8,7 @@
 #define CODE_LDRHL          (0b01000110)
 #define CODE_LDHLR          (0b01110000)
 
+#define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
 #define MASK_LDRHL          (0b11000111)
 #define MASK_LDHLR          (0b11111000)
@@ -22,5 +23,8 @@
 #define REGH                (0b100)
 #define REGL                (0b101)
 #define REGHL               (0b110)
+
+#define INTP_DISPLAY        (0)
+#define INTP_EXECUTE        (1)
 
 #endif
