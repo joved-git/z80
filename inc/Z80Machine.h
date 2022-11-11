@@ -79,6 +79,11 @@ private:
     /// @param  The binary value of the register.
     /// @return A pointer to a 8-bit Register (A, B, C, D, E, F, H, or L).
     Register_8bits *get8bitsRegisterAddress(uint8_t);
+
+    /// @brief  Return a pointer to the register defined by its binary code.
+    /// @param  The binary value of the register.
+    /// @return A pointer to a 8-bit Register (AF, BC, DE, HL, PC or SP).
+    Register_16bits *get16bitsRegisterAddress(uint8_t);
 };	
 
 #endif

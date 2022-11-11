@@ -26,7 +26,11 @@
 #define REGE                (0b011)
 #define REGH                (0b100)
 #define REGL                (0b101)
+
 #define REGHL               (0b110)
+#define REGAF               (0b1001)
+#define REGBC               (0b1010)
+#define REGDE               (0b1011)
 
 #define INTP_DISPLAY        (0)
 #define INTP_EXECUTE        (1)

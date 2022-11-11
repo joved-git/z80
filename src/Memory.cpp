@@ -13,7 +13,6 @@
         {
             /* Initialize memory with (MEM_BYTE_INIT)  */
             memInit(0x0000, MEM_SIZE, MEM_BYTE_INIT);
-            //printf("Initialize memory with %02X\n", MEM_BYTE_INIT);
         }
     }
 
@@ -24,11 +23,11 @@
     }
 
     /* This method returns one byte from the memory.    */
-    uint8_t Memory::get8bitsValue(uint16_t)
+    uint8_t Memory::get8bitsValue(uint16_t pAddress)
     {
-        uint8_t byte=0;
+        //uint8_t byte=;
 
-        return byte;
+        return mMemory[pAddress];
     }
 
     /* This method returns two byte from the memory.    */

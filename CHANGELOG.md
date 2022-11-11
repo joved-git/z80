@@ -1,3 +1,6 @@
+# 0.4.6
+Add the LD r,(HL) instruction.
+
 # 0.4.5
 Add the memory in my machine. class Memory.
 

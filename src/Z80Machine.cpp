@@ -307,6 +307,34 @@ Register_8bits *Z80Machine::get8bitsRegisterAddress(uint8_t pReg)
 
     return(regReturn);
 }
+
+/* Give the address of a register defined by its binary code    */
+Register_16bits *Z80Machine::get16bitsRegisterAddress(uint8_t pReg)
+{
+    Register_16bits *regReturn;
+
+    switch (pReg)
+    {
+        case REGAF:
+            regReturn=&(mRegisterPack.regAF);
+            break;
+
+        case REGBC:
+            regReturn=&(mRegisterPack.regBC);
+            break;
+        
+        case REGDE:
+            regReturn=&(mRegisterPack.regDE);
+            break;
+        
+        case REGHL:
+            regReturn=&(mRegisterPack.regHL);
+            break;
+    }
+
+    return(regReturn);
+}
+
 /* Interpret the machine code   */
 uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
 {
@@ -315,8 +343,9 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
     uint8_t lenEff=0;
     uint8_t op1, op2;
     uint8_t instruction=CODE_NOINSTRUCTION;
-    Register_8bits *reg1=NULL;
-    Register_8bits *reg2=NULL;
+    Register_8bits *reg8_1=NULL;
+    Register_8bits *reg8_2=NULL;
+    Register_16bits *reg16_1=NULL;
 
     uint8_t ret;
     char sop1[MAX_OP_LENGTH], sop2[MAX_OP_LENGTH];
@@ -385,7 +414,7 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
 
     switch (instruction)
     {
-        case CODE_NOP:                  /* This is a NOP    */
+        case CODE_NOP:                              /* This is a NOP    */
             if (pMode==INTP_EXECUTE)
             {
                 printf("\nNOP was executed\n");
@@ -397,17 +426,17 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
             }
             break;
 
-        case CODE_LDRR:                 /* This is a LD r,r'    */
+        case CODE_LDRR:                             /* This is a LD r,r'    */
             if (pMode==INTP_EXECUTE)
             {
                 ret=bitToRegister(op1, sop1);
                 ret=bitToRegister(op2, sop2);
                 printf("LD %s,%s was executed\n", sop1, sop2);
 
-                reg1=get8bitsRegisterAddress(op1);
-                reg2=get8bitsRegisterAddress(op2);
+                reg8_1=get8bitsRegisterAddress(op1);
+                reg8_2=get8bitsRegisterAddress(op2);
 
-                reg1->setValue(reg2->getValue());
+                reg8_1->setValue(reg8_2->getValue());
             }
             
             if (pMode==INTP_DISPLAY)
@@ -419,15 +448,15 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
             }
             break;
 
-        case CODE_LDRN:   
+        case CODE_LDRN:                             /* This is a LD r,n    */
             if (pMode==INTP_EXECUTE)
             {
                 ret=bitToRegister(op1, sop1);
                 printf("LD %s,#%02X was executed\n", sop1, op2);
 
-                reg1=get8bitsRegisterAddress(op1);
+                reg8_1=get8bitsRegisterAddress(op1);
                 
-                reg1->setValue(op2);
+                reg8_1->setValue(op2);
             }
             
             if (pMode==INTP_DISPLAY)
@@ -441,8 +470,14 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
         case CODE_LDRHL:   
             if (pMode==INTP_EXECUTE)
             {
-                /* Do the LD r,(HL) here        */
-                /* Do not forget the flags      */
+                ret=bitToRegister(op1, sop1);
+                ret=bitToRegister(op2, sop2);
+                printf("LD %s,%s was executed\n", sop1, sop2);
+
+                reg8_1=get8bitsRegisterAddress(op1);
+                reg16_1=get16bitsRegisterAddress(REGHL);
+                
+                reg8_1->setValue(mMemory->get8bitsValue(reg16_1->getValue()));
             }
             
             if (pMode==INTP_DISPLAY)
