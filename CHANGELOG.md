@@ -1,3 +1,6 @@
+# 0.5.0
+Add access to the flags (get, set).
+
 # 0.4.9
 Add the HALT command (but not yet executed).
 

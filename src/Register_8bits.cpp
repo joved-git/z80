@@ -19,3 +19,66 @@ uint8_t Register_8bits::getValue()
 {
     return mValue;
 }
+
+ /* Set flags    */
+void Register_8bits::setSignFlag(bool pFlagValue)
+{
+    mValue=(pFlagValue?mValue|FLAG_SIGN:mValue&~FLAG_SIGN);
+}
+
+void Register_8bits::setZeroFlag(bool pFlagValue)
+{
+    mValue=(pFlagValue?mValue|FLAG_ZERO:mValue&~FLAG_ZERO);
+}
+
+void Register_8bits::setHalfCarryFlag(bool pFlagValue)
+{
+    mValue=(pFlagValue?mValue|FLAG_HALF_CARRY:mValue&~FLAG_HALF_CARRY);
+}
+
+void Register_8bits::setParityOverflowFlag(bool pFlagValue)
+{
+    mValue=(pFlagValue?mValue|FLAG_PARITY_OVERFLOW:mValue&~FLAG_PARITY_OVERFLOW);
+}
+
+void Register_8bits::setAddSubtractFlag(bool pFlagValue)
+{
+    mValue=(pFlagValue?mValue|FLAG_ADD_SUBTRACT:mValue&~FLAG_ADD_SUBTRACT);
+}
+
+void Register_8bits::setCarryFlag(bool pFlagValue)
+{
+    mValue=(pFlagValue?mValue|FLAG_CARRY:mValue&~FLAG_CARRY);
+}
+
+
+/* Get flags    */
+bool Register_8bits::getSignFlag()
+{
+    return ((bool) (mValue & FLAG_SIGN));
+}
+
+bool Register_8bits::getZeroFlag()
+{
+    return ((bool) (mValue & FLAG_ZERO));
+}
+
+bool Register_8bits::getHalfCarryFlag()
+{
+    return ((bool) (mValue & FLAG_HALF_CARRY));
+}
+
+bool Register_8bits::getParityOverflowFlag()
+{
+    return ((bool) (mValue & FLAG_PARITY_OVERFLOW));
+}
+
+bool Register_8bits::getAddSubtractFlag()
+{
+    return ((bool) (mValue & FLAG_ADD_SUBTRACT));
+}
+
+bool Register_8bits::getCarryFlag()
+{
+    return ((bool) (mValue & FLAG_CARRY));
+}

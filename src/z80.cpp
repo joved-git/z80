@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 	command[0]='\0';
 
 	/* Display the invitational message	*/
-    std::cout << "Hello Z80 world !" << std::endl;
+    std::cout << std::endl << "Hello Z80 world !" << std::endl;
     std::cout << "Version: " << VERSION << std::endl << std::endl;
     std::cout << "Type h if you want some help..." << std::endl << std::endl;
     std::cout << "z> ";

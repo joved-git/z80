@@ -40,7 +40,14 @@
 #define CMD_EXAMPLE             'e'
 
 #define ERR_NO_REGISTER         (1)
- 
+
+#define FLAG_SIGN               (0b10000000)
+#define FLAG_ZERO               (0b01000000)
+#define FLAG_HALF_CARRY         (0b00010000)
+#define FLAG_PARITY_OVERFLOW    (0b00000100)
+#define FLAG_ADD_SUBTRACT       (0b00000010)
+#define FLAG_CARRY              (0b00000001)
+
 enum typeOfEntry
     {
         NOTHING=0,

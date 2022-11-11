@@ -40,6 +40,57 @@ Z80Machine::Z80Machine()
     mRegisterPack.regPC.setValue(0x1234);
     mRegisterPack.regHL.setValue(0xFE14);
 
+/*
+    printf("\n\n--- set to tf f ttt\n");
+    mRegisterPack.regF.setSignFlag(true);
+    mRegisterPack.regF.setZeroFlag(false);
+    mRegisterPack.regF.setHalfCarryFlag(false),
+    mRegisterPack.regF.setParityOverflowFlag(true),
+    mRegisterPack.regF.setAddSubtractFlag(true),
+    mRegisterPack.regF.setCarryFlag(true);
+    printf("Flags=%d%dx%dx%d%d%d\n", 
+        mRegisterPack.regF.getSignFlag(),
+        mRegisterPack.regF.getZeroFlag(),
+        mRegisterPack.regF.getHalfCarryFlag(),
+        mRegisterPack.regF.getParityOverflowFlag(),
+        mRegisterPack.regF.getAddSubtractFlag(),
+        mRegisterPack.regF.getCarryFlag()
+    );
+
+    printf("--- set to ft t fff\n");
+    mRegisterPack.regF.setSignFlag(false);
+    mRegisterPack.regF.setZeroFlag(true);
+    mRegisterPack.regF.setHalfCarryFlag(true),
+    mRegisterPack.regF.setParityOverflowFlag(false),
+    mRegisterPack.regF.setAddSubtractFlag(false),
+    mRegisterPack.regF.setCarryFlag(false);
+    printf("Flags=%d%dx%dx%d%d%d\n", 
+        mRegisterPack.regF.getSignFlag(),
+        mRegisterPack.regF.getZeroFlag(),
+        mRegisterPack.regF.getHalfCarryFlag(),
+        mRegisterPack.regF.getParityOverflowFlag(),
+        mRegisterPack.regF.getAddSubtractFlag(),
+        mRegisterPack.regF.getCarryFlag()
+    );
+
+    printf("--- set to tf f ttt\n");
+    mRegisterPack.regF.setSignFlag(true);
+    mRegisterPack.regF.setZeroFlag(false);
+    mRegisterPack.regF.setHalfCarryFlag(false),
+    mRegisterPack.regF.setParityOverflowFlag(true),
+    mRegisterPack.regF.setAddSubtractFlag(true),
+    mRegisterPack.regF.setCarryFlag(true);
+    printf("Flags=%d%dx%dx%d%d%d\n", 
+        mRegisterPack.regF.getSignFlag(),
+        mRegisterPack.regF.getZeroFlag(),
+        mRegisterPack.regF.getHalfCarryFlag(),
+        mRegisterPack.regF.getParityOverflowFlag(),
+        mRegisterPack.regF.getAddSubtractFlag(),
+        mRegisterPack.regF.getCarryFlag()
+    );
+*/
+
+
     /* Creating the memory  */
     mMemory=new(Memory);
 }
