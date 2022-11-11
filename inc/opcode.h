@@ -10,6 +10,7 @@
 #define CODE_LDHLR          (0b01110000)
 #define CODE_LDRN           (0b00000110)
 #define CODE_LDHLN          (0b00110110)
+#define CODE_HALT           (0b01110110)
 
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
@@ -17,6 +18,7 @@
 #define MASK_LDHLR          (0b11111000)
 #define MASK_LDRN           (0b11000111)
 #define MASK_LDHLN          (0b11111111)
+#define MASK_HALT           (0b11111111)
 
 #define ONE_BYTE            (2)
 #define TWO_BYTES           (4)

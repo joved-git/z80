@@ -421,6 +421,12 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
         op2=codeInHexa & 0xFF;
     }
 
+    /* This is a HALT    */
+    if ((codeInHexa & MASK_HALT)==CODE_HALT && len == ONE_BYTE)                  
+    {
+        instruction=CODE_HALT;
+    }
+
     switch (instruction)
     {
         case CODE_NOP:                              /* This is a NOP    */
@@ -432,6 +438,19 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
             if (pMode==INTP_DISPLAY)
             {
                 printf("\n[00] is NOP\n");
+            }
+            break;
+        
+        case CODE_HALT:                              /* This is a HALT    */
+            if (pMode==INTP_EXECUTE)
+            {
+                printf("\nHALT was executed\n");
+                /* Don't forget to program the HALT command */
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is HALT\n", codeInHexa);
             }
             break;
 

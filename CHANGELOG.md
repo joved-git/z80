@@ -1,3 +1,6 @@
+# 0.4.9
+Add the HALT command (but not yet executed).
+
 # 0.4.8
 Add the LD (HL),n instruction.
 Add the command 'e' to view somme useful examples (great !!).
