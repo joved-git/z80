@@ -1,3 +1,6 @@
+# 0.4.7
+Add the LD (HL),r instruction.
+
 # 0.4.6
 Add the LD r,(HL) instruction.
 

@@ -492,8 +492,14 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
         case CODE_LDHLR:   
             if (pMode==INTP_EXECUTE)
             {
-                /* Do the LD (HL),r here        */
-                /* Do not forget the flags      */
+                ret=bitToRegister(op1, sop1);
+                ret=bitToRegister(op2, sop2);
+                printf("LD %s,%s was executed\n", sop1, sop2);
+
+                reg8_1=get8bitsRegisterAddress(op2);
+                reg16_1=get16bitsRegisterAddress(REGHL);
+
+                mMemory->set8bitsValue(reg16_1->getValue(), reg8_1->getValue());
             }
             
             if (pMode==INTP_DISPLAY)
@@ -505,6 +511,7 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
             }
             break;
     }
+    
     return 0;
 }
 
