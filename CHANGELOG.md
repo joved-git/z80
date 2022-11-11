@@ -1,3 +1,7 @@
+# 0.4.8
+Add the LD (HL),n instruction.
+Add the command 'e' to view somme useful examples (great !!).
+
 # 0.4.7
 Add the LD (HL),r instruction.
 

@@ -412,6 +412,15 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
         //printf("n=%d\n", op2);
     }
 
+    /* This is a LD (HL),n  */
+    if ((codeInHexa>>8 & MASK_LDHLN)==CODE_LDHLN && len == TWO_BYTES)
+    {
+        instruction=CODE_LDHLN;
+        
+        /* Extract the value of the operand #2 (n)    */
+        op2=codeInHexa & 0xFF;
+    }
+
     switch (instruction)
     {
         case CODE_NOP:                              /* This is a NOP    */
@@ -467,7 +476,7 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
             }
             break;
         
-        case CODE_LDRHL:   
+        case CODE_LDRHL:                            /* This is a LD r,(HL)    */
             if (pMode==INTP_EXECUTE)
             {
                 ret=bitToRegister(op1, sop1);
@@ -489,7 +498,7 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
             }
             break;
 
-        case CODE_LDHLR:   
+        case CODE_LDHLR:                            /* This is a LD (HL),r    */   
             if (pMode==INTP_EXECUTE)
             {
                 ret=bitToRegister(op1, sop1);
@@ -508,6 +517,25 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
                 ret=bitToRegister(op2, sop2);
 
                 printf("\n[%02X] is LD %s,%s\n", codeInHexa, sop1, sop2);
+            }
+            break;
+
+            case CODE_LDHLN:                            /* This is a LD (HL),n    */   
+            if (pMode==INTP_EXECUTE)
+            {
+                ret=bitToRegister(REGHL, sop1);
+                printf("LD %s,#%02X was executed\n", sop1, op2);
+
+                reg16_1=get16bitsRegisterAddress(REGHL);
+
+                mMemory->set8bitsValue(reg16_1->getValue(), op2);
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                ret=bitToRegister(REGHL, sop1);
+                
+                printf("\n[%02X] is LD %s,#%02X\n", codeInHexa, sop1, op2);
             }
             break;
     }
@@ -557,6 +585,15 @@ bool Z80Machine::analyse()
                     printf("<code>\t\texecute the code.\n");
                     break;
           
+                case CMD_EXAMPLE:
+                    printf("\n");
+                    printf("0x36nn - LD (HL),n\n");
+                    printf("00x46  - LD B,(HL)\n"); 
+                    printf("00x4E  - LD C,(HL)\n"); 
+                    printf("00x70  - LD (HL), B\n");
+                    printf("00x71  - LD (HL), C\n\n");
+
+                    break;
                 /* Display registers	*/
                 case CMD_REGISTER:
                     //printf("--- Registers ---\n\n");

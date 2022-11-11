@@ -37,6 +37,7 @@
 #define CMD_ASSEMBLYCODE        'a'
 #define CMD_TOHEXA              'x'
 #define CMD_TODEC               'd'
+#define CMD_EXAMPLE             'e'
 
 #define ERR_NO_REGISTER         (1)
  

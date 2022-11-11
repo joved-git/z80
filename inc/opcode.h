@@ -9,12 +9,14 @@
 #define CODE_LDRHL          (0b01000110)
 #define CODE_LDHLR          (0b01110000)
 #define CODE_LDRN           (0b00000110)
+#define CODE_LDHLN          (0b00110110)
 
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
 #define MASK_LDRHL          (0b11000111)
 #define MASK_LDHLR          (0b11111000)
 #define MASK_LDRN           (0b11000111)
+#define MASK_LDHLN          (0b11111111)
 
 #define ONE_BYTE            (2)
 #define TWO_BYTES           (4)
@@ -34,5 +36,14 @@
 
 #define INTP_DISPLAY        (0)
 #define INTP_EXECUTE        (1)
+
+/****************************/
+/* 0x36nn - LD (HL),n       */
+/* 0x46   - LD B,(HL)       */
+/* 0x4E   - LD C,(HL)       */
+/* 0x70   - LD (HL), B      */
+/* 0x71   - LD (HL), C      */
+/* 0x71   - LD (HL), B      */
+/****************************/
 
 #endif
