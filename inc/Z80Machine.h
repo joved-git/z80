@@ -55,9 +55,16 @@ private:
 
     /// @brief  Interpret the entry (hexa), tranlate it in machine code then display or execute it.
     /// @param  The entry code to be interpreted.
+    /// @param  The length of the entry code (2 = 1 byte = ONE_BYTE).
     /// @param  The mode: INTP_DISPLAY or INTP_EXECUTE.
     /// @return Always 0 for now even if there is a uint8_t.
-    uint8_t interpretCode(char *, uint8_t);
+    uint8_t interpretCode(uint32_t, uint8_t, uint8_t);
+
+    /// @brief  Find the machine code corresponding to the instruction.
+    /// @param  The entry code to be interpreted.
+    /// @param  In out, the length of the command.
+    /// @return Always 0 for now even if there is a uint8_t.
+    uint32_t findMachineCode(char *, uint8_t *);
 
     /// @brief  Convert the string into hexa value.
     /// @param  The string to convert.

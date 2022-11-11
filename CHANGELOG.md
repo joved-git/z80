@@ -1,3 +1,7 @@
+# 0.5.1
+Begin the interpretation of instruction. NOP is implemented.
+Change interpretCode().
+
 # 0.5.0
 Add access to the flags (get, set).
 

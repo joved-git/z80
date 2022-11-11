@@ -387,10 +387,10 @@ Register_16bits *Z80Machine::get16bitsRegisterAddress(uint8_t pReg)
 }
 
 /* Interpret the machine code   */
-uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
+uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMode)
 {
-    uint32_t codeInHexa;
-    uint8_t len=0;
+    //uint32_t codeInHexa;
+    //uint8_t len=0;
     uint8_t lenEff=0;
     uint8_t op1, op2;
     uint8_t instruction=CODE_NOINSTRUCTION;
@@ -402,7 +402,7 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
     char sop1[MAX_OP_LENGTH], sop2[MAX_OP_LENGTH];
 
     //printf("code=<%s>\n", pCode);
-    codeInHexa=toValue(pCode, &len, &lenEff);                     /* Transform the instruction into real number  */
+    //codeInHexa=toValue(pCode, &len, &lenEff);                     /* Transform the instruction into real number  */
     
     /* This is a NOP    */
     if ((codeInHexa & MASK_NOP)==CODE_NOP && len == ONE_BYTE)                  
@@ -614,6 +614,22 @@ uint8_t Z80Machine::interpretCode(char *pCode, uint8_t pMode)
 }
 
 
+/* Find machine code    */
+uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
+{
+    uint32_t retCode;
+
+    if (!strcmp(pInstruction, "NOP"))
+    {
+        retCode=0x00;
+        *pLen=ONE_BYTE;
+    }
+
+    return retCode;
+
+
+}
+
 /* Analyse the command  */
 bool Z80Machine::analyse()
 {
@@ -623,6 +639,8 @@ bool Z80Machine::analyse()
     uint8_t lenEff=0;
     int32_t valDec=0; 
     uint32_t value=0;
+    uint32_t machineCode=0;
+    uint32_t codeInHexa;
 
     if (mCommandIsEntered)
     {
@@ -681,16 +699,24 @@ bool Z80Machine::analyse()
                     printf("\n");
                     printf("PC: [%04X]    SP [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());
                    
-                    //mRegisterPack.regBC.setValue(0xcb08);
-
                     break;
 
                 case CMD_ASSEMBLYCODE:
                     mEntry+=2;
-                    interpretCode(mEntry, INTP_DISPLAY);
+                    codeInHexa=toValue(mEntry, &lenValue, &lenEff);                     /* Transform the instruction into real number  */
+                    printf("code=%04X len=%d\n", codeInHexa, lenValue);
+                    interpretCode(codeInHexa, lenValue, INTP_DISPLAY);
                     
                     break;
                 
+                case CMD_MACHINECODE:
+                    mEntry+=2;
+                    printf("INSTR=%s\n", mEntry);
+                    machineCode=findMachineCode(mEntry, &lenValue);
+                    interpretCode(codeInHexa, lenValue, INTP_DISPLAY);
+                    
+                    break;
+
                 case CMD_TODEC:
                     mEntry+=2;
                     mEntry[8]='\0';
@@ -727,7 +753,16 @@ bool Z80Machine::analyse()
 
             case CODE:
                 //printf("EXECUTE=%s\n", mEntry);
-                interpretCode(mEntry, INTP_EXECUTE);
+                codeInHexa=toValue(mEntry, &lenValue, &lenEff);                     /* Transform the instruction into real number  */
+                interpretCode(codeInHexa, lenValue, INTP_EXECUTE);
+                printf("code=%04X len=%d\n", codeInHexa, lenValue);
+
+                break;
+
+            case INSTRUCTION:
+                printf("INSTR=%s\n", mEntry);
+                machineCode=findMachineCode(mEntry, &lenValue);
+                interpretCode(codeInHexa, lenValue, INTP_EXECUTE);
                 break;
         }
     }
