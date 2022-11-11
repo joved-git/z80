@@ -39,6 +39,9 @@ Z80Machine::Z80Machine()
 	mRegisterPack.regF.setValue(0b01101111);
     mRegisterPack.regPC.setValue(0x1234);
     mRegisterPack.regHL.setValue(0xFE14);
+
+    /* Creating the memory  */
+    mMemory=new(Memory);
 }
 
 /* The destructor  */

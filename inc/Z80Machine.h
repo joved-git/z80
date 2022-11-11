@@ -9,6 +9,7 @@
 
 #include "../inc/common_values.h"
 #include "../inc/RegisterPack.h"
+#include "../inc/Memory.h"
 
 class Z80Machine 
 {
@@ -27,7 +28,10 @@ public:
 private:
     char *mEntry;
     bool mCommandIsEntered;
-    RegisterPack mRegisterPack;          /* The pack of all the registers    */
+
+    RegisterPack mRegisterPack;         /* The pack of all the registers    */
+
+    Memory *mMemory;                    /* The memory of the Z80            */
 
     /// @brief  This method find the type of the entry command.
     /// @param  Nothing. 

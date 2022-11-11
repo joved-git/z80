@@ -1,3 +1,6 @@
+# 0.4.5
+Add the memory in my machine. class Memory.
+
 # 0.4.4
 Add check content into toValue() and toHexa() methods.
 
