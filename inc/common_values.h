@@ -9,8 +9,8 @@
 
 #define EOL                 	'\n'            /* The user has typed Enter                                 */                             
 #define MAX_LEN	            	256             /* Max length of an entry                                   */
-#define MAX_LEN_FOR_A_CODE  	8               /* 4 bytes is the max size of a machine code instruction   */
-#define MAX_OP_LENGTH           10
+#define MAX_LEN_FOR_A_CODE  	8               /* 4 bytes is the max size of a machine code instruction    */
+#define MAX_OP_LENGTH           10              /* Max size of an operande                                  */
 
 #define HALF					false			/* A 16-bit register made of 2 4-bit registers (example BC)	*/
 #define FULL					true			/* A full 16-bit register (example, PC or SP)				*/
@@ -18,7 +18,7 @@
 #define I_AM_NAN                (1)
 #define I_AM_NUMBER             (2)
 
-#define INITIAL_STACK_POINTER	(0xDFF0)		/* Initial value for the Stack Pointer	*					*/
+#define INITIAL_STACK_POINTER	(0xDFF0)		/* Initial value for the Stack Pointer						*/
 
 #define STRING_REG_UNDEFINED    "?"
 #define STRING_REGA             "A"
