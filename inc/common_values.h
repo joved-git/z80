@@ -10,7 +10,7 @@
 #define EOL                 	'\n'            /* The user has typed Enter                                 */                             
 #define MAX_LEN	            	256             /* Max length of an entry                                   */
 #define MAX_LEN_FOR_A_CODE  	8               /* 4 bytes is the max size of a machine code instruction    */
-#define MAX_OP_LENGTH           10              /* Max size of an operande                                  */
+#define MAX_OP_LENGTH           10              /* Max size of an operand                                   */
 
 #define HALF					false			/* A 16-bit register made of 2 4-bit registers (example BC)	*/
 #define FULL					true			/* A full 16-bit register (example, PC or SP)				*/

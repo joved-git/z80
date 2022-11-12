@@ -95,6 +95,14 @@ private:
     /// @brief  This method dumps 16 bytes of memory from the given address.
     /// @param  The address of the first byte to be diplayed.
     void dumpMemory(uint16_t);
+
+    /// @brief  This method cuts the instruction into an instruction and from 0 to 2 operand(s).
+    /// @param  The instruction to cut.
+    /// @param  The instruction.
+    /// @param  The potential first operand.
+    /// @param  The potential second operand.
+    /// @return The number of components.
+    uint8_t cutInstruction(char *, char *, char *, char *);
 };	
 
 #endif

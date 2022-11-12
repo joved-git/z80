@@ -1,3 +1,9 @@
+# 0.5.6
+Cut instruction method if done (cutInstruction()).
+
+# 0.5.5
+Decode LD r,r' instruction.
+
 # 0.5.4
 Add LD A,(DE) and LD A,(nn) commands.
 
