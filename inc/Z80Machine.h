@@ -66,13 +66,13 @@ private:
     /// @return Always 0 for now even if there is a uint8_t.
     uint32_t findMachineCode(char *, uint8_t *);
 
-    /// @brief  Convert the string into hexa value.
+    /// @brief  Convert the string into real value.
     /// @param  The string to convert.
     /// @param  In return, the length of the convertio (in digit, 2 digits = 1 byte).
     /// @return The converted value.
     uint32_t toValue(char *, uint8_t *, uint8_t *);
 
-/// @brief  Convert the string into dec value.
+    /// @brief  Convert the string into dec value.
     /// @param  The string to convert.
     /// @return The converted value.
     int32_t toDec(char *);
@@ -91,6 +91,10 @@ private:
     /// @param  The binary value of the register.
     /// @return A pointer to a 8-bit Register (AF, BC, DE, HL, PC or SP).
     Register_16bits *get16bitsRegisterAddress(uint8_t);
+
+    /// @brief  This method dumps 16 bytes of memory from the given address.
+    /// @param  The address of the first byte to be diplayed.
+    void dumpMemory(uint16_t);
 };	
 
 #endif

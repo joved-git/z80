@@ -98,7 +98,7 @@ Z80Machine::Z80Machine()
 /* The destructor  */
 Z80Machine::~Z80Machine()
 {
-    
+    delete(mMemory);
 }
 
 /* Byte to binary function	*/
@@ -205,6 +205,27 @@ bool Z80Machine::isACode()
     }
 
     return code;
+}
+
+
+/* This method dumps 16 bytes of memory from the given address. */
+void Z80Machine::dumpMemory(uint16_t pAddress)
+{
+    uint16_t dumpToView=16;
+
+    printf("\n[%04X]: ", pAddress);
+
+    for (int i=0; i<dumpToView; i++)
+    {
+        printf("%02X", mMemory->get8bitsValue(pAddress+i));
+
+        if (i<dumpToView-1)
+        {
+            printf(".");
+        }
+    }
+
+    printf("\n");
 }
 
 /* Internal method to find the entry type   */
@@ -693,7 +714,7 @@ bool Z80Machine::analyse()
                     printf("              Example: ld c,b gives 0x41\n");
                     printf("r           display main registers.\n");
                     printf("R           display all registers.\n");
-                    printf("m <addr>    dump 16 bits memory from <addr>.\n");
+                    printf("m <addr>    dump 16 bytes memory from <addr>.\n");
                     printf("x <dec>     convert <dec> to hexa.\n");
                     printf("d <hex>     convert <hex> to decimal.\n");
                     printf("b <hex>     convert <hex> to binary.\n");
@@ -799,6 +820,22 @@ bool Z80Machine::analyse()
                         printf("\n0x%s = 0b%s\n", mEntry, byteToBinary((uint8_t) value));
                     }
                     
+                    break;
+
+                case CMD_DISPLAY_MEMORY:
+                    mEntry+=2;
+
+                    value=toValue(mEntry, &lenValue, &lenEff);
+
+                    if (lenEff<lenValue)
+                    {
+                        printf("\nNot a valid address\n"); 
+                    }
+                    else
+                    {
+                        dumpMemory(value);
+                    }
+
                     break;
             }
             break;

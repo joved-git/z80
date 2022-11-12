@@ -1,3 +1,6 @@
+# 0.5.3
+Add the memory dump (16 bytes).
+
 # 0.5.2
 Add LD A,(BC) command.
 Change 'm' to 'c for machine code.
