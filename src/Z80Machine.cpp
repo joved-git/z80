@@ -414,7 +414,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     //uint8_t len=0;
     uint8_t lenEff=0;
     uint8_t op1, op2;
-    uint8_t instruction=CODE_NOP;
+    uint8_t instruction=CODE_NO_INSTRUCTION;
     Register_8bits *reg8_1=NULL;
     Register_8bits *reg8_2=NULL;
     Register_16bits *reg16_1=NULL;
@@ -429,7 +429,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     /* This is a NOP    */
     if ((codeInHexa & MASK_NOP)==CODE_NOP && len == ONE_BYTE)                  
     {
-        //printf("\n[00] is NOP\n");
         instruction=CODE_NOP;
     }
 
@@ -716,18 +715,97 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     return 0;
 }
 
+/* Used to cut the instrcution  */
+uint8_t Z80Machine::cutInstruction(char *pInstruction, char *pInst, char *pOp1, char *pOp2)
+{
+    uint8_t nbObComp=0;
+    char *charPos;
+
+    pOp1[0]='\0';
+    pOp2[0]='\0';
+
+    printf("inst=<%s>\n", pInstruction);
+
+    strcpy(pInst, pInstruction);                        /* Init the return intruction string    */
+
+    /* Is there a space into the instruction ?  */
+    if (!(charPos=strchr(pInst, ' ')))
+    {
+        pOp1[0]='\0';
+        pOp2[0]='\0';
+
+        nbObComp=1;
+    }
+    else 
+    {
+        printf("inst=<%s>\n", pInstruction);
+        strcpy(pOp1, charPos+1);
+        pInst[charPos-pInst]='\0';
+        printf("diff=%d\n", charPos-pInst);
+
+        printf("inst=<%s>\n", pInstruction);
+        printf("ins =<%s>\n", pInst);
+        printf("op1 =<%s>\n", pOp1);
+        printf("op2 =<%s>\n", pOp2);
+
+        /* Is there a ',' into the instruction ?  */
+        if (!(charPos=strchr(pOp1, ',')))
+        {
+            nbObComp=2;
+        }
+        else
+        {
+            pOp1[charPos-pOp1]='\0';
+            strcpy(pOp2, charPos+1);
+            nbObComp=2;
+
+            printf("ins =<%s>\n", pInst);
+            printf("op1 =<%s>\n", pOp1);
+            printf("op2 =<%s>\n", pOp2);
+        }
+    }
+
+    return nbObComp;
+}
 
 /* Find machine code    */
 uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 {
-    uint32_t retCode;
+    uint32_t retCode=0xFFFFFFFF;
+    char str_inst[MAX_OP_LENGTH];
+    char str_op1[MAX_OP_LENGTH];
+    char str_op2[MAX_OP_LENGTH];
+    char *str_ptr=NULL;
+    uint8_t nbOfComponents=0;
 
-    if (!strcmp(pInstruction, "NOP"))
+    nbOfComponents=cutInstruction(pInstruction, str_inst, str_op1, str_op2);
+
+    switch (nbOfComponents)
     {
-        retCode=0x00;
-        *pLen=ONE_BYTE;
-    }
+        case 1:                                 /* Only one component in the instruction    */
+            if (!strcmp(str_inst, "NOP"))
+            {
+                retCode=0x00;
+                *pLen=ONE_BYTE;
+            }
+            break;
 
+        case 2:
+            break;    
+    
+        case 3:
+
+            if (!strcmp(str_inst, "LD"))                   /* A LD instruction is present */
+            {
+                if (strlen(str_op1)==1 && strlen(str_op2)==1)
+                {
+                    /* This is a LD r,r'    */
+                }
+                
+            }
+            break;
+            
+    }
     return retCode;
 
 
@@ -809,16 +887,17 @@ bool Z80Machine::analyse()
                 case CMD_ASSEMBLYCODE:
                     mEntry+=2;
                     codeInHexa=toValue(mEntry, &lenValue, &lenEff);                     /* Transform the instruction into real number  */
-                    //printf("code=%04X len=%d\n", codeInHexa, lenValue);
+                    printf("code 'c'=%04X len=%d\n", codeInHexa, lenValue);
                     interpretCode(codeInHexa, lenValue, INTP_DISPLAY);
                     
                     break;
                 
                 case CMD_MACHINECODE:
                     mEntry+=2;
-                    printf("INSTR=%s\n", mEntry);
+                    //printf("INSTR1=%s\n", mEntry);
                     machineCode=findMachineCode(mEntry, &lenValue);
-                    interpretCode(codeInHexa, lenValue, INTP_DISPLAY);
+                    //printf("INSTR2=%08X len=%d\n", machineCode, lenValue);
+                    interpretCode(machineCode, lenValue, INTP_DISPLAY);
                     
                     break;
 
@@ -904,7 +983,7 @@ bool Z80Machine::analyse()
             case INSTRUCTION:
                 printf("INSTR=%s\n", mEntry);
                 machineCode=findMachineCode(mEntry, &lenValue);
-                interpretCode(codeInHexa, lenValue, INTP_EXECUTE);
+                interpretCode(machineCode, lenValue, INTP_EXECUTE);
                 break;
         }
     }

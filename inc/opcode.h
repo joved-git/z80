@@ -3,7 +3,8 @@
 
 #define EXTRACT(a, d, l)    (a>>d & ~(((uint8_t) 0b111111111)<<l))  
 
-#define CODE_NOP            (0b00000000)
+#define CODE_NO_INSTRUCTION (0b11001011) 
+#define CODE_NOP            (0b00000000)        
 #define CODE_LDRR           (0b01000000)
 #define CODE_LDRHL          (0b01000110)
 #define CODE_LDHLR          (0b01110000)
