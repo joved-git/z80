@@ -1,7 +1,8 @@
 #ifndef OPCODE_H
 #define OPCODE_H
 
-#define EXTRACT(a, d, l)    (a>>d & ~(((uint8_t) 0b111111111)<<l))  
+#define EXTRACT(a, d, l)    (a>>d & ~(((uint8_t) 0b111111111)<<l)) 
+#define PUSHBIT(a, b, l)       (a=a|(b<<l))
 
 #define CODE_NO_INSTRUCTION (0b11001011) 
 #define CODE_NOP            (0b00000000)        

@@ -1,3 +1,7 @@
+# 0.6.0
+Decode first pack of instruction (LD r,r').
+Add registerToBit() method.
+
 # 0.5.6
 Cut instruction method if done (cutInstruction()).
 

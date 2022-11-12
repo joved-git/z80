@@ -116,7 +116,50 @@ const char *Z80Machine::byteToBinary(uint8_t x)
     return b;
 }
 
-/* Bit to register function */
+/* Register to bit converter  */
+uint8_t Z80Machine::registerToBit(char *pRegister)
+{
+    char reg='0';
+    uint8_t retBit=0;
+
+    reg=pRegister[0];              /* The register as a character  */
+    
+    switch (reg)
+    {
+        case 'A':
+            retBit=REGA;
+            break;
+        
+        case 'B':
+            retBit=REGB;
+            break;
+
+        case 'C':
+            retBit=REGC;
+            break;
+
+        case 'D':
+            retBit=REGD;
+            break;
+
+        case 'E':
+            retBit=REGE;
+            break;
+
+        case 'H':
+            retBit=REGH;
+            break;
+
+        case 'L':
+            retBit=REGL;
+            break;
+    }
+
+    return retBit;
+
+}
+
+/* Bit to register converter     */
 uint8_t Z80Machine::bitToRegister(uint8_t pBit, char *pRetChar)
 {
     uint8_t ret=0;
@@ -724,8 +767,6 @@ uint8_t Z80Machine::cutInstruction(char *pInstruction, char *pInst, char *pOp1, 
     pOp1[0]='\0';
     pOp2[0]='\0';
 
-    printf("inst=<%s>\n", pInstruction);
-
     strcpy(pInst, pInstruction);                        /* Init the return intruction string    */
 
     /* Is there a space into the instruction ?  */
@@ -738,16 +779,9 @@ uint8_t Z80Machine::cutInstruction(char *pInstruction, char *pInst, char *pOp1, 
     }
     else 
     {
-        printf("inst=<%s>\n", pInstruction);
         strcpy(pOp1, charPos+1);
         pInst[charPos-pInst]='\0';
-        printf("diff=%d\n", charPos-pInst);
-
-        printf("inst=<%s>\n", pInstruction);
-        printf("ins =<%s>\n", pInst);
-        printf("op1 =<%s>\n", pOp1);
-        printf("op2 =<%s>\n", pOp2);
-
+        
         /* Is there a ',' into the instruction ?  */
         if (!(charPos=strchr(pOp1, ',')))
         {
@@ -757,11 +791,7 @@ uint8_t Z80Machine::cutInstruction(char *pInstruction, char *pInst, char *pOp1, 
         {
             pOp1[charPos-pOp1]='\0';
             strcpy(pOp2, charPos+1);
-            nbObComp=2;
-
-            printf("ins =<%s>\n", pInst);
-            printf("op1 =<%s>\n", pOp1);
-            printf("op2 =<%s>\n", pOp2);
+            nbObComp=3;
         }
     }
 
@@ -780,12 +810,15 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
     nbOfComponents=cutInstruction(pInstruction, str_inst, str_op1, str_op2);
 
+    //printf(">>> %s %s,%s\n", str_inst, str_op1, str_op2);
+    //printf("comp=%d\n", nbOfComponents);
+
     switch (nbOfComponents)
     {
         case 1:                                 /* Only one component in the instruction    */
             if (!strcmp(str_inst, "NOP"))
             {
-                retCode=0x00;
+                retCode=CODE_NOP;
                 *pLen=ONE_BYTE;
             }
             break;
@@ -795,13 +828,16 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
     
         case 3:
 
-            if (!strcmp(str_inst, "LD"))                   /* A LD instruction is present */
+            if (!strcmp(str_inst, "LD"))                            /* A LD instruction is present  */
             {
-                if (strlen(str_op1)==1 && strlen(str_op2)==1)
+                if (strlen(str_op1)==1 && strlen(str_op2)==1)       /* Check if it is a LD, r,r' instruction    */
                 {
-                    /* This is a LD r,r'    */
+                    retCode=CODE_LDRR;                              /* Prepare the LD r,r'  */
+                    *pLen=ONE_BYTE;
+                    
+                    PUSHBIT(retCode, registerToBit(str_op1), 3);    /* Add the first register as bits   */
+                    PUSHBIT(retCode, registerToBit(str_op2), 0);    /* Add the first register as bits   */
                 }
-                
             }
             break;
             
@@ -887,16 +923,13 @@ bool Z80Machine::analyse()
                 case CMD_ASSEMBLYCODE:
                     mEntry+=2;
                     codeInHexa=toValue(mEntry, &lenValue, &lenEff);                     /* Transform the instruction into real number  */
-                    printf("code 'c'=%04X len=%d\n", codeInHexa, lenValue);
                     interpretCode(codeInHexa, lenValue, INTP_DISPLAY);
                     
                     break;
                 
                 case CMD_MACHINECODE:
                     mEntry+=2;
-                    //printf("INSTR1=%s\n", mEntry);
                     machineCode=findMachineCode(mEntry, &lenValue);
-                    //printf("INSTR2=%08X len=%d\n", machineCode, lenValue);
                     interpretCode(machineCode, lenValue, INTP_DISPLAY);
                     
                     break;
@@ -934,15 +967,10 @@ bool Z80Machine::analyse()
                     break;
 
                 case CMD_TOBIN:
-                    //printf("c1=%s\n", mEntry);
                     mEntry+=2;
-                    //printf("c2=%s\n", mEntry);
                     mEntry[ONE_BYTE]='\0';                             /* Only one byte    */
-                    //printf("c3=%s\n", mEntry);
 
                     value=toValue(mEntry, &lenValue, &lenEff);
-                    //printf("v =%02X\n", value);
-                    //printf("len=%d, leneff=%d\n", lenValue, lenEff);
 
                     if (lenEff<lenValue)
                     {
@@ -974,14 +1002,12 @@ bool Z80Machine::analyse()
             break;
 
             case CODE:
-                //printf("EXECUTE=%s\n", mEntry);
                 codeInHexa=toValue(mEntry, &lenValue, &lenEff);                     /* Transform the instruction into real number  */
                 interpretCode(codeInHexa, lenValue, INTP_EXECUTE);
                 
                 break;
 
             case INSTRUCTION:
-                printf("INSTR=%s\n", mEntry);
                 machineCode=findMachineCode(mEntry, &lenValue);
                 interpretCode(machineCode, lenValue, INTP_EXECUTE);
                 break;
