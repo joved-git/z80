@@ -4,7 +4,6 @@
 #define EXTRACT(a, d, l)    (a>>d & ~(((uint8_t) 0b111111111)<<l))  
 
 #define CODE_NOP            (0b00000000)
-#define CODE_NOINSTRUCTION  (0b11001011)
 #define CODE_LDRR           (0b01000000)
 #define CODE_LDRHL          (0b01000110)
 #define CODE_LDHLR          (0b01110000)
@@ -12,6 +11,8 @@
 #define CODE_LDHLN          (0b00110110)
 #define CODE_HALT           (0b01110110)
 #define CODE_LDABC          (0b00001010)
+#define CODE_LDADE          (0b00011010)
+#define CODE_LDANN          (0b00111010)
 
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
@@ -21,11 +22,18 @@
 #define MASK_LDHLN          (0b11111111)
 #define MASK_HALT           (0b11111111)
 #define MASK_LDABC          (0b11111111)
+#define MASK_LDADE          (0b11111111)
+#define MASK_LDANN          (0b11111111)
 
 #define ONE_BYTE            (2)
 #define TWO_BYTES           (4)
 #define THREE_BYTES         (6)
 #define FOUR_BYTES          (8)
+
+#define SIZE_1_BYTE         (8)
+#define SIZE_2_BYTES        (16)
+#define SIZE_3_BYTES        (24)
+#define SIZE_4_BYTES        (32)
 
 #define REGA                (0b111)
 #define REGB                (0b000)

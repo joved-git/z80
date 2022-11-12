@@ -414,10 +414,11 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     //uint8_t len=0;
     uint8_t lenEff=0;
     uint8_t op1, op2;
-    uint8_t instruction=CODE_NOINSTRUCTION;
+    uint8_t instruction=CODE_NOP;
     Register_8bits *reg8_1=NULL;
     Register_8bits *reg8_2=NULL;
     Register_16bits *reg16_1=NULL;
+    uint16_t address=0x0000;
 
     uint8_t ret;
     char sop1[MAX_OP_LENGTH], sop2[MAX_OP_LENGTH];
@@ -485,7 +486,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD (HL),n  */
-    if ((codeInHexa>>8 & MASK_LDHLN)==CODE_LDHLN && len == TWO_BYTES)
+    if ((codeInHexa>>SIZE_1_BYTE & MASK_LDHLN)==CODE_LDHLN && len == TWO_BYTES)
     {
         instruction=CODE_LDHLN;
         
@@ -503,6 +504,22 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if ((codeInHexa & MASK_LDABC)==CODE_LDABC && len == ONE_BYTE)
     {
         instruction=CODE_LDABC;
+    }
+
+    /* This is a LD A,(DE) */
+    if ((codeInHexa & MASK_LDADE)==CODE_LDADE && len == ONE_BYTE)
+    {
+        instruction=CODE_LDADE;
+    }
+
+     /* This is a LD A,nn  */
+    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDANN)==CODE_LDANN && len == THREE_BYTES)
+    {
+        instruction=CODE_LDANN;
+        
+        /* Extract the value of the operand #2 (n)    */
+        op1=codeInHexa & 0x0000FF;
+        op2=(codeInHexa & 0x00FF00) >> SIZE_1_BYTE;
     }
 
     /*************************************************************************************************************************/
@@ -619,7 +636,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
-            case CODE_LDHLN:                            /* This is a LD (HL),n    */   
+        case CODE_LDHLN:                            /* This is a LD (HL),n    */   
             if (pMode==INTP_EXECUTE)
             {
                 ret=bitToRegister(REGHL, sop1);
@@ -638,7 +655,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
-            case CODE_LDABC:                            /* This is a LD A,(BC)    */   
+        case CODE_LDABC:                            /* This is a LD A,(BC)    */   
             if (pMode==INTP_EXECUTE)
             {
                 printf("LD A,(BC) was executed\n");
@@ -657,6 +674,43 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%02X] is LD A,(BC)\n", codeInHexa);
             }
             break;
+
+        case CODE_LDADE:                            /* This is a LD A,(BC)    */   
+            if (pMode==INTP_EXECUTE)
+            {
+                printf("LD A,(DE) was executed\n");
+
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg16_1=get16bitsRegisterAddress(REGDE);
+
+                reg8_1->setValue(mMemory->get8bitsValue(reg16_1->getValue()));
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                ret=bitToRegister(op1, sop1);
+                ret=bitToRegister(op2, sop2);
+
+                printf("\n[%02X] is LD A,(DE)\n", codeInHexa);
+            }
+            break;
+        
+        case CODE_LDANN:                                    /* This is a LD A,(nn)    */   
+            address=op1*0x100+op2;
+            
+            if (pMode==INTP_EXECUTE)
+            {
+                printf("LD A,(#%04X) was executed\n", address);
+
+                reg8_1=get8bitsRegisterAddress(REGA);
+                
+                reg8_1->setValue(mMemory->get8bitsValue(address));
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is LD A,(#%04X)\n", codeInHexa, address);
+            }
     }
     
     return 0;
@@ -844,8 +898,7 @@ bool Z80Machine::analyse()
                 //printf("EXECUTE=%s\n", mEntry);
                 codeInHexa=toValue(mEntry, &lenValue, &lenEff);                     /* Transform the instruction into real number  */
                 interpretCode(codeInHexa, lenValue, INTP_EXECUTE);
-                printf("code=%04X len=%d\n", codeInHexa, lenValue);
-
+                
                 break;
 
             case INSTRUCTION:

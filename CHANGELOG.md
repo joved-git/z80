@@ -1,3 +1,6 @@
+# 0.5.4
+Add LD A,(DE) and LD A,(nn) commands.
+
 # 0.5.3
 Add the memory dump (16 bytes).
 
