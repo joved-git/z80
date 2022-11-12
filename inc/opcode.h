@@ -11,6 +11,7 @@
 #define CODE_LDRN           (0b00000110)
 #define CODE_LDHLN          (0b00110110)
 #define CODE_HALT           (0b01110110)
+#define CODE_LDABC          (0b00001010)
 
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
@@ -19,9 +20,12 @@
 #define MASK_LDRN           (0b11000111)
 #define MASK_LDHLN          (0b11111111)
 #define MASK_HALT           (0b11111111)
+#define MASK_LDABC          (0b11111111)
 
 #define ONE_BYTE            (2)
 #define TWO_BYTES           (4)
+#define THREE_BYTES         (6)
+#define FOUR_BYTES          (8)
 
 #define REGA                (0b111)
 #define REGB                (0b000)
@@ -40,6 +44,7 @@
 #define INTP_EXECUTE        (1)
 
 /****************************/
+/* 0x0A   - LD A,(BC)       */
 /* 0x36nn - LD (HL),n       */
 /* 0x46   - LD B,(HL)       */
 /* 0x4E   - LD C,(HL)       */

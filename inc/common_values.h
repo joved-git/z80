@@ -31,13 +31,17 @@
 #define STRING_REGHL            "(HL)"
 
 #define CMD_HELP                'h'
-#define CMD_MACHINECODE         'm'
+#define CMD_MACHINECODE         'c'
 #define CMD_EXIT                'q'
 #define CMD_REGISTER            'r'
+#define CMD_ALL_REGISTER        'R'
 #define CMD_ASSEMBLYCODE        'a'
 #define CMD_TOHEXA              'x'
 #define CMD_TODEC               'd'
+#define CMD_TOBIN               'b'
 #define CMD_EXAMPLE             'e'
+#define CMD_DISPLAY_MEMORY      'm'
+
 
 #define ERR_NO_REGISTER         (1)
 

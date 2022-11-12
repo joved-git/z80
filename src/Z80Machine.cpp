@@ -478,6 +478,14 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         instruction=CODE_HALT;
     }
 
+    /* This is a LD A,(BC) */
+    if ((codeInHexa & MASK_LDABC)==CODE_LDABC && len == ONE_BYTE)
+    {
+        instruction=CODE_LDABC;
+    }
+
+    /*************************************************************************************************************************/
+
     switch (instruction)
     {
         case CODE_NOP:                              /* This is a NOP    */
@@ -608,6 +616,26 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%02X] is LD %s,#%02X\n", codeInHexa, sop1, op2);
             }
             break;
+
+            case CODE_LDABC:                            /* This is a LD A,(BC)    */   
+            if (pMode==INTP_EXECUTE)
+            {
+                printf("LD A,(BC) was executed\n");
+
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg16_1=get16bitsRegisterAddress(REGBC);
+
+                reg8_1->setValue(mMemory->get8bitsValue(reg16_1->getValue()));
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                ret=bitToRegister(op1, sop1);
+                ret=bitToRegister(op2, sop2);
+
+                printf("\n[%02X] is LD A,(BC)\n", codeInHexa);
+            }
+            break;
     }
     
     return 0;
@@ -633,14 +661,14 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 /* Analyse the command  */
 bool Z80Machine::analyse()
 {
-    typeOfEntry type;
+    typeOfEntry type=NOTHING;
     bool retValue=false;
     uint8_t lenValue=0;
     uint8_t lenEff=0;
     int32_t valDec=0; 
     uint32_t value=0;
     uint32_t machineCode=0;
-    uint32_t codeInHexa;
+    uint32_t codeInHexa=0;
 
     if (mCommandIsEntered)
     {
@@ -658,19 +686,21 @@ bool Z80Machine::analyse()
             
                 /* OK, display help	*/
                 case CMD_HELP:
-                    printf("\na <code>\ttranslate <code> to assembly langage.\n");
-                    printf("\t\tExample: cb22 gives SLA D\n");
-                    printf("m <cmd>\t\ttranslate <cmd> to machine code.\n");
-                    printf("\t\tExample: ld c,b gives 0x41\n");
-                    printf("\t\tExample: cb22 gives SLA D\n");
-                    printf("r\t\tdisplay main registers.\n");
-                    printf("R\t\tdisplay all registers.\n");
-                    printf("x <dec>\tconvert <dec> to hexa.\n");
-                    printf("d <hex>\tconvert <hex> to decimal.\n");
-                    printf("q\t\texit me.\n");
                     printf("\n");
-                    printf("<cmd>\t\texecute the command.\n");
-                    printf("<code>\t\texecute the code.\n");
+                    printf("a <code>    translate <code> to assembly langage.\n");
+                    printf("              Example: cb22 gives SLA D\n");
+                    printf("c <cmd>     translate <cmd> to machine code.\n");
+                    printf("              Example: ld c,b gives 0x41\n");
+                    printf("r           display main registers.\n");
+                    printf("R           display all registers.\n");
+                    printf("m <addr>    dump 16 bits memory from <addr>.\n");
+                    printf("x <dec>     convert <dec> to hexa.\n");
+                    printf("d <hex>     convert <hex> to decimal.\n");
+                    printf("b <hex>     convert <hex> to binary.\n");
+                    printf("q           quit me.\n");
+                    printf("\n");
+                    printf("<cmd>       execute the command.\n");
+                    printf("<code>      execute the code.\n");
                     break;
           
                 case CMD_EXAMPLE:
@@ -704,7 +734,7 @@ bool Z80Machine::analyse()
                 case CMD_ASSEMBLYCODE:
                     mEntry+=2;
                     codeInHexa=toValue(mEntry, &lenValue, &lenEff);                     /* Transform the instruction into real number  */
-                    printf("code=%04X len=%d\n", codeInHexa, lenValue);
+                    //printf("code=%04X len=%d\n", codeInHexa, lenValue);
                     interpretCode(codeInHexa, lenValue, INTP_DISPLAY);
                     
                     break;
@@ -719,12 +749,12 @@ bool Z80Machine::analyse()
 
                 case CMD_TODEC:
                     mEntry+=2;
-                    mEntry[8]='\0';
+                    mEntry[FOUR_BYTES]='\0';
                     value=toValue(mEntry, &lenValue, &lenEff);
 
                     if (lenEff<lenValue)
                     {
-                        printf("\nNot a hexa number\n");
+                        printf("\nNot an hexa number\n");
                     }
                     else
                     {
@@ -745,6 +775,28 @@ bool Z80Machine::analyse()
                     else
                     {
                         printf("\nNot a decimal number\n");
+                    }
+                    
+                    break;
+
+                case CMD_TOBIN:
+                    //printf("c1=%s\n", mEntry);
+                    mEntry+=2;
+                    //printf("c2=%s\n", mEntry);
+                    mEntry[ONE_BYTE]='\0';                             /* Only one byte    */
+                    //printf("c3=%s\n", mEntry);
+
+                    value=toValue(mEntry, &lenValue, &lenEff);
+                    //printf("v =%02X\n", value);
+                    //printf("len=%d, leneff=%d\n", lenValue, lenEff);
+
+                    if (lenEff<lenValue)
+                    {
+                        printf("\nNot a decimal number\n"); 
+                    }
+                    else
+                    {
+                        printf("\n0x%s = 0b%s\n", mEntry, byteToBinary((uint8_t) value));
                     }
                     
                     break;

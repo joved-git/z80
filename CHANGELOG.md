@@ -1,3 +1,10 @@
+# 0.5.2
+Add LD A,(BC) command.
+Change 'm' to 'c for machine code.
+Add 'm' for dump memory.
+Add 'b' for convert one byte to binary.
+Add the binary convertion.
+
 # 0.5.1
 Begin the interpretation of instruction. NOP is implemented.
 Change interpretCode().
