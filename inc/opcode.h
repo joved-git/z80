@@ -4,20 +4,20 @@
 #define EXTRACT(a, d, l)    (a>>d & ~(((uint8_t) 0b111111111)<<l)) 
 #define PUSHBIT(a, b, l)       (a=a|(b<<l))
 
-#define CODE_NO_INSTRUCTION (0b11001011) 
-#define CODE_NOP            (0b00000000)        
-#define CODE_LDRR           (0b01000000)
+#define CODE_NO_INSTRUCTION (0b11001011)                // 0xDE
+#define CODE_NOP            (0b00000000)                // 0X00
+#define CODE_LDRR           (0b01000000)                
 #define CODE_LDRHL          (0b01000110)
 #define CODE_LDHLR          (0b01110000)
 #define CODE_LDRN           (0b00000110)
-#define CODE_LDHLN          (0b00110110)
+#define CODE_LDHLN          (0b00110110)                // 0x36
 #define CODE_HALT           (0b01110110)
-#define CODE_LDABC          (0b00001010)
-#define CODE_LDADE          (0b00011010)
-#define CODE_LDANN          (0b00111010)
-#define CODE_LDBCA          (0b00000010)
-#define CODE_LDDEA          (0b00010010)
-#define CODE_LDNNA          (0b00110010)
+#define CODE_LDABC          (0b00001010)                // 0x0A
+#define CODE_LDADE          (0b00011010)                // 0x1A
+#define CODE_LDANN          (0b00111010)                // 0x3A
+#define CODE_LDBCA          (0b00000010)                // 0x02
+#define CODE_LDDEA          (0b00010010)                // 0x12
+#define CODE_LDNNA          (0b00110010)                // 0x32
 
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
