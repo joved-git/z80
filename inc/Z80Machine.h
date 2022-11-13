@@ -73,7 +73,8 @@ private:
 
     /// @brief  Convert the string into real value.
     /// @param  The string to convert.
-    /// @param  In return, the length of the convertio (in digit, 2 digits = 1 byte).
+    /// @param  In return, the length of the convertion (in digit, 2 digits = 1 byte).
+    /// @param  In return, the effective length.
     /// @return The converted value.
     uint32_t toValue(char *, uint8_t *, uint8_t *);
 
@@ -107,7 +108,12 @@ private:
     /// @param  The potential first operand.
     /// @param  The potential second operand.
     /// @return The number of components.
-    uint8_t cutInstruction(char *, char *, char *, char *);
+    int8_t cutInstruction(char *, char *, char *, char *);
+
+    /// @brief  Clean a 8-bit operand.
+    /// @param  The operand as a string.
+    /// @return OK or error code (bas operand).
+    int8_t clean8bits(char *);
 };	
 
 #endif

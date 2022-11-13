@@ -43,7 +43,10 @@
 #define CMD_DISPLAY_MEMORY      'm'
 
 
-#define ERR_NO_REGISTER         (1)
+#define ERR_NO_ERROR            (0)
+#define ERR_NO_REGISTER         (-1)
+#define ERR_BAD_OPERAND         (-2)
+
 
 #define FLAG_SIGN               (0b10000000)
 #define FLAG_ZERO               (0b01000000)

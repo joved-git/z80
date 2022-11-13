@@ -1,3 +1,7 @@
+# 0.6.3
+Clean the operand.
+Decode LD r,n.
+
 # 0.6.2
 Add LD (nn),A
 
