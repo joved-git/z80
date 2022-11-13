@@ -194,8 +194,36 @@ uint8_t Z80Machine::bitToRegister(uint8_t pBit, char *pRetChar)
             strcpy(pRetChar, STRING_REGL);
             break;
 
+        case REGBC:
+            strcpy(pRetChar, STRING_REGBC);
+            break;
+
+        case REGIBC:
+            strcpy(pRetChar, STRING_REGIBC);
+            break;
+
+        case REGDE:
+            strcpy(pRetChar, STRING_REGDE);
+            break;
+
+        case REGIDE:
+            strcpy(pRetChar, STRING_REGIDE);
+            break;
+
         case REGHL:
             strcpy(pRetChar, STRING_REGHL);
+            break;
+
+        case REGIHL:
+            strcpy(pRetChar, STRING_REGIHL);
+            break;
+
+        case REGSP:
+            strcpy(pRetChar, STRING_REGSP);
+            break;
+
+        case REGISP:
+            strcpy(pRetChar, STRING_REGISP);
             break;
 
         default:
@@ -449,6 +477,10 @@ Register_16bits *Z80Machine::get16bitsRegisterAddress(uint8_t pReg)
         case REGHL:
             regReturn=&(mRegisterPack.regHL);
             break;
+
+        case REGSP:
+            regReturn=&(mRegisterPack.regSP);
+            break;
     }
 
     return(regReturn);
@@ -547,7 +579,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         instruction=CODE_LDHLR;
         
         /* Extract the value of the register (in bits)    */
-        op1=EXTRACT(codeInHexa, 3, 3);
+        op1=REGIHL;
         op2=EXTRACT(codeInHexa, 0, 3);
     }
 
@@ -558,7 +590,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         
         /* Extract the value of the register (in bits)    */
         op1=EXTRACT(codeInHexa, 3, 3);
-        op2=EXTRACT(codeInHexa, 0, 3);
+        op2=REGIHL;
     }
 
     /* This is a LD r,n  */
@@ -753,7 +785,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         case CODE_LDHLN:                            /* This is a LD (HL),n    */   
             if (pMode==INTP_EXECUTE)
             {
-                ret=bitToRegister(REGHL, sop1);
+                ret=bitToRegister(REGIHL, sop1);
                 printf("LD %s,#%02X was executed\n", sop1, op2);
 
                 reg16_1=get16bitsRegisterAddress(REGHL);
@@ -763,7 +795,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                ret=bitToRegister(REGHL, sop1);
+                ret=bitToRegister(REGIHL, sop1);
                 
                 printf("\n[%02X] is LD %s,#%02X\n", codeInHexa, sop1, op2);
             }

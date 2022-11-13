@@ -28,7 +28,17 @@
 #define STRING_REGE             "E"
 #define STRING_REGH             "H"
 #define STRING_REGL             "L"
-#define STRING_REGHL            "(HL)"
+#define STRING_REGBC            "BC"
+#define STRING_REGIBC           "(BC)"
+#define STRING_REGDE            "DE"
+#define STRING_REGIDE           "(DE)"
+#define STRING_REGHL            "HL"
+#define STRING_REGIHL           "(HL)"
+#define STRING_REGAF            "AF"
+#define STRING_REGIAF           "(AF)"
+#define STRING_REGSP            "SP"
+#define STRING_REGISP           "(SP)"
+
 
 #define CMD_HELP                'h'
 #define CMD_MACHINECODE         'c'

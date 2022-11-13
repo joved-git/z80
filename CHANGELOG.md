@@ -1,3 +1,7 @@
+# 0.6.4
+Add direct and indirect register entries into opcode.h.
+Able to display both: HL and (HL) for example.
+
 # 0.6.3
 Clean the operand.
 Decode LD r,n.

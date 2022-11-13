@@ -51,10 +51,18 @@
 #define REGH                (0b100)
 #define REGL                (0b101)
 
-#define REGHL               (0b110)
-#define REGAF               (0b1001)
-#define REGBC               (0b1010)
-#define REGDE               (0b1011)
+
+#define REGBC               (0b1000)
+#define REGDE               (0b1001)
+#define REGHL               (0b1010)
+#define REGSP               (0b1011)
+#define REGAF               (0b1100)
+
+#define REGIBC              (0b11000)
+#define REGIDE              (0b11001)
+#define REGIHL              (0b11010)
+#define REGISP              (0b11011)
+#define REGIAF              (0b11100)
 
 #define INTP_DISPLAY        (0)
 #define INTP_EXECUTE        (1)
