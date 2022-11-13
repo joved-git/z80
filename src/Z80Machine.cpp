@@ -564,6 +564,20 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op2=(codeInHexa & 0x00FF00) >> SIZE_1_BYTE;
     }
 
+    /* This is a LD (BC),A  */
+    if ((codeInHexa & MASK_LDBCA)==CODE_LDBCA && len == ONE_BYTE)
+    {
+        instruction=CODE_LDBCA;
+        
+    }
+
+    /* This is a LD (DE),A  */
+    if ((codeInHexa & MASK_LDDEA)==CODE_LDDEA && len == ONE_BYTE)
+    {
+        instruction=CODE_LDDEA;
+        
+    }
+
     /*************************************************************************************************************************/
 
     switch (instruction)
@@ -717,7 +731,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
-        case CODE_LDADE:                            /* This is a LD A,(BC)    */   
+        case CODE_LDADE:                            /* This is a LD A,(DE)    */   
             if (pMode==INTP_EXECUTE)
             {
                 printf("LD A,(DE) was executed\n");
@@ -753,6 +767,40 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             {
                 printf("\n[%06X] is LD A,(#%04X)\n", codeInHexa, address);
             }
+        case CODE_LDBCA:                            /* This is a LD (BC),A    */   
+            if (pMode==INTP_EXECUTE)
+            {
+                printf("LD (BC),A was executed\n");
+
+                reg16_1=get16bitsRegisterAddress(REGBC);
+                reg8_2=get8bitsRegisterAddress(REGA);
+
+                mMemory->set8bitsValue(reg16_1->getValue(), reg8_2->getValue());
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is LD (BC),A\n", codeInHexa);
+            }
+            break;
+
+        case CODE_LDDEA:                            /* This is a LD (DE),A    */   
+            if (pMode==INTP_EXECUTE)
+            {
+                printf("LD (DE),A was executed\n");
+
+                reg16_1=get16bitsRegisterAddress(REGDE);
+                reg8_2=get8bitsRegisterAddress(REGA);
+
+                mMemory->set8bitsValue(reg16_1->getValue(), reg8_2->getValue());
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is LD (DE),A\n", codeInHexa);
+            }
+            break;
+
     }
     
     return 0;

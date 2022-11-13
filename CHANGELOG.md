@@ -1,3 +1,6 @@
+# 0.6.1
+Add LD (BC),A and LD (DE),A commands.
+
 # 0.6.0
 Decode first pack of instruction (LD r,r').
 Add registerToBit() method.
