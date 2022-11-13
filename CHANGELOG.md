@@ -1,5 +1,6 @@
 # 0.6.6
 Add clean_r(), clean_ixn() and clean_n() function.
+Decode the LD r,(IX+n) command.
 
 # 0.6.5
 Handle instruction beginning with 0xDD.
