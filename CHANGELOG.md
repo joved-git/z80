@@ -1,3 +1,6 @@
+# 0.6.2
+Add LD (nn),A
+
 # 0.6.1
 Add LD (BC),A and LD (DE),A commands.
 
@@ -6,7 +9,7 @@ Decode first pack of instruction (LD r,r').
 Add registerToBit() method.
 
 # 0.5.6
-Cut instruction method if done (cutInstruction()).
+Cut instruction method is terminted (cutInstruction()).
 
 # 0.5.5
 Decode LD r,r' instruction.

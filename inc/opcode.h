@@ -17,6 +17,7 @@
 #define CODE_LDANN          (0b00111010)
 #define CODE_LDBCA          (0b00000010)
 #define CODE_LDDEA          (0b00010010)
+#define CODE_LDNNA          (0b00110010)
 
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
@@ -30,6 +31,7 @@
 #define MASK_LDANN          (0b11111111)
 #define MASK_LDBCA          (0b11111111)
 #define MASK_LDDEA          (0b11111111)
+#define MASK_LDNNA          (0b11111111)
 
 #define ONE_BYTE            (2)
 #define TWO_BYTES           (4)
