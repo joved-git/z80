@@ -1,3 +1,8 @@
+# 0.6.5
+Handle instruction beginning with 0xDD.
+Add LD r,(IX+d) command.
+Add IX and IY registers.
+
 # 0.6.4
 Add direct and indirect register entries into opcode.h.
 Able to display both: HL and (HL) for example.

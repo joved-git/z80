@@ -18,8 +18,10 @@ Z80Machine::Z80Machine()
 
     mRegisterPack.regSP.set16bitsRegisterType(FULL);
     mRegisterPack.regPC.set16bitsRegisterType(FULL);
+    mRegisterPack.regIX.set16bitsRegisterType(FULL);
+    mRegisterPack.regIY.set16bitsRegisterType(FULL);
 
-     /* Initialize registers to 0 exept SP  */
+    /* Initialize registers to 0 exept SP  */
     mRegisterPack.regA.setValue(0x00);
     mRegisterPack.regB.setValue(0x00);
 	mRegisterPack.regC.setValue(0x00);
@@ -27,7 +29,10 @@ Z80Machine::Z80Machine()
 	mRegisterPack.regE.setValue(0x00);
 	mRegisterPack.regL.setValue(0x00);
 	mRegisterPack.regF.setValue(0b00000000);
+
     mRegisterPack.regPC.setValue(0x0000);
+    mRegisterPack.regIX.setValue(0x0000);
+    mRegisterPack.regIY.setValue(0x0000);
     mRegisterPack.regSP.setValue(INITIAL_STACK_POINTER);
 
      /* Initialize some registers (for test)   */
@@ -39,6 +44,8 @@ Z80Machine::Z80Machine()
 	mRegisterPack.regF.setValue(0b01101111);
     mRegisterPack.regPC.setValue(0x1234);
     mRegisterPack.regHL.setValue(0xFE14);
+    mRegisterPack.regIX.setValue(0x1200);
+    mRegisterPack.regIY.setValue(0x1400);
 
 /*
     printf("\n\n--- set to tf f ttt\n");
@@ -537,7 +544,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     //uint8_t len=0;
     uint8_t lenEff=0;
     uint8_t op1, op2;
-    uint8_t instruction=CODE_NO_INSTRUCTION;
+    uint16_t instruction=CODE_NO_INSTRUCTION;
     Register_8bits *reg8_1=NULL;
     Register_8bits *reg8_2=NULL;
     Register_16bits *reg16_1=NULL;
@@ -613,7 +620,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         instruction=CODE_LDHLN;
         
         /* Extract the value of the operand #2 (n)    */
-        op2=codeInHexa & 0xFF;
+        op2=codeInHexa & FIRST_LOWEST_BYTE;
     }
 
     /* This is a HALT    */
@@ -650,8 +657,8 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         instruction=CODE_LDNNA;
         
         /* Extract the value of the operand #2 (nn)    */
-        op1=codeInHexa & 0x0000FF;
-        op2=(codeInHexa & 0x00FF00) >> SIZE_1_BYTE;
+        op1=codeInHexa & FIRST_LOWEST_BYTE;
+        op2=(codeInHexa & SECOND_LOWEST_BYTE) >> SIZE_1_BYTE;
     }
 
     /* This is a LD (BC),A  */
@@ -666,6 +673,14 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     {
         instruction=CODE_LDDEA;
         
+    }
+
+    /* This is a LD r,(IX+d)    */
+    if ((codeInHexa>>SIZE_2_BYTES==ALT_CODE_DD) && ((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE & MASK_LDRIXD)==CODE_LDRIXD && len == THREE_BYTES)
+    {
+        instruction=CODE_DD_LDRIXD; 
+        op1=EXTRACT(codeInHexa, 11, 3);
+        op2=codeInHexa & FIRST_LOWEST_BYTE;
     }
 
     /*************************************************************************************************************************/
@@ -898,7 +913,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_EXECUTE)
             {
-                printf("LD (#%04X),A was executed\n", address);
+                printf("\nLD (#%04X),A was executed\n", address);
 
                 reg8_1=get8bitsRegisterAddress(REGA);
                 
@@ -908,6 +923,24 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             if (pMode==INTP_DISPLAY)
             {
                 printf("\n[%06X] is LD (#%04X),A\n", codeInHexa, address);
+            }
+            break;
+
+        case CODE_DD_LDRIXD:
+            address=mRegisterPack.regIX.getValue()+op2;
+            ret=bitToRegister(op1, sop1);
+            
+            if (pMode==INTP_EXECUTE)
+            {
+                printf("\nLD %s,(IX+#%02X) was executed\n", sop1, op2);
+
+                reg8_1=get8bitsRegisterAddress(op1);
+                reg8_1->setValue(mMemory->get8bitsValue(address));
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is LD %s,(IX+#%02X)\n", codeInHexa, sop1, op2);
             }
             break;
 
@@ -1101,6 +1134,7 @@ bool Z80Machine::analyse()
                     printf("\n");
                     printf("BC: [%04X]    DE [%04X]\n", mRegisterPack.regBC.getValue(), mRegisterPack.regDE.getValue());
                     printf("HL: [%04X]    AF [%04X]\n", mRegisterPack.regHL.getValue(), mRegisterPack.regAF.getValue());
+                    printf("IX: [%04X]    IY [%04X]\n", mRegisterPack.regIX.getValue(), mRegisterPack.regIY.getValue());
 
                     printf("\n");
                     printf("PC: [%04X]    SP [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());

@@ -4,6 +4,10 @@
 #define EXTRACT(a, d, l)    (a>>d & ~(((uint8_t) 0b111111111)<<l)) 
 #define PUSHBIT(a, b, l)       (a=a|(b<<l))
 
+#define ALT_CODE_CB         (0xCB)
+#define ALT_CODE_ED         (0xED)
+#define ALT_CODE_DD         (0xDD)
+
 #define CODE_NO_INSTRUCTION (0b11001011)                // 0xDE
 #define CODE_NOP            (0b00000000)                // 0X00
 #define CODE_LDRR           (0b01000000)                
@@ -18,6 +22,8 @@
 #define CODE_LDBCA          (0b00000010)                // 0x02
 #define CODE_LDDEA          (0b00010010)                // 0x12
 #define CODE_LDNNA          (0b00110010)                // 0x32
+#define CODE_LDRIXD         (0b01000110)
+#define CODE_DD_LDRIXD      (0b1101110101000110)        
 
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
@@ -32,6 +38,7 @@
 #define MASK_LDBCA          (0b11111111)
 #define MASK_LDDEA          (0b11111111)
 #define MASK_LDNNA          (0b11111111)
+#define MASK_LDRIXD         (0b11000111)
 
 #define ONE_BYTE            (2)
 #define TWO_BYTES           (4)
@@ -43,6 +50,11 @@
 #define SIZE_3_BYTES        (24)
 #define SIZE_4_BYTES        (32)
 
+#define FIRST_LOWEST_BYTE   (0x000000FF)
+#define SECOND_LOWEST_BYTE  (0x0000FF00)
+#define THIRD_LOWEST_BYTE   (0x00FF0000)
+#define FOURTH_LOWEST_BYTE  (0xFF000000)
+
 #define REGA                (0b111)
 #define REGB                (0b000)
 #define REGC                (0b001)
@@ -51,12 +63,13 @@
 #define REGH                (0b100)
 #define REGL                (0b101)
 
-
 #define REGBC               (0b1000)
 #define REGDE               (0b1001)
 #define REGHL               (0b1010)
 #define REGSP               (0b1011)
 #define REGAF               (0b1100)
+#define REGIX               (0b1101)
+#define REGIY               (0b1110)
 
 #define REGIBC              (0b11000)
 #define REGIDE              (0b11001)
