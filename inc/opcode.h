@@ -22,8 +22,8 @@
 #define CODE_LDBCA          (0b00000010)                // 0x02
 #define CODE_LDDEA          (0b00010010)                // 0x12
 #define CODE_LDNNA          (0b00110010)                // 0x32
-#define CODE_LDRIXD         (0b01000110)
-#define CODE_DD_LDRIXD      (0b1101110101000110)        
+#define CODE_LDRIXN         (0b01000110)
+#define CODE_DD_LDRIXN      (0b1101110101000110)        
 
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
@@ -38,7 +38,7 @@
 #define MASK_LDBCA          (0b11111111)
 #define MASK_LDDEA          (0b11111111)
 #define MASK_LDNNA          (0b11111111)
-#define MASK_LDRIXD         (0b11000111)
+#define MASK_LDRIXN         (0b11000111)
 
 #define ONE_BYTE            (2)
 #define TWO_BYTES           (4)

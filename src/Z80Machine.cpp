@@ -493,15 +493,16 @@ Register_16bits *Z80Machine::get16bitsRegisterAddress(uint8_t pReg)
     return(regReturn);
 }
 
-/* Clean the operand    */
-int8_t Z80Machine::clean8bits(char *pOp)
+
+/* Clean the n operand    */
+int8_t Z80Machine::clean_n(char *pOp)
 {
     uint8_t retCode=ERR_NO_ERROR;
     char *posChar;
 
     //printf("op_in =<%s>\n", pOp);
 
-    if (posChar=strchr(pOp, '#'))           /* Is there a '#' ? */
+    if (posChar=strchr(pOp, '#'))               /* Is there a '#' ? */
     {
         if (strlen(pOp)>=3)                     /* Remove characters if needed  */
         {
@@ -535,6 +536,66 @@ int8_t Z80Machine::clean8bits(char *pOp)
     //printf("op_out=<%s>\n", pOp);
 
     return retCode;
+}
+
+
+/* Clean the (IX+#00) operand */
+int8_t Z80Machine::clean_ixn(char *pOp)
+{
+    uint8_t retCode=ERR_NO_ERROR;
+    char *posChar;
+
+    printf("op_i=<%s>\n", pOp);
+
+    if (posChar=strchr(pOp, '#'))               /* Is there a '#' ? */ 
+    {
+        strcpy(pOp, posChar);
+
+        pOp[strlen(pOp)-1]='\0';
+        
+        if (strlen(pOp)>=3)                     /* Remove characters if needed  */
+        {
+            pOp[3]='\0';
+        }
+
+        if (pOp[0]!='#')
+        {
+            printf("The # is not at the first position...\n");
+            retCode=ERR_BAD_OPERAND;
+        }
+        else
+        {
+            if (!strcmp(pOp, "#"))
+            {
+                printf("The operand is just '#'...\n");
+                retCode=ERR_BAD_OPERAND;
+            }
+            else
+            {
+                if (strlen(pOp)==2)
+                {
+                    pOp[3]='\0';            /* Add a zero before */
+                    pOp[2]=pOp[1];
+                    pOp[1]='0';
+                }
+            }
+        }              
+    }
+    else
+    {
+        retCode=ERR_BAD_OPERAND;
+    }
+
+    printf("op_o=<%s>\n", pOp);
+    printf("rc=%d", retCode);
+
+    return retCode;
+}
+
+/* Clean the r operand  (IX+#00)  */
+int8_t Z80Machine::clean_r(char *)
+{
+    return 0;
 }
 
 /* Interpret the machine code   */
@@ -676,9 +737,9 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD r,(IX+d)    */
-    if ((codeInHexa>>SIZE_2_BYTES==ALT_CODE_DD) && ((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE & MASK_LDRIXD)==CODE_LDRIXD && len == THREE_BYTES)
+    if ((codeInHexa>>SIZE_2_BYTES==ALT_CODE_DD) && ((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE & MASK_LDRIXN)==CODE_LDRIXN && len == THREE_BYTES)
     {
-        instruction=CODE_DD_LDRIXD; 
+        instruction=CODE_DD_LDRIXN; 
         op1=EXTRACT(codeInHexa, 11, 3);
         op2=codeInHexa & FIRST_LOWEST_BYTE;
     }
@@ -926,7 +987,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
-        case CODE_DD_LDRIXD:
+        case CODE_DD_LDRIXN:
             address=mRegisterPack.regIX.getValue()+op2;
             ret=bitToRegister(op1, sop1);
             
@@ -960,6 +1021,7 @@ int8_t Z80Machine::cutInstruction(char *pInstruction, char *pInst, char *pOp1, c
     pOp2[0]='\0';
 
     strcpy(pInst, pInstruction);                        /* Init the return intruction string    */
+    printf("inst=%s\n", pInst);
 
     /* Is there a space into the instruction ?  */
     if (!(charPos=strchr(pInst, ' ')))
@@ -987,14 +1049,14 @@ int8_t Z80Machine::cutInstruction(char *pInstruction, char *pInst, char *pOp1, c
         }
     }
 
-    /* Clean the #nn for pOp1 and pOp2  */
-    retCheck=clean8bits(pOp1);
-    retCheck=clean8bits(pOp2);
+    //if (retCheck<0)                 /* Return the error */
+    //{
+    //    nbOfComp=retCheck;
+    //}
 
-    if (retCheck<0)                 /* Return the error */
-    {
-        nbOfComp=retCheck;
-    }
+    printf("inst=%s\n", pInst);
+    printf("op1 =%s\n", pOp1);
+    printf("op2 =%s\n", pOp2);
     
     return nbOfComp;
 }
@@ -1009,6 +1071,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
     char *str_ptr=NULL;
     uint8_t nbOfComponents=0;
     uint8_t lenEff=0;
+    int8_t retCheck=0;
 
     nbOfComponents=cutInstruction(pInstruction, str_inst, str_op1, str_op2);
 
@@ -1035,21 +1098,46 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 {
                     retCode=CODE_LDRR;                              /* Prepare the LD r,r'  */
                     *pLen=ONE_BYTE;
+
+                    retCheck=clean_r(str_op1);
+                    retCheck=clean_r(str_op2);
                     
                     PUSHBIT(retCode, registerToBit(str_op1), 3);    /* Add the first register as bits   */
                     PUSHBIT(retCode, registerToBit(str_op2), 0);    /* Add the first register as bits   */
                 }
 
-                if (strlen(str_op1)==1 && strlen(str_op2)==3)       /* Check if it is a LD, r,n instruction    */
+                if (strlen(str_op1)==1 && (strlen(str_op2)==3) || (strlen(str_op2)==2))       /* Check if it is a LD, r,n instruction    */
                 {
-                    retCode=CODE_LDRN;
-                    //*pLen=TWO_BYTE;
-                    
-                    PUSHBIT(retCode, registerToBit(str_op1), 3);    /* Add the first register as bits   */
+                    /* Clean the n for Op2 and r for Op1 */
+                    retCheck=clean_r(str_op1);
+                    retCheck=clean_n(str_op2);
+                    printf("OP2=%s\n", str_op2);
 
-                    retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);  /* Prepare the LD r,n   */
+                    retCode=CODE_LDRN;
+                    
+                    PUSHBIT(retCode, registerToBit(str_op1), 3);                /* Add the first register as bits   */
+
+                    retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);     /* Prepare the LD r,n   */
                     *pLen=TWO_BYTES;
                 }
+
+                if (strlen(str_op1)==1 && (strlen(str_op2)==7) || (strlen(str_op2)==8))       /* Check if it is a LD, r,(IX+n) instruction    */
+                {
+                    /* Clean the (IX+n) for Op2 and r for Op1 */
+                    retCheck=clean_r(str_op1);
+                    retCheck=clean_ixn(str_op2);
+                    printf("OP2=%s\n", str_op2);
+
+                    retCode=CODE_DD_LDRIXN;
+                    
+                    PUSHBIT(retCode, registerToBit(str_op1), 3);            /* Add the first register as bits   */
+
+                    
+                    retCode=(retCode<<8)+toValue(str_op2+2, pLen, &lenEff);  /* Prepare the LD r,n   */
+                    printf("CODE %03X\n", retCode);
+                    *pLen=THREE_BYTES;
+                }
+
 
 
             }

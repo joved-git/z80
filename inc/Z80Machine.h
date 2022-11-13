@@ -110,10 +110,20 @@ private:
     /// @return The number of components.
     int8_t cutInstruction(char *, char *, char *, char *);
 
-    /// @brief  Clean a 8-bit operand.
+    /// @brief  Clean a n operand.
     /// @param  The operand as a string.
     /// @return OK or error code (bas operand).
-    int8_t clean8bits(char *);
+    int8_t clean_n(char *);
+
+    /// @brief  Clean a r operand.
+    /// @param  The operand as a string.
+    /// @return OK or error code (bas operand).
+    int8_t clean_r(char *);
+
+    /// @brief  Clean a (Ix+n) operand.
+    /// @param  The operand as a string.
+    /// @return OK or error code (bas operand).
+    int8_t clean_ixn(char *);
 };	
 
 #endif
