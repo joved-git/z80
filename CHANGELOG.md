@@ -1,10 +1,14 @@
+# 0.6.7
+Add 'm pc' command.
+Add LD rr,nn instruction.
+
 # 0.6.6
 Add clean_r(), clean_ixn() and clean_n() function.
 Decode the LD r,(IX+n) command.
 
 # 0.6.5
 Handle instruction beginning with 0xDD.
-Add LD r,(IX+d) command.
+Add LD r,(IX+d) instruction.
 Add IX and IY registers.
 
 # 0.6.4
@@ -16,10 +20,10 @@ Clean the operand.
 Decode LD r,n.
 
 # 0.6.2
-Add LD (nn),A
+Add LD (nn),A instruction.
 
 # 0.6.1
-Add LD (BC),A and LD (DE),A commands.
+Add LD (BC),A and LD (DE),A instructions.
 
 # 0.6.0
 Decode first pack of instruction (LD r,r').
@@ -32,13 +36,13 @@ Cut instruction method is terminted (cutInstruction()).
 Decode LD r,r' instruction.
 
 # 0.5.4
-Add LD A,(DE) and LD A,(nn) commands.
+Add LD A,(DE) and LD A,(nn) instruction.
 
 # 0.5.3
 Add the memory dump (16 bytes).
 
 # 0.5.2
-Add LD A,(BC) command.
+Add LD A,(BC) instruction.
 Change 'm' to 'c for machine code.
 Add 'm' for dump memory.
 Add 'b' for convert one byte to binary.

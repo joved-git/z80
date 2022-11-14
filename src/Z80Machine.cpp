@@ -604,7 +604,9 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     //uint32_t codeInHexa;
     //uint8_t len=0;
     uint8_t lenEff=0;
-    uint8_t op1, op2;
+    uint8_t op1=0;
+    uint8_t op2=0;
+    uint16_t op16=0;
     uint16_t instruction=CODE_NO_INSTRUCTION;
     Register_8bits *reg8_1=NULL;
     Register_8bits *reg8_2=NULL;
@@ -708,8 +710,8 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         instruction=CODE_LDANN;
         
         /* Extract the value of the operand #2 (nn)    */
-        op1=codeInHexa & 0x0000FF;
-        op2=(codeInHexa & 0x00FF00) >> SIZE_1_BYTE;
+        op1=codeInHexa & FIRST_LOWEST_BYTE;
+        op2=(codeInHexa & SECOND_LOWEST_BYTE) >> SIZE_1_BYTE;
     }
 
     /* This is a LD (nn),A  */
@@ -743,6 +745,17 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=EXTRACT(codeInHexa, 11, 3);
         op2=codeInHexa & FIRST_LOWEST_BYTE;
     }
+
+    /* This is a LD rr,nn    */
+    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDRRNN)==CODE_LDRRNN && len == THREE_BYTES)
+    {
+        instruction=CODE_LDRRNN;
+        
+        /* Extract the value of the operand #1 (rr) and #2 (nn)    */
+        op1=EXTRACT(codeInHexa, 20,2) | 0b1000;
+        op16=codeInHexa & (FIRST_LOWEST_BYTE | SECOND_LOWEST_BYTE);
+    }
+
 
     /*************************************************************************************************************************/
 
@@ -1002,6 +1015,23 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             if (pMode==INTP_DISPLAY)
             {
                 printf("\n[%06X] is LD %s,(IX+#%02X)\n", codeInHexa, sop1, op2);
+            }
+            break;
+
+        case CODE_LDRRNN:                                    /* This is a LD rr,nn    */   
+            ret=bitToRegister(op1, sop1);
+            
+            if (pMode==INTP_EXECUTE)
+            {
+                printf("LD %s, #%04X was executed\n", sop1, op16);
+
+                reg16_1=get16bitsRegisterAddress(op1);
+                reg16_1->setValue(op16);
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is LD %s,#%04X\n", codeInHexa, sop1, op16);
             }
             break;
 
@@ -1294,8 +1324,16 @@ bool Z80Machine::analyse()
 
                 case CMD_DISPLAY_MEMORY:
                     mEntry+=2;
+                    lenValue=lenEff=0;
 
-                    value=toValue(mEntry, &lenValue, &lenEff);
+                    if (!strcmp(mEntry, "PC"))
+                    {
+                        value=mRegisterPack.regPC.getValue();
+                    }
+                    else
+                    {
+                        value=toValue(mEntry, &lenValue, &lenEff);
+                    }
 
                     if (lenEff<lenValue)
                     {

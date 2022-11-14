@@ -7,6 +7,7 @@
 #define ALT_CODE_CB         (0xCB)
 #define ALT_CODE_ED         (0xED)
 #define ALT_CODE_DD         (0xDD)
+#define ALT_CODE_FD         (0xFD)
 
 #define CODE_NO_INSTRUCTION (0b11001011)                // 0xDE
 #define CODE_NOP            (0b00000000)                // 0X00
@@ -23,7 +24,8 @@
 #define CODE_LDDEA          (0b00010010)                // 0x12
 #define CODE_LDNNA          (0b00110010)                // 0x32
 #define CODE_LDRIXN         (0b01000110)
-#define CODE_DD_LDRIXN      (0b1101110101000110)        
+#define CODE_DD_LDRIXN      (0b1101110101000110)     
+#define CODE_LDRRNN         (0b00000001)   
 
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
@@ -39,6 +41,7 @@
 #define MASK_LDDEA          (0b11111111)
 #define MASK_LDNNA          (0b11111111)
 #define MASK_LDRIXN         (0b11000111)
+#define MASK_LDRRNN         (0b11001111)
 
 #define ONE_BYTE            (2)
 #define TWO_BYTES           (4)
