@@ -1,3 +1,7 @@
+# 0.6.9
+Add LD (IX+d), r and LD (IY+d),r.
+Display displacement as a positive or negative number.
+
 # 0.6.8
 Add LD r,(IY+d) instruction.
 Handle negative displacement (use SIGN() macro).

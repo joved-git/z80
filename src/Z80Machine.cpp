@@ -764,6 +764,22 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op2=codeInHexa & FIRST_LOWEST_BYTE;
     }
 
+    /* This is a LD (IX+d),r    */
+    if ((codeInHexa>>SIZE_2_BYTES==ALT_CODE_DD) && ((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE & MASK_LDIXDR)==CODE_LDIXDR && len == THREE_BYTES)
+    {
+        instruction=CODE_DD_LDIXDR;
+        op1=codeInHexa & FIRST_LOWEST_BYTE;
+        op2=EXTRACT(codeInHexa, 8, 3);
+    }
+
+    /* This is a LD (IY+d),r    */
+    if ((codeInHexa>>SIZE_2_BYTES==ALT_CODE_FD) && ((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE & MASK_LDIYDR)==CODE_LDIYDR && len == THREE_BYTES)
+    {
+        instruction=CODE_FD_LDIYDR; 
+        op1=codeInHexa & FIRST_LOWEST_BYTE;
+        op2=EXTRACT(codeInHexa, 8, 3);
+    }
+
     /*************************************************************************************************************************/
 
     switch (instruction)
@@ -1012,18 +1028,18 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_EXECUTE)
             {
-                printf("\nLD %s,(IX+#%02X) was executed\n", sop1, op2);
-
                 reg8_1=get8bitsRegisterAddress(op1);
 
                 if (SIGN(op2))                                      /* Check if op2 is negative */
                 {
                     op2=~op2+1;
                     address=mRegisterPack.regIX.getValue()-op2;
+                    printf("\nLD %s,(IX-#%02X) was executed\n", sop1, op2);
                 }
                 else
                 {
                     address=mRegisterPack.regIX.getValue()+op2;
+                    printf("\nLD %s,(IX+#%02X) was executed\n", sop1, op2);
                 }
 
                 reg8_1->setValue(mMemory->get8bitsValue(address));
@@ -1031,7 +1047,15 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%06X] is LD %s,(IX+#%02X)\n", codeInHexa, sop1, op2);
+                if SIGN(op2)
+                {
+                    op2=~op2+1;
+                    printf("\n[%06X] is LD %s,(IX-#%02X)\n", codeInHexa, sop1, op2);
+                }
+                else
+                {
+                    printf("\n[%06X] is LD %s,(IX+#%02X)\n", codeInHexa, sop1, op2);
+                }
             }
             break;
 
@@ -1057,18 +1081,20 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_EXECUTE)                                /* Execute LD r,(IY+d)*/
             {
-                printf("\nLD %s,(IY+#%02X) was executed\n", sop1, op2);
-
                 reg8_1=get8bitsRegisterAddress(op1);
 
                 if (SIGN(op2))                                      /* Check if op2 is negative */
                 {
                     op2=~op2+1;
                     address=mRegisterPack.regIY.getValue()-op2;
+                    printf("\nLD %s,(IY-#%02X) was executed\n", sop1, op2);
+
                 }
                 else
                 {
                     address=mRegisterPack.regIY.getValue()+op2;
+                    printf("\nLD %s,(IY+#%02X) was executed\n", sop1, op2);
+
                 }
 
                 reg8_1->setValue(mMemory->get8bitsValue(address));
@@ -1076,7 +1102,88 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%06X] is LD %s,(IY+#%02X)\n", codeInHexa, sop1, op2);
+                if (SIGN(op2))
+                {
+                    op2=~op2+1;
+                    printf("\n[%06X] is LD %s,(IY-#%02X)\n", codeInHexa, sop1, op2);
+                }
+                else
+                {
+                    printf("\n[%06X] is LD %s,(IY+#%02X)\n", codeInHexa, sop1, op2);
+                }
+            }
+            break;
+
+        case CODE_DD_LDIXDR:
+            ret=bitToRegister(op2, sop2);
+            
+            if (pMode==INTP_EXECUTE)
+            {
+                reg8_1=get8bitsRegisterAddress(op2);
+
+                if (SIGN(op1))                                      /* Check if op2 is negative */
+                {
+                    op1=~op1+1;
+                    address=mRegisterPack.regIX.getValue()-op1;
+                    printf("\nLD (IX-#%02X),%s was executed\n", op1, sop2);
+                }
+                else
+                {
+                    address=mRegisterPack.regIX.getValue()+op1;
+                    printf("\nLD (IX+#%02X),%s was executed\n", op1, sop2);
+                }
+
+                mMemory->set8bitsValue(address, reg8_1->getValue());
+                //reg8_1->setValue(mMemory->get8bitsValue(address));
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                if (SIGN(op1))
+                {
+                    op1=~op1+1;
+                    printf("\n[%06X] is LD (IX-#%02X),%s\n", codeInHexa, op1, sop2);
+                }
+                else
+                {
+                    printf("\n[%06X] is LD (IX+#%02X),%s\n", codeInHexa, op1, sop2);
+                }
+            }
+            break;
+
+        case CODE_FD_LDIYDR:
+            ret=bitToRegister(op2, sop2);
+            
+            if (pMode==INTP_EXECUTE)
+            {
+                reg8_1=get8bitsRegisterAddress(op2);
+
+                if (SIGN(op1))                                      /* Check if op2 is negative */
+                {
+                    op1=~op1+1;
+                    address=mRegisterPack.regIY.getValue()-op1;
+                    printf("\nLD (IY-#%02X),%s was executed\n", op1, sop2);
+                }
+                else
+                {
+                    address=mRegisterPack.regIY.getValue()+op1;
+                    printf("\nLD (IY+#%02X),%s was executed\n", op1, sop2);
+                }
+
+                mMemory->set8bitsValue(address, reg8_1->getValue());
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                if (SIGN(op1))
+                {
+                    op1=~op1+1;
+                    printf("\n[%06X] is LD (IY-#%02X),%s\n", codeInHexa, op1, sop2);
+                }
+                else
+                {
+                    printf("\n[%06X] is LD (IY+#%02X),%s\n", codeInHexa, op1, sop2);
+                }
             }
             break;
 

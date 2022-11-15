@@ -26,9 +26,13 @@
 #define CODE_LDNNA          (0b00110010)                // 0x32
 #define CODE_LDRIXD         (0b01000110)
 #define CODE_LDRIYD         (0b01000110)
+#define CODE_LDRRNN         (0b00000001)
+#define CODE_LDIXDR         (0b01110000)   
+#define CODE_LDIYDR         (0b01110000) 
 #define CODE_DD_LDRIXD      (0b1111110101000110)    
 #define CODE_FD_LDRIYD      (0b1101110101000110)     
-#define CODE_LDRRNN         (0b00000001)   
+#define CODE_DD_LDIXDR      (0b1111110101110000)    
+#define CODE_FD_LDIYDR      (0b1101110101110000)   
 
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
@@ -43,9 +47,11 @@
 #define MASK_LDBCA          (0b11111111)
 #define MASK_LDDEA          (0b11111111)
 #define MASK_LDNNA          (0b11111111)
-#define MASK_LDRIXD         (0b11000111)
 #define MASK_LDRRNN         (0b11001111)
+#define MASK_LDRIXD         (0b11000111)
 #define MASK_LDRIYD         (0b11000111)
+#define MASK_LDIXDR         (0b11111000)
+#define MASK_LDIYDR         (0b11111000)
 
 #define ONE_BYTE            (2)
 #define TWO_BYTES           (4)
