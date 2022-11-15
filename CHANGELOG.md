@@ -1,3 +1,7 @@
+# 0.6.8
+Add LD r,(IY+d) instruction.
+Handle negative displacement (use SIGN() macro).
+
 # 0.6.7
 Add 'm pc' command.
 Add LD rr,nn instruction.

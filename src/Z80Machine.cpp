@@ -586,8 +586,8 @@ int8_t Z80Machine::clean_ixn(char *pOp)
         retCode=ERR_BAD_OPERAND;
     }
 
-    printf("op_o=<%s>\n", pOp);
-    printf("rc=%d", retCode);
+    //printf("op_o=<%s>\n", pOp);
+    //printf("rc=%d", retCode);
 
     return retCode;
 }
@@ -739,9 +739,9 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD r,(IX+d)    */
-    if ((codeInHexa>>SIZE_2_BYTES==ALT_CODE_DD) && ((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE & MASK_LDRIXN)==CODE_LDRIXN && len == THREE_BYTES)
+    if ((codeInHexa>>SIZE_2_BYTES==ALT_CODE_DD) && ((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE & MASK_LDRIXD)==CODE_LDRIXD && len == THREE_BYTES)
     {
-        instruction=CODE_DD_LDRIXN; 
+        instruction=CODE_DD_LDRIXD; 
         op1=EXTRACT(codeInHexa, 11, 3);
         op2=codeInHexa & FIRST_LOWEST_BYTE;
     }
@@ -756,6 +756,13 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op16=codeInHexa & (FIRST_LOWEST_BYTE | SECOND_LOWEST_BYTE);
     }
 
+    /* This is a LD r,(IY+d)    */
+    if ((codeInHexa>>SIZE_2_BYTES==ALT_CODE_FD) && ((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE & MASK_LDRIYD)==CODE_LDRIYD && len == THREE_BYTES)
+    {
+        instruction=CODE_FD_LDRIYD; 
+        op1=EXTRACT(codeInHexa, 11, 3);
+        op2=codeInHexa & FIRST_LOWEST_BYTE;
+    }
 
     /*************************************************************************************************************************/
 
@@ -1000,8 +1007,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
-        case CODE_DD_LDRIXN:
-            address=mRegisterPack.regIX.getValue()+op2;
+        case CODE_DD_LDRIXD:
             ret=bitToRegister(op1, sop1);
             
             if (pMode==INTP_EXECUTE)
@@ -1009,6 +1015,17 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\nLD %s,(IX+#%02X) was executed\n", sop1, op2);
 
                 reg8_1=get8bitsRegisterAddress(op1);
+
+                if (SIGN(op2))                                      /* Check if op2 is negative */
+                {
+                    op2=~op2+1;
+                    address=mRegisterPack.regIX.getValue()-op2;
+                }
+                else
+                {
+                    address=mRegisterPack.regIX.getValue()+op2;
+                }
+
                 reg8_1->setValue(mMemory->get8bitsValue(address));
             }
             
@@ -1035,6 +1052,34 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
+        case CODE_FD_LDRIYD:
+            ret=bitToRegister(op1, sop1);
+            
+            if (pMode==INTP_EXECUTE)                                /* Execute LD r,(IY+d)*/
+            {
+                printf("\nLD %s,(IY+#%02X) was executed\n", sop1, op2);
+
+                reg8_1=get8bitsRegisterAddress(op1);
+
+                if (SIGN(op2))                                      /* Check if op2 is negative */
+                {
+                    op2=~op2+1;
+                    address=mRegisterPack.regIY.getValue()-op2;
+                }
+                else
+                {
+                    address=mRegisterPack.regIY.getValue()+op2;
+                }
+
+                reg8_1->setValue(mMemory->get8bitsValue(address));
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is LD %s,(IY+#%02X)\n", codeInHexa, sop1, op2);
+            }
+            break;
+
     }
     
     return 0;
@@ -1051,8 +1096,7 @@ int8_t Z80Machine::cutInstruction(char *pInstruction, char *pInst, char *pOp1, c
     pOp2[0]='\0';
 
     strcpy(pInst, pInstruction);                        /* Init the return intruction string    */
-    printf("inst=%s\n", pInst);
-
+    
     /* Is there a space into the instruction ?  */
     if (!(charPos=strchr(pInst, ' ')))
     {
@@ -1079,14 +1123,9 @@ int8_t Z80Machine::cutInstruction(char *pInstruction, char *pInst, char *pOp1, c
         }
     }
 
-    //if (retCheck<0)                 /* Return the error */
-    //{
-    //    nbOfComp=retCheck;
-    //}
-
-    printf("inst=%s\n", pInst);
-    printf("op1 =%s\n", pOp1);
-    printf("op2 =%s\n", pOp2);
+    //printf("inst=%s\n", pInst);
+    //printf("op1 =%s\n", pOp1);
+    //printf("op2 =%s\n", pOp2);
     
     return nbOfComp;
 }
@@ -1141,7 +1180,6 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     /* Clean the n for Op2 and r for Op1 */
                     retCheck=clean_r(str_op1);
                     retCheck=clean_n(str_op2);
-                    printf("OP2=%s\n", str_op2);
 
                     retCode=CODE_LDRN;
                     
@@ -1156,9 +1194,8 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     /* Clean the (IX+n) for Op2 and r for Op1 */
                     retCheck=clean_r(str_op1);
                     retCheck=clean_ixn(str_op2);
-                    printf("OP2=%s\n", str_op2);
 
-                    retCode=CODE_DD_LDRIXN;
+                    retCode=CODE_DD_LDRIXD;
                     
                     PUSHBIT(retCode, registerToBit(str_op1), 3);            /* Add the first register as bits   */
 

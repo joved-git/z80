@@ -49,7 +49,7 @@ Go to the **clone** directory.
 Compile with make:
 
 ```
-c:\make
+c:\<bla>\z80\>make
 ```
 
 The executable is into the build directory.
