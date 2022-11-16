@@ -1,3 +1,7 @@
+# 0.6.11
+Decode LD r,(IY+d).
+Correct the LD r,(IX+d).
+
 # 0.6.10
 Correct the LD rr,nn. Invert low and hight bytes.
 

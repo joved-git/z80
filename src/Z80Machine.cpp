@@ -539,13 +539,13 @@ int8_t Z80Machine::clean_n(char *pOp)
 }
 
 
-/* Clean the (IX+#00) operand */
+/* Clean the (IX+#nn) and the (IY+#nn) operand */
 int8_t Z80Machine::clean_ixn(char *pOp)
 {
     uint8_t retCode=ERR_NO_ERROR;
     char *posChar;
 
-    printf("op_i=<%s>\n", pOp);
+    //printf("op_i=<%s>\n", pOp);
 
     if (posChar=strchr(pOp, '#'))               /* Is there a '#' ? */ 
     {
@@ -1249,6 +1249,8 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
     uint8_t nbOfComponents=0;
     uint8_t lenEff=0;
     int8_t retCheck=0;
+    bool isIX=false;
+    bool isIY=false;
 
     nbOfComponents=cutInstruction(pInstruction, str_inst, str_op1, str_op2);
 
@@ -1257,7 +1259,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
     switch (nbOfComponents)
     {
-        case 1:                                 /* Only one component in the instruction    */
+        case 1:                                                     /* Only one component in the instruction    */
             if (!strcmp(str_inst, "NOP"))
             {
                 retCode=CODE_NOP;
@@ -1299,19 +1301,27 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
                 if (strlen(str_op1)==1 && (strlen(str_op2)==7) || (strlen(str_op2)==8))       /* Check if it is a LD, r,(IX+n) instruction    */
                 {
-                    /* Clean the (IX+n) for Op2 and r for Op1 */
+                    /* Clean the (IX+d) or (IY+d) for Op2 and r for Op1 */
                     retCheck=clean_r(str_op1);
+
+                    if (strstr(str_op2, "IX")) 
+                    {
+                        retCode=CODE_DD_LDRIXD;
+                    }
+                    else if (strstr(str_op2, "IY")) 
+                    {
+                        retCode=CODE_FD_LDRIYD;
+                    }
+
                     retCheck=clean_ixn(str_op2);
-
-                    retCode=CODE_DD_LDRIXD;
                     
-                    PUSHBIT(retCode, registerToBit(str_op1), 3);            /* Add the first register as bits   */
+                    PUSHBIT(retCode, registerToBit(str_op1), 3);                /* Add the first register as bits   */
 
-                    
-                    retCode=(retCode<<8)+toValue(str_op2+2, pLen, &lenEff);  /* Prepare the LD r,n   */
-                    printf("CODE %03X\n", retCode);
+                    retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);     /* Prepare the LD r,(IX+d) or the LD r,(IY+d)  */
+
                     *pLen=THREE_BYTES;
                 }
+
 
 
 
