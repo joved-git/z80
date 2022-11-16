@@ -1,3 +1,6 @@
+# 0.6.10
+Correct the LD rr,nn. Invert low and hight bytes.
+
 # 0.6.9
 Add LD (IX+d), r and LD (IY+d),r.
 Display displacement as a positive or negative number.

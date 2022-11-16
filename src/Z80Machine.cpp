@@ -753,7 +753,8 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         
         /* Extract the value of the operand #1 (rr) and #2 (nn)    */
         op1=EXTRACT(codeInHexa, 20,2) | 0b1000;
-        op16=codeInHexa & (FIRST_LOWEST_BYTE | SECOND_LOWEST_BYTE);
+
+        op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
     }
 
     /* This is a LD r,(IY+d)    */
