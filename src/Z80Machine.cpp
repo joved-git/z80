@@ -488,6 +488,14 @@ Register_16bits *Z80Machine::get16bitsRegisterAddress(uint8_t pReg)
         case REGSP:
             regReturn=&(mRegisterPack.regSP);
             break;
+
+        case REGIX:
+            regReturn=&(mRegisterPack.regIX);
+            break;
+
+        case REGIY:
+            regReturn=&(mRegisterPack.regIY);
+            break;
     }
 
     return(regReturn);
@@ -781,6 +789,20 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op2=EXTRACT(codeInHexa, 8, 3);
     }
 
+    /* This is a LD IX,nn    */
+    if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_DD) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDIXNN)==CODE_LDIXNN && len == FOUR_BYTES)
+    {
+        instruction=CODE_DD_LDIXNN; 
+        op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
+    }
+
+    /* This is a LD IY,nn    */
+    if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_FD) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDIYNN)==CODE_LDIYNN && len == FOUR_BYTES)
+    {
+        instruction=CODE_FD_LDIYNN; 
+        op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
+    }
+
     /*************************************************************************************************************************/
 
     switch (instruction)
@@ -815,7 +837,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             {
                 ret=bitToRegister(op1, sop1);
                 ret=bitToRegister(op2, sop2);
-                printf("LD %s,%s was executed\n", sop1, sop2);
+                printf("\nLD %s,%s was executed\n", sop1, sop2);
 
                 reg8_1=get8bitsRegisterAddress(op1);
                 reg8_2=get8bitsRegisterAddress(op2);
@@ -836,7 +858,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             if (pMode==INTP_EXECUTE)
             {
                 ret=bitToRegister(op1, sop1);
-                printf("LD %s,#%02X was executed\n", sop1, op2);
+                printf("\nLD %s,#%02X was executed\n", sop1, op2);
 
                 reg8_1=get8bitsRegisterAddress(op1);
                 
@@ -856,7 +878,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             {
                 ret=bitToRegister(op1, sop1);
                 ret=bitToRegister(op2, sop2);
-                printf("LD %s,%s was executed\n", sop1, sop2);
+                printf("\nLD %s,%s was executed\n", sop1, sop2);
 
                 reg8_1=get8bitsRegisterAddress(op1);
                 reg16_1=get16bitsRegisterAddress(REGHL);
@@ -878,7 +900,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             {
                 ret=bitToRegister(op1, sop1);
                 ret=bitToRegister(op2, sop2);
-                printf("LD %s,%s was executed\n", sop1, sop2);
+                printf("\nLD %s,%s was executed\n", sop1, sop2);
 
                 reg8_1=get8bitsRegisterAddress(op2);
                 reg16_1=get16bitsRegisterAddress(REGHL);
@@ -899,7 +921,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             if (pMode==INTP_EXECUTE)
             {
                 ret=bitToRegister(REGIHL, sop1);
-                printf("LD %s,#%02X was executed\n", sop1, op2);
+                printf("\nLD %s,#%02X was executed\n", sop1, op2);
 
                 reg16_1=get16bitsRegisterAddress(REGHL);
 
@@ -917,7 +939,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         case CODE_LDABC:                            /* This is a LD A,(BC)    */   
             if (pMode==INTP_EXECUTE)
             {
-                printf("LD A,(BC) was executed\n");
+                printf("\nLD A,(BC) was executed\n");
 
                 reg8_1=get8bitsRegisterAddress(REGA);
                 reg16_1=get16bitsRegisterAddress(REGBC);
@@ -937,7 +959,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         case CODE_LDADE:                            /* This is a LD A,(DE)    */   
             if (pMode==INTP_EXECUTE)
             {
-                printf("LD A,(DE) was executed\n");
+                printf("\nLD A,(DE) was executed\n");
 
                 reg8_1=get8bitsRegisterAddress(REGA);
                 reg16_1=get16bitsRegisterAddress(REGDE);
@@ -959,7 +981,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_EXECUTE)
             {
-                printf("LD A,(#%04X) was executed\n", address);
+                printf("\nLD A,(#%04X) was executed\n", address);
 
                 reg8_1=get8bitsRegisterAddress(REGA);
                 
@@ -975,7 +997,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         case CODE_LDBCA:                            /* This is a LD (BC),A    */   
             if (pMode==INTP_EXECUTE)
             {
-                printf("LD (BC),A was executed\n");
+                printf("\nLD (BC),A was executed\n");
 
                 reg16_1=get16bitsRegisterAddress(REGBC);
                 reg8_2=get8bitsRegisterAddress(REGA);
@@ -992,7 +1014,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         case CODE_LDDEA:                            /* This is a LD (DE),A    */   
             if (pMode==INTP_EXECUTE)
             {
-                printf("LD (DE),A was executed\n");
+                printf("\nLD (DE),A was executed\n");
 
                 reg16_1=get16bitsRegisterAddress(REGDE);
                 reg8_2=get8bitsRegisterAddress(REGA);
@@ -1065,7 +1087,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_EXECUTE)
             {
-                printf("LD %s, #%04X was executed\n", sop1, op16);
+                printf("\nLD %s,#%04X was executed\n", sop1, op16);
 
                 reg16_1=get16bitsRegisterAddress(op1);
                 reg16_1->setValue(op16);
@@ -1188,7 +1210,40 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
+        case CODE_DD_LDIXNN:                                    /* This is a LD IX,nn    */   
+            if (pMode==INTP_EXECUTE)
+            {
+                printf("\nLD IX,#%04X was executed\n", op16);
+
+                reg16_1=get16bitsRegisterAddress(REGIX);
+                reg16_1->setValue(op16);
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%08X] is LD IX,#%04X\n", codeInHexa, op16);
+            }
+            break;
+    
+        case CODE_FD_LDIYNN:                                    /* This is a LD IX,nn    */   
+            if (pMode==INTP_EXECUTE)
+            {
+                printf("\nLD IY,#%04X was executed\n", op16);
+
+                reg16_1=get16bitsRegisterAddress(REGIY);
+                reg16_1->setValue(op16);
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%08X] is LD IY,#%04X\n", codeInHexa, op16);
+            }
+            break;
+
     }
+
+    /*************************************************************************************************************************/
+
     
     return 0;
 }

@@ -1,3 +1,6 @@
+# 0.6.12 
+Add LD IX,nn and LD IY,nn.
+
 # 0.6.11
 Decode LD r,(IY+d).
 Correct the LD r,(IX+d).
