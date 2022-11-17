@@ -30,11 +30,18 @@
     }
 
     /* This method returns two byte from the memory.    */
+    /* !!! Probably not useful !!!  */
     uint16_t Memory::get16BitsValue(uint16_t)
     {
         uint16_t bytes=0;
 
         return bytes;
+    }
+
+    /* This method returns two bytes address from memory (lowest then highest part of the address)   */
+    uint16_t Memory::getAddress(uint16_t pAddress)
+    {
+        return (mMemory[pAddress] + mMemory[pAddress+1]*0x100);
     }
 
     /* This method stores a byte into memory.           */

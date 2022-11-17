@@ -1,3 +1,8 @@
+# 0.6.13
+Add LD dd,(nn).
+Add LD HL,(nn).
+Add getAddress() into Memory class.
+
 # 0.6.12 
 Add LD IX,nn and LD IY,nn.
 

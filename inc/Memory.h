@@ -19,10 +19,15 @@ public:
     /// @return The read byte.  
     uint8_t get8bitsValue(uint16_t);
 
-    /// @brief  This method returns two byte from the memory.
+    /// @brief  This method returns two bytes from the memory.
     /// @param  The address of the bytes to be read.
     /// @return The read bytes.
     uint16_t get16BitsValue(uint16_t);
+
+    /// @brief  This method returns two bytes address from memory (lowest then highest part of the address)
+    /// @param  The address of the bytes to be read.
+    /// @return The read address.
+    uint16_t getAddress(uint16_t);
 
     /// @brief  This method stores a byte into memory.
     /// @param  The address of the bytes to be written.

@@ -803,6 +803,21 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
     }
 
+    /* This is a LD dd,(nn)    */
+    if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_ED) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDDDNN)==CODE_LDDDNN && len == FOUR_BYTES)
+    {
+        instruction=CODE_ED_LDDDNN; 
+        op1=EXTRACT(codeInHexa, 20, 2) | 0b1000;
+        op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
+    }
+
+    /* This is a LD HL,(nn)    */
+    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDHLNN)==CODE_LDHLNN && len == THREE_BYTES)
+    {
+        instruction=CODE_LDHLNN; 
+        op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
+    }
+
     /*************************************************************************************************************************/
 
     switch (instruction)
@@ -1237,6 +1252,39 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             if (pMode==INTP_DISPLAY)
             {
                 printf("\n[%08X] is LD IY,#%04X\n", codeInHexa, op16);
+            }
+            break;
+
+        case CODE_ED_LDDDNN:                                    /* This is a LD rr,(nn)    */   
+            ret=bitToRegister(op1, sop1);
+
+            if (pMode==INTP_EXECUTE)
+            {
+
+                printf("\nLD %s,(#%04X) was executed\n", sop1, op16);
+
+                reg16_1=get16bitsRegisterAddress(op1);
+                reg16_1->setValue(mMemory->getAddress(op16));
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%08X] is LD %s,(#%04X)\n", codeInHexa, sop1, op16);
+            }
+            break;
+
+        case CODE_LDHLNN:                                    /* This is a LD HL,(nn)    */   
+            if (pMode==INTP_EXECUTE)
+            {
+                printf("\nLD HL,(#%04X) was executed\n", op16);
+
+                reg16_1=get16bitsRegisterAddress(REGHL);
+                reg16_1->setValue(mMemory->getAddress(op16));
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is LD HL,(#%04X)\n", codeInHexa, op16);
             }
             break;
 
