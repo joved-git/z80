@@ -1,3 +1,7 @@
+# 0.6.14
+Add LD IX,(nn).
+Add LD IY,(nn).
+
 # 0.6.13
 Add LD dd,(nn).
 Add LD HL,(nn).

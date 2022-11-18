@@ -818,6 +818,21 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
     }
 
+    /* This is a LD IX,(nn)    */
+    if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_DD) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDIXANN)==CODE_LDIXANN && len == FOUR_BYTES)
+    {
+        instruction=CODE_DD_LDIXANN; 
+        op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
+    }
+
+    /* This is a LD IY,(nn)    */
+    if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_FD) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDIYANN)==CODE_LDIYANN && len == FOUR_BYTES)
+    {
+        instruction=CODE_FD_LDIYANN; 
+        op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
+    }
+
+
     /*************************************************************************************************************************/
 
     switch (instruction)
@@ -1155,7 +1170,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         case CODE_DD_LDIXDR:
             ret=bitToRegister(op2, sop2);
             
-            if (pMode==INTP_EXECUTE)
+            if (pMode==INTP_EXECUTE)                                /* Execute LD (IX+d),r  */
             {
                 reg8_1=get8bitsRegisterAddress(op2);
 
@@ -1192,7 +1207,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         case CODE_FD_LDIYDR:
             ret=bitToRegister(op2, sop2);
             
-            if (pMode==INTP_EXECUTE)
+            if (pMode==INTP_EXECUTE)                                /* Execute LD (IX+d),r  */
             {
                 reg8_1=get8bitsRegisterAddress(op2);
 
@@ -1285,6 +1300,36 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             if (pMode==INTP_DISPLAY)
             {
                 printf("\n[%06X] is LD HL,(#%04X)\n", codeInHexa, op16);
+            }
+            break;
+
+        case CODE_DD_LDIXANN:                                    /* This is a LD IX,(nn)    */   
+            if (pMode==INTP_EXECUTE)
+            {
+                printf("\nLD IX,(#%04X) was executed\n", op16);
+
+                reg16_1=get16bitsRegisterAddress(REGIX);
+                reg16_1->setValue(mMemory->getAddress(op16));
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%08X] is LD IX,(#%04X)\n", codeInHexa, op16);
+            }
+            break;
+
+                case CODE_FD_LDIYANN:                                    /* This is a LD IY,(nn)    */   
+            if (pMode==INTP_EXECUTE)
+            {
+                printf("\nLD IY,(#%04X) was executed\n", op16);
+
+                reg16_1=get16bitsRegisterAddress(REGIY);
+                reg16_1->setValue(mMemory->getAddress(op16));
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%08X] is LD IY,(#%04X)\n", codeInHexa, op16);
             }
             break;
 

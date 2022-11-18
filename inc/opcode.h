@@ -17,6 +17,8 @@
 #define CODE_LDDEA          (0b00010010)                // 0x12
 #define CODE_LDADE          (0b00011010)                // 0x1A
 #define CODE_LDHLNN         (0b00101010)                // 0x2A
+#define CODE_LDIXANN        (0b00101010)                // 0x2A
+#define CODE_LDIYANN        (0b00101010)                // 0x2A
 #define CODE_LDNNA          (0b00110010)                // 0x32
 #define CODE_LDHLN          (0b00110110)                // 0x36
 #define CODE_LDANN          (0b00111010)                // 0x3A
@@ -33,12 +35,15 @@
 #define CODE_LDIXNN         (0b00100001)
 #define CODE_LDIYNN         (0b00100001)
 #define CODE_LDDDNN         (0b01001011)
+
 #define CODE_DD_LDRIXD      (0b1101110101000110)
 #define CODE_FD_LDRIYD      (0b1111110101000110)    
 #define CODE_DD_LDIXDR      (0b1111110101110000)    
 #define CODE_FD_LDIYDR      (0b1101110101110000)   
 #define CODE_DD_LDIXNN      (0b1101110100100001)        // 0xDD21
+#define CODE_DD_LDIXANN     (0b1101110100101010)        // 0xDD2A
 #define CODE_FD_LDIYNN      (0b1111110100100001)        // 0xFD21
+#define CODE_FD_LDIYANN     (0b1111110100101010)        // 0xFD2A
 #define CODE_ED_LDDDNN      (0b1110110101001011)
 
 #define MASK_NOP            (0b11111111)
@@ -63,6 +68,8 @@
 #define MASK_LDIYNN         (0b11111111)
 #define MASK_LDDDNN         (0b11001111)
 #define MASK_LDHLNN         (0b11111111)
+#define MASK_LDIXANN        (0b11111111)
+#define MASK_LDIYANN        (0b11111111)
 
 #define ONE_BYTE            (2)
 #define TWO_BYTES           (4)
