@@ -47,6 +47,13 @@ Z80Machine::Z80Machine()
     mRegisterPack.regIX.setValue(0x1200);
     mRegisterPack.regIY.setValue(0x1400);
 
+    uint8_t v=VALUE(00);
+    printf("v0=%d\n", v);
+    v=VALUE(01);
+    printf("v1=%d\n", v);
+    v=VALUE(FF);
+    printf("v2=%d\n", v);
+
 /*
     printf("\n\n--- set to tf f ttt\n");
     mRegisterPack.regF.setSignFlag(true);

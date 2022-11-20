@@ -111,6 +111,12 @@
 #define INTP_DISPLAY        (0)
 #define INTP_EXECUTE        (1)
 
+#define NATURAL_00          (1)
+#define NATURAL_01          (3)
+#define NATURAL_FF          (8)
+
+#define VALUE(a)            (NATURAL_##a)
+
 /****************************/
 /* 0x0A   - LD A,(BC)       */
 /* 0x36nn - LD (HL),n       */

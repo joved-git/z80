@@ -1,3 +1,7 @@
+# 0.7.0
+Add python file (generate_include.py) used to generate instruction_length.h file.
+First try with VALUE() macro.
+
 # 0.6.14
 Add LD IX,(nn).
 Add LD IY,(nn).
