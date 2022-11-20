@@ -1,3 +1,6 @@
+# 0.7.1
+The generate_include.py file is terminated.
+
 # 0.7.0
 Add python file (generate_include.py) used to generate instruction_length.h file.
 First try with VALUE() macro.

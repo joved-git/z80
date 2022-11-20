@@ -1,5 +1,5 @@
 #---------------------------------------------------------------#
-# generate_include.py - v 0.2                                   #
+# generate_include.py - v 0.3                                   #
 # The file aims to create ./inc/instruction_length.h file.      #
 # The instruction_length.h file contains all the instruction    #
 # lengths used to decode Z80 instruction.                       #
