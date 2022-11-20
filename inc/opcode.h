@@ -112,7 +112,9 @@
 #define INTP_EXECUTE        (1)
 
 //#define VALUE(a, b)         (LENGTH_##a_##b)
-#define VALUE_NATURAL(a)    (LENGTH_NATURAL_##a)
+//#define VALUE_NATURAL(a)    (LENGTH_NATURAL_##a)
+//#define LENGTH(a, b)        (LENGTH_##a##b)
+//#define LENGTH1(b, c)        (LENGTH_##c##b)
 
 /****************************/
 /* 0x0A   - LD A,(BC)       */

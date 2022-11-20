@@ -27,6 +27,7 @@ POS_OF_DD_CODE      = 9
 POS_OF_FD_CODE      = 11
 POS_OF_DDCB_CODE    = 13
 POS_OF_FDCB_CODE    = 15
+NB_OF_INST          = 256
 
 # Open the result file and add header
 result=open("./inc/instruction_length.h", "w")
@@ -44,103 +45,162 @@ with open('docs/Z80_Instruction_length.csv', newline='') as csvfile:
     iterable = mit.seekable(spamreader)
 
     # Add the natural size #define into the file
-    for row in iterable:
-        for i in range(NB_OF_ELEMENTS):
-            if (row[i]==''):
-                row[i]='0'
-
-        if row[INDICE_DEC]!='Dec':
-            result.write("#define LENGTH_NATURAL_")
-
-            if int(row[INDICE_DEC]) < 16:
-                result.write("0")
-
-            result.write(row[INDICE_HEXA] + "\t\t" + "(" + row[POS_OF_NATURAL_CODE] +")" + '\n')
+    #for row in iterable:
+    #    for i in range(NB_OF_ELEMENTS):
+    #        if (row[i]==''):
+    #            row[i]='0'
+    #
+    #    if row[INDICE_DEC]!='Dec':
+    #        result.write("#define LENGTH_NATURAL_")
+    #
+    #        if int(row[INDICE_DEC]) < 16:
+    #            result.write("0")
+    #
+    #        result.write(row[INDICE_HEXA] + "\t\t" + "(" + row[POS_OF_NATURAL_CODE] +")" + '\n')
     
     result.write("\n")
     iterable.seek(0)
-    
-    # Add the CB size #define into the file
+    result.write("char natural_code_length[" + str(NB_OF_INST) + "]=\n{\n")
+    j=0
+
+    # Add the natural size array into the instruction_length.h file
     for row in iterable:
         for i in range(NB_OF_ELEMENTS):
             if (row[i]==''):
                 row[i]='0'
 
         if row[INDICE_DEC]!='Dec':
-            result.write("#define LENGTH_CB_")
+            result.write(row[POS_OF_NATURAL_CODE])
 
-            if int(row[INDICE_DEC]) < 16:
-                result.write("0")
+            if j<NB_OF_INST-1:
+                result.write(', ')
 
-            result.write(row[INDICE_HEXA] + "\t\t\t" + "(" + row[POS_OF_CB_CODE] +")" + '\n')
+            j=j+1
 
-    result.write("\n")   
-    iterable.seek(0)
-    
-    # Add the ED size #define into the file
-    for row in iterable:
-        for i in range(NB_OF_ELEMENTS):
-            if (row[i]==''):
-                row[i]='0'
+            if j%16==0:
+                result.write('\n')
 
-        if row[INDICE_DEC]!='Dec':
-            result.write("#define LENGTH_ED_")
+    result.write("};\n")
 
-            if int(row[INDICE_DEC]) < 16:
-                result.write("0")
-
-            result.write(row[INDICE_HEXA] + "\t\t\t" + "(" + row[POS_OF_ED_CODE] +")" + '\n')
-
+    # Add the CB size array into the instruction_length.h file
     result.write("\n")
     iterable.seek(0)
-    
-    # Add the FD size #define into the file
+    result.write("char cb_code_length[" + str(NB_OF_INST) + "]=\n{\n")
+    j=0
+
     for row in iterable:
         for i in range(NB_OF_ELEMENTS):
             if (row[i]==''):
                 row[i]='0'
 
         if row[INDICE_DEC]!='Dec':
-            result.write("#define LENGTH_FD_")
+            result.write(row[POS_OF_CB_CODE])
 
-            if int(row[INDICE_DEC]) < 16:
-                result.write("0")
+            if j<NB_OF_INST-1:
+                result.write(', ')
 
-            result.write(row[INDICE_HEXA] + "\t\t\t" + "(" + row[POS_OF_FD_CODE] +")" + '\n')
+            j=j+1
 
+            if j%16==0:
+                result.write('\n')
+
+    result.write("};\n")
+
+    # Add the ED size array into the instruction_length.h file
     result.write("\n")
     iterable.seek(0)
-    
-    # Add the DDCB size #define into the file
+    result.write("char ed_code_length[" + str(NB_OF_INST) + "]=\n{\n")
+    j=0
+
     for row in iterable:
         for i in range(NB_OF_ELEMENTS):
             if (row[i]==''):
                 row[i]='0'
 
         if row[INDICE_DEC]!='Dec':
-            result.write("#define LENGTH_DDCB_")
+            result.write(row[POS_OF_ED_CODE])
 
-            if int(row[INDICE_DEC]) < 16:
-                result.write("0")
+            if j<NB_OF_INST-1:
+                result.write(', ')
 
-            result.write(row[INDICE_HEXA] + "\t\t\t" + "(" + row[POS_OF_DDCB_CODE] +")" + '\n')
+            j=j+1
 
+            if j%16==0:
+                result.write('\n')
+
+    result.write("};\n")
+
+    # Add the FD size array into the instruction_length.h file
     result.write("\n")
     iterable.seek(0)
+    result.write("char fd_code_length[" + str(NB_OF_INST) + "]=\n{\n")
+    j=0
 
-    # Add the FDCB size #define into the file
     for row in iterable:
         for i in range(NB_OF_ELEMENTS):
             if (row[i]==''):
                 row[i]='0'
 
         if row[INDICE_DEC]!='Dec':
-            result.write("#define LENGTH_FDCB_")
+            result.write(row[POS_OF_FD_CODE])
 
-            if int(row[INDICE_DEC]) < 16:
-                result.write("0")
+            if j<NB_OF_INST-1:
+                result.write(', ')
 
-            result.write(row[INDICE_HEXA] + "\t\t\t" + "(" + row[POS_OF_FDCB_CODE] +")" + '\n')
+            j=j+1
+
+            if j%16==0:
+                result.write('\n')
+
+    result.write("};\n")
+
+    # Add the DDCB size array into the instruction_length.h file
+    result.write("\n")
+    iterable.seek(0)
+    result.write("char ddcb_code_length[" + str(NB_OF_INST) + "]=\n{\n")
+    j=0
+
+    for row in iterable:
+        for i in range(NB_OF_ELEMENTS):
+            if (row[i]==''):
+                row[i]='0'
+
+        if row[INDICE_DEC]!='Dec':
+            result.write(row[POS_OF_DDCB_CODE])
+
+            if j<NB_OF_INST-1:
+                result.write(', ')
+
+            j=j+1
+
+            if j%16==0:
+                result.write('\n')
+
+    result.write("};\n")
+
+    # Add the FDCB size array into the instruction_length.h file
+    result.write("\n")
+    iterable.seek(0)
+    result.write("char fdcb_code_length[" + str(NB_OF_INST) + "]=\n{\n")
+    j=0
+
+    for row in iterable:
+        for i in range(NB_OF_ELEMENTS):
+            if (row[i]==''):
+                row[i]='0'
+
+        if row[INDICE_DEC]!='Dec':
+            result.write(row[POS_OF_FDCB_CODE])
+
+            if j<NB_OF_INST-1:
+                result.write(', ')
+
+            j=j+1
+
+            if j%16==0:
+                result.write('\n')
+
+    result.write("};\n")
 
 result.write("\n#endif\n")
 result.close()

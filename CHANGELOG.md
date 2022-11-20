@@ -1,3 +1,6 @@
+# 0.7.2
+Switch from #define to array for the instruction lengths.
+
 # 0.7.1
 The generate_include.py file is terminated.
 

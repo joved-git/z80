@@ -48,14 +48,18 @@ Z80Machine::Z80Machine()
     mRegisterPack.regIX.setValue(0x1200);
     mRegisterPack.regIY.setValue(0x1400);
 
-    uint8_t v=VALUE_NATURAL(00);
+    uint8_t byte=0;
+    uint8_t v=natural_code_length[byte];
     printf("v0=%d\n", v);
-    v=VALUE_NATURAL(01);
-    //v=VALUE(NATURAL, 01);
+    byte=1;
+    v=natural_code_length[byte];
     printf("v1=%d\n", v);
-    v=VALUE_NATURAL(FE);
-    //v=VALUE(NATURAL, FF);
-    printf("v2=%d\n", v);
+    byte=254;
+    v=cb_code_length[byte];
+    printf("v1=%d\n", v);
+    byte=254;
+    v=fdcb_code_length[byte];
+    printf("v1=%d\n", v);
 
 /*
     printf("\n\n--- set to tf f ttt\n");
