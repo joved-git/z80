@@ -1,4 +1,5 @@
 #include "../inc/Z80Machine.h"
+#include "../inc/instruction_length.h"
 
 /* The constructor  */
 Z80Machine::Z80Machine()
@@ -47,11 +48,13 @@ Z80Machine::Z80Machine()
     mRegisterPack.regIX.setValue(0x1200);
     mRegisterPack.regIY.setValue(0x1400);
 
-    uint8_t v=VALUE(00);
+    uint8_t v=VALUE_NATURAL(00);
     printf("v0=%d\n", v);
-    v=VALUE(01);
+    v=VALUE_NATURAL(01);
+    //v=VALUE(NATURAL, 01);
     printf("v1=%d\n", v);
-    v=VALUE(FF);
+    v=VALUE_NATURAL(FE);
+    //v=VALUE(NATURAL, FF);
     printf("v2=%d\n", v);
 
 /*

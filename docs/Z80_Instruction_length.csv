@@ -7,7 +7,7 @@ Dec;Hexa;Instruction;Natural size;Instruction CB;Size CB;Instruction ED;Size ED;
 5;5;DEC B;1;RLC L;1;;;;;;;;;;;
 6;6;LD B,n;2;RLC (HL);1;;;;;;;RLC (IX+n);2;RLC (IY+n);2;inverted bytes
 7;7;RLCA;1;RLC A;1;;;;;;;;;;;
-8;8;EX AF, AF’;1;RRC B;1;;;;;;;;;;;
+8;8;EX AF,AF\â€™;1;RRC B;1;;;;;;;;;;;
 9;9;ADD HL,BC;1;RRC C;1;;;ADD IX,BC;1;ADD IY,BC;1;;;;;
 10;A;LD A,(BC);1;RRC D;1;;;;;;;;;;;
 11;B;DEC BC;1;RRC E;1;;;;;;;;;;;
