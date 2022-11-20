@@ -1,3 +1,6 @@
+# 0.7.3
+Add LD (nn),HL. Add setAddress() to Memory class.
+
 # 0.7.2
 Switch from #define to array for the instruction lengths.
 

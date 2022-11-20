@@ -48,6 +48,7 @@ Z80Machine::Z80Machine()
     mRegisterPack.regIX.setValue(0x1200);
     mRegisterPack.regIY.setValue(0x1400);
 
+    /*
     uint8_t byte=0;
     uint8_t v=natural_code_length[byte];
     printf("v0=%d\n", v);
@@ -60,6 +61,7 @@ Z80Machine::Z80Machine()
     byte=254;
     v=fdcb_code_length[byte];
     printf("v1=%d\n", v);
+    */
 
 /*
     printf("\n\n--- set to tf f ttt\n");
@@ -846,6 +848,14 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
     }
 
+    /* This is a (nn),HL    */
+    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDNNHL)==CODE_LDNNHL && len == 2*natural_code_length[CODE_LDNNHL])
+    {
+        instruction=CODE_LDNNHL; 
+        op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
+    }
+
+
 
     /*************************************************************************************************************************/
 
@@ -1332,7 +1342,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
-                case CODE_FD_LDIYANN:                                    /* This is a LD IY,(nn)    */   
+        case CODE_FD_LDIYANN:                                    /* This is a LD IY,(nn)    */   
             if (pMode==INTP_EXECUTE)
             {
                 printf("\nLD IY,(#%04X) was executed\n", op16);
@@ -1346,6 +1356,22 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%08X] is LD IY,(#%04X)\n", codeInHexa, op16);
             }
             break;
+
+        case CODE_LDNNHL:                                    /* This is a LD (nn),HL    */   
+            if (pMode==INTP_EXECUTE)
+            {
+                printf("\nLD (#%04X),HL was executed\n", op16);
+
+                reg16_1=get16bitsRegisterAddress(REGHL);
+                mMemory->setAddress(op16, reg16_1->getValue());
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is LD (#%04X),HL\n", codeInHexa, op16);
+            }
+            break;
+
 
     }
 

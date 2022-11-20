@@ -16,6 +16,7 @@
 #define CODE_LDABC          (0b00001010)                // 0x0A
 #define CODE_LDDEA          (0b00010010)                // 0x12
 #define CODE_LDADE          (0b00011010)                // 0x1A
+#define CODE_LDNNHL         (0b00100010)                // 0x22
 #define CODE_LDHLNN         (0b00101010)                // 0x2A
 #define CODE_LDIXANN        (0b00101010)                // 0x2A
 #define CODE_LDIYANN        (0b00101010)                // 0x2A
@@ -70,6 +71,7 @@
 #define MASK_LDHLNN         (0b11111111)
 #define MASK_LDIXANN        (0b11111111)
 #define MASK_LDIYANN        (0b11111111)
+#define MASK_LDNNHL         (0b11111111)
 
 #define ONE_BYTE            (2)
 #define TWO_BYTES           (4)
