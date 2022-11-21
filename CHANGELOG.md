@@ -1,3 +1,8 @@
+# 0.7.6
+Decode INC r and INC rr.
+Add a clean_nn() function. Optimise clean_n().
+Decode LD rr,nn.
+
 # 0.7.5
 Add INC rr instruction.
 
