@@ -1,3 +1,7 @@
+# 0.7.7
+Add PUSH qq.
+Decode PUSH qq.
+
 # 0.7.6
 Decode INC r and INC rr.
 Add a clean_nn() function. Optimise clean_n().
