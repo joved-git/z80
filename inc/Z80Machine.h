@@ -115,6 +115,11 @@ private:
     /// @return OK or error code (bas operand).
     int8_t clean_n(char *);
 
+    /// @brief  Clean a nn operand.
+    /// @param  The operand as a string.
+    /// @return OK or error code (bas operand).
+    int8_t clean_nn(char *);
+
     /// @brief  Clean a r operand.
     /// @param  The operand as a string.
     /// @return OK or error code (bas operand).
