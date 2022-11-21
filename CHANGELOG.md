@@ -1,3 +1,8 @@
+# 0.7.4
+Add INC r (with flags modification).
+Multiply by 2 the length of any instruction (instruction_length.h).
+Add the visualisation of the flags with the 'r' command.
+
 # 0.7.3
 Add LD (nn),HL. Add setAddress() to Memory class.
 

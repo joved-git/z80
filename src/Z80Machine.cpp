@@ -42,7 +42,7 @@ Z80Machine::Z80Machine()
 	mRegisterPack.regD.setValue(0x0C);
 	mRegisterPack.regE.setValue(0x10);
 	mRegisterPack.regL.setValue(0xC8);
-	mRegisterPack.regF.setValue(0b01101111);
+	//mRegisterPack.regF.setValue(0b01101111);
     mRegisterPack.regPC.setValue(0x1234);
     mRegisterPack.regHL.setValue(0xFE14);
     mRegisterPack.regIX.setValue(0x1200);
@@ -849,12 +849,19 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a (nn),HL    */
-    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDNNHL)==CODE_LDNNHL && len == 2*natural_code_length[CODE_LDNNHL])
+    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDNNHL)==CODE_LDNNHL && len == natural_code_length[CODE_LDNNHL])
     {
         instruction=CODE_LDNNHL; 
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
     }
 
+    /* This is a INC r */
+    if ((codeInHexa & MASK_INCR)==CODE_INCR && len == natural_code_length[CODE_INCR])
+    {
+        instruction=CODE_INCR;
+               
+        op1=EXTRACT(codeInHexa, 3, 3);
+    }
 
 
     /*************************************************************************************************************************/
@@ -1372,6 +1379,48 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
+            case CODE_INCR:                             /* This is a INC R  */
+            if (pMode==INTP_EXECUTE)
+            {
+                ret=bitToRegister(op1, sop1);
+                printf("\nINC %s was executed\n", sop1);
+
+                reg8_1=get8bitsRegisterAddress(op1);
+                reg8_1->setValue(reg8_1->getValue()+1);
+
+                /* Modify flags here    */
+                mRegisterPack.regF.setSignFlag(reg8_1->getSignFlag());
+                mRegisterPack.regF.setZeroFlag(reg8_1->isZero());
+
+                if (reg8_1->getValue()==0x10)
+                {
+                    mRegisterPack.regF.setHalfCarryFlag(true);
+                }
+                else
+                {
+                    mRegisterPack.regF.setHalfCarryFlag(false);
+                }
+
+                if (reg8_1->getValue()==0x80)
+                {
+                    mRegisterPack.regF.setParityOverflowFlag(true);
+                }
+                else
+                {
+                    mRegisterPack.regF.setParityOverflowFlag(false);
+                }
+
+
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                ret=bitToRegister(op1, sop1);
+                ret=bitToRegister(op2, sop2);
+
+                printf("\n[%02X] is INC %s\n", codeInHexa, sop1);
+            }
+            break;
 
     }
 
@@ -1589,8 +1638,11 @@ bool Z80Machine::analyse()
                     printf("B:  [%02X]      C: [%02X]\n", mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue());
                     printf("D:  [%02X]      E: [%02X]\n", mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue());
                     printf("H:  [%02X]      L: [%02X]\n", mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue());
-                    printf("A:  [%02X]      F: [%02X] [%s]\n", mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
-                        byteToBinary(mRegisterPack.regF.getValue()));
+                    printf("A:  [%02X]      F: [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
+                        byteToBinary(mRegisterPack.regF.getValue()), 
+                        mRegisterPack.regF.getSignFlag(), mRegisterPack.regF.getZeroFlag(), 
+                        mRegisterPack.regF.getHalfCarryFlag(), mRegisterPack.regF.getParityOverflowFlag(),
+                        mRegisterPack.regF.getAddSubtractFlag(), mRegisterPack.regF.getCarryFlag());
 
                     printf("\n");
                     printf("BC: [%04X]    DE [%04X]\n", mRegisterPack.regBC.getValue(), mRegisterPack.regDE.getValue());

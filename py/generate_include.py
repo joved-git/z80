@@ -1,5 +1,5 @@
 #---------------------------------------------------------------#
-# generate_include.py - v 0.3                                   #
+# generate_include.py - v 0.4                                   #
 # The file aims to create ./inc/instruction_length.h file.      #
 # The instruction_length.h file contains all the instruction    #
 # lengths used to decode Z80 instruction.                       #
@@ -70,7 +70,7 @@ with open('docs/Z80_Instruction_length.csv', newline='') as csvfile:
                 row[i]='0'
 
         if row[INDICE_DEC]!='Dec':
-            result.write(row[POS_OF_NATURAL_CODE])
+            result.write(str(int(row[POS_OF_NATURAL_CODE])*2))
 
             if j<NB_OF_INST-1:
                 result.write(', ')
@@ -94,7 +94,7 @@ with open('docs/Z80_Instruction_length.csv', newline='') as csvfile:
                 row[i]='0'
 
         if row[INDICE_DEC]!='Dec':
-            result.write(row[POS_OF_CB_CODE])
+            result.write(str(int(row[POS_OF_CB_CODE])*2))
 
             if j<NB_OF_INST-1:
                 result.write(', ')
@@ -118,7 +118,7 @@ with open('docs/Z80_Instruction_length.csv', newline='') as csvfile:
                 row[i]='0'
 
         if row[INDICE_DEC]!='Dec':
-            result.write(row[POS_OF_ED_CODE])
+            result.write(str(int(row[POS_OF_ED_CODE])*2))
 
             if j<NB_OF_INST-1:
                 result.write(', ')
@@ -142,7 +142,7 @@ with open('docs/Z80_Instruction_length.csv', newline='') as csvfile:
                 row[i]='0'
 
         if row[INDICE_DEC]!='Dec':
-            result.write(row[POS_OF_FD_CODE])
+            result.write(str(int(row[POS_OF_FD_CODE])*2))
 
             if j<NB_OF_INST-1:
                 result.write(', ')
@@ -166,7 +166,7 @@ with open('docs/Z80_Instruction_length.csv', newline='') as csvfile:
                 row[i]='0'
 
         if row[INDICE_DEC]!='Dec':
-            result.write(row[POS_OF_DDCB_CODE])
+            result.write(str(int(row[POS_OF_DDCB_CODE])*2))
 
             if j<NB_OF_INST-1:
                 result.write(', ')
@@ -190,7 +190,7 @@ with open('docs/Z80_Instruction_length.csv', newline='') as csvfile:
                 row[i]='0'
 
         if row[INDICE_DEC]!='Dec':
-            result.write(row[POS_OF_FDCB_CODE])
+            result.write(str(int(row[POS_OF_FDCB_CODE])*2))
 
             if j<NB_OF_INST-1:
                 result.write(', ')

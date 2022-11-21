@@ -82,3 +82,16 @@ bool Register_8bits::getCarryFlag()
 {
     return ((bool) (mValue & FLAG_CARRY));
 }
+
+/* Is the register to 0 */
+bool Register_8bits::isZero()
+{
+    if (mValue==0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}

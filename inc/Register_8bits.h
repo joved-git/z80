@@ -15,6 +15,9 @@ public:
     uint8_t getValue();
     void setValue(uint8_t);
 
+    /* Some useful result   */
+    bool isZero();
+
     /* Set flags    */
     void setSignFlag(bool);
     void setZeroFlag(bool);

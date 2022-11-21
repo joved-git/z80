@@ -36,6 +36,7 @@
 #define CODE_LDIXNN         (0b00100001)
 #define CODE_LDIYNN         (0b00100001)
 #define CODE_LDDDNN         (0b01001011)
+#define CODE_INCR           (0b00000100)
 
 #define CODE_DD_LDRIXD      (0b1101110101000110)
 #define CODE_FD_LDRIYD      (0b1111110101000110)    
@@ -72,6 +73,7 @@
 #define MASK_LDIXANN        (0b11111111)
 #define MASK_LDIYANN        (0b11111111)
 #define MASK_LDNNHL         (0b11111111)
+#define MASK_INCR           (0b11000111)
 
 #define ONE_BYTE            (2)
 #define TWO_BYTES           (4)
