@@ -271,6 +271,10 @@ uint8_t Z80Machine::bitToRegister(uint8_t pBit, char *pRetChar)
             strcpy(pRetChar, STRING_REGSP);
             break;
 
+        case REGAF:
+            strcpy(pRetChar, STRING_REGAF);
+            break;
+
         case REGISP:
             strcpy(pRetChar, STRING_REGISP);
             break;
@@ -963,6 +967,19 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=EXTRACT(codeInHexa, 4, 2) | 0b1000;;
     }
 
+    /* This is a PUSH rr */
+    if ((codeInHexa & MASK_PUSHQQ)==CODE_PUSHQQ && len == natural_code_length[CODE_PUSHQQ])
+    {
+        instruction=CODE_PUSHQQ;
+               
+        op1=EXTRACT(codeInHexa, 4, 2) | 0b1000;
+
+        if (op1==REGSP)                          /* This is the case of qq operand       */
+        {                                           
+            op1=REGAF;
+        }
+    }
+
 
     /*************************************************************************************************************************/
 
@@ -1530,7 +1547,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\nINC %s was executed\n", sop1);
 
                 reg16_1=get16bitsRegisterAddress(op1);
-
                 reg16_1->setValue(reg16_1->getValue()+1);
             }
             
@@ -1539,6 +1555,26 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 ret=bitToRegister(op1, sop1);
 
                 printf("\n[%02X] is INC %s\n", codeInHexa, sop1);
+            }
+            break;
+
+        case CODE_PUSHQQ:                               /* This is a PUSH qq                    */
+            if (pMode==INTP_EXECUTE)
+            {
+                ret=bitToRegister(op1, sop1);
+                
+                printf("\nPUSH %s was executed\n", sop1);
+
+                mRegisterPack.regSP.setValue(mRegisterPack.regSP.getValue()-2);
+                reg16_1=get16bitsRegisterAddress(op1);
+                mMemory->setAddress(mRegisterPack.regSP.getValue(), reg16_1->getValue());
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                ret=bitToRegister(op1, sop1);
+
+                printf("\n[%02X] is PUSH %s\n", codeInHexa, sop1);
             }
             break;
 
@@ -1626,7 +1662,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
             break;
 
         case 2:
-             if (!strcmp(str_inst, "INC"))                          /* A INC instruction is present         */
+            if (!strcmp(str_inst, "INC"))                          /* A INC instruction is present         */
             {
                 if (strlen(str_op1)==1)                             /* Check if it is a INC r instruction   */
                 {
@@ -1645,6 +1681,25 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
                     retCheck=clean_r(str_op1);
                     
+                    PUSHBIT(retCode, registerToBit(str_op1), 4);    /* Add the register as bits             */
+                }
+            }
+
+            if (!strcmp(str_inst, "PUSH"))                          /* A PUSH instruction is present         */
+            {
+                /* Check if it is a PUSH qq instruction   */
+                if (strlen(str_op1)==2 && (!strcmp(str_op1, "BC") || !strcmp(str_op1, "DE") || !strcmp(str_op1, "HL") || !strcmp(str_op1, "AF")))                             
+                {
+                    retCode=CODE_PUSHQQ;                              /* Prepare the PUSH qq                    */
+                    *pLen=ONE_BYTE;
+
+                    retCheck=clean_r(str_op1);
+
+                    if (!strcmp(str_op1, "AF"))
+                    {
+                        strcpy(str_op1, "SP");
+                    }
+
                     PUSHBIT(retCode, registerToBit(str_op1), 4);    /* Add the register as bits             */
                 }
             }
@@ -1679,7 +1734,6 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
                     retCode=(retCode<<SIZE_1_BYTE)+toValue(str_op2+1, pLen, &lenEff);     /* Prepare the LD r,n   */
                     *pLen=TWO_BYTES;
-                    printf("LD R,n detected\n");
                 }
 
                 /* Check if it is a LD rr,nn instruction    */

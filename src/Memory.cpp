@@ -59,7 +59,6 @@
     /* This method stores a two bytes address into memory.  */
     void Memory::setAddress(uint16_t pAddress, uint16_t pValue)
     {
-        printf("pv=%04x\n", pValue);
         mMemory[pAddress]=(uint8_t) pValue & FIRST_LOWEST_BYTE;
         mMemory[pAddress+1]=(uint8_t) (pValue >> SIZE_1_BYTE);
     }
