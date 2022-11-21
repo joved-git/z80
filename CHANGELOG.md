@@ -1,3 +1,6 @@
+# 0.7.5
+Add INC rr instruction.
+
 # 0.7.4
 Add INC r (with flags modification).
 Multiply by 2 the length of any instruction (instruction_length.h).

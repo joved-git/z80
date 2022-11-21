@@ -863,6 +863,14 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=EXTRACT(codeInHexa, 3, 3);
     }
 
+    /* This is a INC rr */
+    if ((codeInHexa & MASK_INCRR)==CODE_INCRR && len == natural_code_length[CODE_INCRR])
+    {
+        instruction=CODE_INCRR;
+               
+        op1=EXTRACT(codeInHexa, 4, 2) | 0b1000;;
+    }
+
 
     /*************************************************************************************************************************/
 
@@ -1379,7 +1387,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
-            case CODE_INCR:                             /* This is a INC R  */
+        case CODE_INCR:                             /* This is a INC R  */
             if (pMode==INTP_EXECUTE)
             {
                 ret=bitToRegister(op1, sop1);
@@ -1417,6 +1425,26 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             {
                 ret=bitToRegister(op1, sop1);
                 ret=bitToRegister(op2, sop2);
+
+                printf("\n[%02X] is INC %s\n", codeInHexa, sop1);
+            }
+            break;
+
+        case CODE_INCRR:                             /* This is a INC rr    */
+            if (pMode==INTP_EXECUTE)
+            {
+                ret=bitToRegister(op1, sop1);
+                
+                printf("\nINC %s was executed\n", sop1);
+
+                reg16_1=get16bitsRegisterAddress(op1);
+
+                reg16_1->setValue(reg16_1->getValue()+1);
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                ret=bitToRegister(op1, sop1);
 
                 printf("\n[%02X] is INC %s\n", codeInHexa, sop1);
             }
