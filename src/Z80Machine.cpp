@@ -1820,6 +1820,26 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     *pLen=THREE_BYTES;
                 }
 
+                /* Check if it is LD (BC),A or a LD (DE),A instruction    */
+                if (strlen(str_op1)==4 && strlen(str_op2)==1 && !strchr(str_op2, '#') && !strcmp(str_op2, "A"))       
+                {
+                    /* Clean the n for Op1 */
+                    retCheck=clean_r(str_op2);
+                    //retCheck=clean_nn(str_op2);
+
+                    if (!strcmp(str_op1, "(BC)"))
+                    {
+                        retCode=CODE_LDBCA;
+                    }
+
+                    if (!strcmp(str_op1, "(DE)"))
+                    {
+                        retCode=CODE_LDDEA;
+                    }                  
+
+                    *pLen=ONE_BYTE;
+                }
+
 
             }
             break;

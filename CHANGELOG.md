@@ -1,3 +1,6 @@
+# 0.7.10
+Decode LD (BC),A and LD (DE),A.
+
 # 0.7.9
 Decode LD a,(nn).
 
