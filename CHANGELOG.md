@@ -1,3 +1,8 @@
+# 0.7.8
+Add 'm (sp)' command.
+Set the INITIAL_STACK_POINTER to 0x0000.
+Decode LD r,(HL), LD A,(BC) and LD A,(DE).
+
 # 0.7.7
 Add PUSH qq.
 Decode PUSH qq.

@@ -18,7 +18,7 @@
 #define I_AM_NAN                (1)
 #define I_AM_NUMBER             (2)
 
-#define INITIAL_STACK_POINTER	(0xDFF0)		/* Initial value for the Stack Pointer						*/
+#define INITIAL_STACK_POINTER	(0x0000)		/* Initial value for the Stack Pointer						*/
 
 #define STRING_REG_UNDEFINED    "?"
 #define STRING_REGA             "A"

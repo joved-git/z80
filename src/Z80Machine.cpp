@@ -1777,6 +1777,33 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     *pLen=THREE_BYTES;
                 }
 
+                /* Check if it is a LD r,(HL) or a LD A,(BC) or a LD A,(DE) instruction    */
+                if (strlen(str_op1)==1 && strlen(str_op2)==4 && !strchr(str_op2, '#'))       
+                {
+                    /* Clean the n for Op2 and r for Op1 */
+                    retCheck=clean_r(str_op1);
+                    //retCheck=clean_nn(str_op2);
+
+                    if (!strcmp(str_op2, "(HL)"))
+                    {
+                        retCode=CODE_LDRHL;
+                        PUSHBIT(retCode, registerToBit(str_op1), 3);                /* Add the first register as bits   */
+                    }
+
+                    if (!strcmp(str_op2, "(BC)"))
+                    {
+                        retCode=CODE_LDABC;
+                    }
+
+                    if (!strcmp(str_op2, "(DE)"))
+                    {
+                        retCode=CODE_LDADE;
+                    }                  
+
+                    *pLen=ONE_BYTE;
+                }
+
+
             }
             break;
             
@@ -1826,6 +1853,8 @@ bool Z80Machine::analyse()
                     printf("r           display main registers.\n");
                     printf("R           display all registers.\n");
                     printf("m <addr>    dump 16 bytes memory from <addr>.\n");
+                    printf("m (SP)      dump 16 bytes memory from (SP).\n");
+                    printf("m (PC)      dump 16 bytes memory from (PC).\n");
                     printf("x <dec>     convert <dec> to hexa.\n");
                     printf("d <hex>     convert <hex> to decimal.\n");
                     printf("b <hex>     convert <hex> to binary.\n");
@@ -1936,14 +1965,21 @@ bool Z80Machine::analyse()
                     mEntry+=2;
                     lenValue=lenEff=0;
 
-                    if (!strcmp(mEntry, "PC"))
+                    if (!strcmp(mEntry, "(PC)"))
                     {
                         value=mRegisterPack.regPC.getValue();
                     }
                     else
                     {
-                        value=toValue(mEntry, &lenValue, &lenEff);
-                    }
+                        if (!strcmp(mEntry, "(SP)"))
+                        {
+                            value=mRegisterPack.regSP.getValue();
+                        }
+                        else
+                        {
+                            value=toValue(mEntry, &lenValue, &lenEff);
+                        }
+                    }    
 
                     if (lenEff<lenValue)
                     {
