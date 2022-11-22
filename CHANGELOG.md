@@ -1,3 +1,6 @@
+# 0.7.9
+Decode LD a,(nn).
+
 # 0.7.8
 Add 'm (sp)' command.
 Set the INITIAL_STACK_POINTER to 0x0000.
