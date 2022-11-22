@@ -1807,13 +1807,13 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 if (strlen(str_op1)==1 && strchr(str_op2, '#') && strchr(str_op2, '(') && strchr(str_op2, ')') && strlen(str_op2)>=4 && strlen(str_op2)<=7 )    
                 {
                     retCode=CODE_LDANN;
-                    /* Clean the n for Op1 */
+                    /* Clean the r for Op1 */
                     retCheck=clean_r(str_op1);
 
-                    strcpy(str_op2, &str_op2[1]);               /* Remove '(' and ')'   */
-                    str_op2[strlen(str_op2)-1]='\0';
+                    str_ptr=str_op2+1;                      /* Remove '(' and ')'   */
+                    str_ptr[strlen(str_ptr)-1]='\0';
 
-                    word=toValue(str_op2+1, pLen, &lenEff);
+                    word=toValue(str_ptr+1, pLen, &lenEff);
 
                     retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
 
@@ -1823,10 +1823,9 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 /* Check if it is LD (BC),A or a LD (DE),A instruction    */
                 if (strlen(str_op1)==4 && strlen(str_op2)==1 && !strchr(str_op2, '#') && !strcmp(str_op2, "A"))       
                 {
-                    /* Clean the n for Op1 */
+                    /* Clean the r for Op2 */
                     retCheck=clean_r(str_op2);
-                    //retCheck=clean_nn(str_op2);
-
+                    
                     if (!strcmp(str_op1, "(BC)"))
                     {
                         retCode=CODE_LDBCA;
@@ -1840,6 +1839,22 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     *pLen=ONE_BYTE;
                 }
 
+                 /* Check if it is a LD (nn),A instruction    */
+                if (!strcmp(str_op2, "A") && strchr(str_op1, '#') && strchr(str_op1, '(') && strchr(str_op1, ')') && strlen(str_op1)>=4 && strlen(str_op1)<=7 )    
+                {
+                    retCode=CODE_LDNNA;
+                    /* Clean the r for Op1 */
+                    retCheck=clean_r(str_op2);
+
+                    str_ptr=str_op1+1;                      /* Remove '(' and ')'   */
+                    str_ptr[strlen(str_ptr)-1]='\0';
+
+                    word=toValue(str_ptr+1, pLen, &lenEff);
+
+                    retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
+
+                    *pLen=THREE_BYTES;
+                }
 
             }
             break;

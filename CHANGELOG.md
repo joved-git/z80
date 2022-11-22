@@ -1,3 +1,7 @@
+# 0.7.11
+Decode LD (nn),A.
+Correct LD (nn),A and LD A,(nn).
+
 # 0.7.10
 Decode LD (BC),A and LD (DE),A.
 
