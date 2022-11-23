@@ -1,3 +1,6 @@
+# 0.7.12
+Add and decode LD (nn),rr.
+
 # 0.7.11
 Decode LD (nn),A.
 Correct LD (nn),A and LD A,(nn).

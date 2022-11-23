@@ -980,6 +980,15 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         }
     }
 
+    /* This is a (nn),rr    */
+    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDNNRR)==CODE_LDNNRR && len == ed_code_length[CODE_LDNNRR])
+    {
+        instruction=CODE_LDNNRR; 
+
+        op1=EXTRACT(codeInHexa, 20, 2) | 0b1000;
+        op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
+    }
+
 
     /*************************************************************************************************************************/
 
@@ -1575,6 +1584,23 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 ret=bitToRegister(op1, sop1);
 
                 printf("\n[%02X] is PUSH %s\n", codeInHexa, sop1);
+            }
+            break;
+
+        case CODE_ED_LDNNRR:                                    /* This is a LD (nn),rr    */   
+            ret=bitToRegister(op1, sop1);
+
+            if (pMode==INTP_EXECUTE)
+            {
+                printf("\nLD (#%04X),%s was executed\n", op16, sop1);
+
+                reg16_1=get16bitsRegisterAddress(op1);
+                mMemory->setAddress(op16, reg16_1->getValue());
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is LD (#%04X),%s\n", codeInHexa, op16, sop1);
             }
             break;
 

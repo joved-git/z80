@@ -39,6 +39,7 @@
 #define CODE_INCR           (0b00000100)
 #define CODE_INCRR          (0b00000011)
 #define CODE_PUSHQQ         (0b11000101)
+#define CODE_LDNNRR         (0b01000011)
 
 #define CODE_DD_LDRIXD      (0b1101110101000110)
 #define CODE_FD_LDRIYD      (0b1111110101000110)    
@@ -49,6 +50,7 @@
 #define CODE_FD_LDIYNN      (0b1111110100100001)        // 0xFD21
 #define CODE_FD_LDIYANN     (0b1111110100101010)        // 0xFD2A
 #define CODE_ED_LDDDNN      (0b1110110101001011)
+#define CODE_ED_LDNNRR      (0b1110110101000011)
 
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
@@ -78,6 +80,7 @@
 #define MASK_INCR           (0b11000111)
 #define MASK_INCRR          (0b11001111)
 #define MASK_PUSHQQ         (0b11001111)
+#define MASK_LDNNRR         (0b11001111)
 
 #define ONE_BYTE            (2)
 #define TWO_BYTES           (4)
