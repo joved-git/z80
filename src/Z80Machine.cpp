@@ -715,17 +715,20 @@ int8_t Z80Machine::clean_ixn(char *pOp)
     return retCode;
 }
 
+
 /* Clean the r operand  (IX+#00)  */
 int8_t Z80Machine::clean_r(char *)
 {
     return 0;
 }
 
+
 /* Give the execution mode.     */
 bool Z80Machine::getExecutionMode()
 {
     return mExecMode;
 }
+
 
 /* Display registers            */
 void Z80Machine::displaySimpleRegisters()
@@ -749,6 +752,7 @@ void Z80Machine::displaySimpleRegisters()
     printf("PC: [%04X]    SP [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());
 }
 
+
 /* Display registers in exec mode           */
 void Z80Machine::displayExecRegisters()
 {
@@ -770,6 +774,7 @@ void Z80Machine::displayExecRegisters()
 
     printf("PC: [%04X]    SP [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());
 }
+
 
 /* Display memory from (PC)     */
 void Z80Machine::displayMemory(const char *pAddress)
@@ -809,6 +814,14 @@ void Z80Machine::displayMemory(const char *pAddress)
     }
 }
 
+
+/* Give the next instruction as a string    */
+char *Z80Machine::getInstruction()
+{
+    return mInstruction;
+}
+
+
 /* Interpret the machine code   */
 uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMode)
 {
@@ -823,6 +836,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     Register_8bits *reg8_2=NULL;
     Register_16bits *reg16_1=NULL;
     uint16_t address=0x0000;
+    char strInstr[MAX_OP_LENGTH*3];
 
     uint8_t ret;
     char sop1[MAX_OP_LENGTH], sop2[MAX_OP_LENGTH];
@@ -1095,8 +1109,10 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             {
                 printf("\n[00] is NOP\n");
             }
+
+            strcpy(mInstruction, "NOP");
             break;
-        
+
         case CODE_HALT:                              /* This is a HALT    */
             if (pMode==INTP_EXECUTE)
             {
@@ -1108,14 +1124,20 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             {
                 printf("\n[%02X] is HALT\n", codeInHexa);
             }
+
+            strcpy(mInstruction, "HALT");
             break;
 
         case CODE_LDRR:                             /* This is a LD r,r'    */
+            ret=bitToRegister(op1, sop1);
+            ret=bitToRegister(op2, sop2);
+
+            sprintf(mInstruction, "LD %s,%s", sop1, sop2);
+
             if (pMode==INTP_EXECUTE)
             {
-                ret=bitToRegister(op1, sop1);
-                ret=bitToRegister(op2, sop2);
-                printf("\nLD %s,%s was executed\n", sop1, sop2);
+                //printf("\nLD %s,%s was executed\n", sop1, sop2);
+                printf("\n%s was executed\n", mInstruction);
 
                 reg8_1=get8bitsRegisterAddress(op1);
                 reg8_2=get8bitsRegisterAddress(op2);
@@ -1125,38 +1147,42 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                ret=bitToRegister(op1, sop1);
-                ret=bitToRegister(op2, sop2);
-
-                printf("\n[%02X] is LD %s,%s\n", codeInHexa, sop1, sop2);
+                //printf("\n[%02X] is LD %s,%s\n", codeInHexa, sop1, sop2);
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
+
+
             break;
 
         case CODE_LDRN:                             /* This is a LD r,n    */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "LD %s,#%02X", sop1, op2);
+            
             if (pMode==INTP_EXECUTE)
             {
-                ret=bitToRegister(op1, sop1);
-                printf("\nLD %s,#%02X was executed\n", sop1, op2);
+                
+                printf("\n%s was executed\n", mInstruction);
 
                 reg8_1=get8bitsRegisterAddress(op1);
-                
                 reg8_1->setValue(op2);
             }
             
             if (pMode==INTP_DISPLAY)
             {
-                ret=bitToRegister(op1, sop1);
-
-                printf("\n[%04X] is LD %s,#%02X\n", codeInHexa, sop1, op2);
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
         
         case CODE_LDRHL:                            /* This is a LD r,(HL)    */
+            ret=bitToRegister(op1, sop1);
+            ret=bitToRegister(op2, sop2);
+
+            sprintf(mInstruction, "LD %s,(HL)", sop1);
+
             if (pMode==INTP_EXECUTE)
             {
-                ret=bitToRegister(op1, sop1);
-                ret=bitToRegister(op2, sop2);
-                printf("\nLD %s,%s was executed\n", sop1, sop2);
+                printf("\n%s was executed\n", mInstruction);
 
                 reg8_1=get8bitsRegisterAddress(op1);
                 reg16_1=get16bitsRegisterAddress(REGHL);
@@ -1166,19 +1192,20 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                ret=bitToRegister(op1, sop1);
-                ret=bitToRegister(op2, sop2);
-
-                printf("\n[%02X] is LD %s,%s\n", codeInHexa, sop1, sop2);
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
         case CODE_LDHLR:                            /* This is a LD (HL),r    */   
+            ret=bitToRegister(op1, sop1);
+            ret=bitToRegister(op2, sop2);
+
+            sprintf(mInstruction, "LD (HL),%s", sop2);
+
             if (pMode==INTP_EXECUTE)
             {
-                ret=bitToRegister(op1, sop1);
-                ret=bitToRegister(op2, sop2);
-                printf("\nLD %s,%s was executed\n", sop1, sop2);
+                
+                printf("\n%s was executed\n", mInstruction);
 
                 reg8_1=get8bitsRegisterAddress(op2);
                 reg16_1=get16bitsRegisterAddress(REGHL);
@@ -1188,14 +1215,11 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                ret=bitToRegister(op1, sop1);
-                ret=bitToRegister(op2, sop2);
-
-                printf("\n[%02X] is LD %s,%s\n", codeInHexa, sop1, sop2);
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
-        case CODE_LDHLN:                            /* This is a LD (HL),n    */   
+        case CODE_LDHLN:                            /* This is a LD (HL),n  xxxjoexxx  */   
             if (pMode==INTP_EXECUTE)
             {
                 ret=bitToRegister(REGIHL, sop1);
@@ -1626,8 +1650,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 {
                     mRegisterPack.regF.setParityOverflowFlag(false);
                 }
-
-
             }
             
             if (pMode==INTP_DISPLAY)
@@ -2003,6 +2025,65 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
     return retCode;
 
 
+}
+
+/* Give the next instruction to execute.    */
+uint32_t Z80Machine::getNextInstruction(char *pInstr, uint8_t *pLen)
+{
+    //uint8_t len=0;
+    uint32_t machineCode=0;
+    uint16_t address=0;
+
+    address=mRegisterPack.regPC.getValue();
+
+    switch (mMemory->get8bitsValue(address))
+    {
+        case ALT_CODE_CB:
+            *pLen=cb_code_length[mMemory->get8bitsValue(address+1)]+1;
+            break;
+
+        case ALT_CODE_ED:
+            *pLen=ed_code_length[mMemory->get8bitsValue(address+1)]+1;
+            break;
+
+        case ALT_CODE_DD:
+            if (mMemory->get8bitsValue(address+1)==ALT_CODE_CB)
+            {
+                *pLen=ddcb_code_length[mMemory->get8bitsValue(address+2)]+2;
+            }
+            else
+            {
+                *pLen=dd_code_length[mMemory->get8bitsValue(address+1)]+1;
+            }
+            break;
+        
+        case ALT_CODE_FD:
+             if (mMemory->get8bitsValue(address+1)==ALT_CODE_CB)
+            {
+                *pLen=fdcb_code_length[mMemory->get8bitsValue(address+2)]+2;
+            }
+            else
+            {
+                *pLen=fd_code_length[mMemory->get8bitsValue(address+1)]+1;
+            }
+
+            *pLen=fd_code_length[mMemory->get8bitsValue(address+1)]+1;
+            break;
+
+        default:
+            *pLen=natural_code_length[mMemory->get8bitsValue(address)];
+    }
+
+    for (int i=0; i<*pLen/2; i++)
+    {
+        uint16_t value=mMemory->get8bitsValue(address+i);
+        machineCode=(machineCode<<SIZE_1_BYTE)+mMemory->get8bitsValue(address+i);
+    }
+
+    interpretCode(machineCode, *pLen, INTP_STORE);
+    strcpy(pInstr, mInstruction);
+
+    return machineCode;
 }
 
 /* Analyse the command  */

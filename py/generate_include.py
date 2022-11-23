@@ -1,5 +1,5 @@
 #---------------------------------------------------------------#
-# generate_include.py - v 0.4                                   #
+# generate_include.py - v 0.6                                   #
 # The file aims to create ./inc/instruction_length.h file.      #
 # The instruction_length.h file contains all the instruction    #
 # lengths used to decode Z80 instruction.                       #
@@ -60,7 +60,7 @@ with open('docs/Z80_Instruction_length.csv', newline='') as csvfile:
     
     result.write("\n")
     iterable.seek(0)
-    result.write("char natural_code_length[" + str(NB_OF_INST) + "]=\n{\n")
+    result.write("uint8_t natural_code_length[" + str(NB_OF_INST) + "]=\n{\n")
     j=0
 
     # Add the natural size array into the instruction_length.h file
@@ -85,7 +85,7 @@ with open('docs/Z80_Instruction_length.csv', newline='') as csvfile:
     # Add the CB size array into the instruction_length.h file
     result.write("\n")
     iterable.seek(0)
-    result.write("char cb_code_length[" + str(NB_OF_INST) + "]=\n{\n")
+    result.write("uint8_t cb_code_length[" + str(NB_OF_INST) + "]=\n{\n")
     j=0
 
     for row in iterable:
@@ -109,7 +109,7 @@ with open('docs/Z80_Instruction_length.csv', newline='') as csvfile:
     # Add the ED size array into the instruction_length.h file
     result.write("\n")
     iterable.seek(0)
-    result.write("char ed_code_length[" + str(NB_OF_INST) + "]=\n{\n")
+    result.write("uint8_t ed_code_length[" + str(NB_OF_INST) + "]=\n{\n")
     j=0
 
     for row in iterable:
@@ -130,10 +130,35 @@ with open('docs/Z80_Instruction_length.csv', newline='') as csvfile:
 
     result.write("};\n")
 
+    # Add the DD size array into the instruction_length.h file
+    result.write("\n")
+    iterable.seek(0)
+    result.write("uint8_t dd_code_length[" + str(NB_OF_INST) + "]=\n{\n")
+    j=0
+
+    for row in iterable:
+        for i in range(NB_OF_ELEMENTS):
+            if (row[i]==''):
+                row[i]='0'
+
+        if row[INDICE_DEC]!='Dec':
+            result.write(str(int(row[POS_OF_DD_CODE])*2))
+
+            if j<NB_OF_INST-1:
+                result.write(', ')
+
+            j=j+1
+
+            if j%16==0:
+                result.write('\n')
+
+    result.write("};\n")
+
+
     # Add the FD size array into the instruction_length.h file
     result.write("\n")
     iterable.seek(0)
-    result.write("char fd_code_length[" + str(NB_OF_INST) + "]=\n{\n")
+    result.write("uint8_t fd_code_length[" + str(NB_OF_INST) + "]=\n{\n")
     j=0
 
     for row in iterable:
@@ -157,7 +182,7 @@ with open('docs/Z80_Instruction_length.csv', newline='') as csvfile:
     # Add the DDCB size array into the instruction_length.h file
     result.write("\n")
     iterable.seek(0)
-    result.write("char ddcb_code_length[" + str(NB_OF_INST) + "]=\n{\n")
+    result.write("uint8_t ddcb_code_length[" + str(NB_OF_INST) + "]=\n{\n")
     j=0
 
     for row in iterable:
@@ -181,7 +206,7 @@ with open('docs/Z80_Instruction_length.csv', newline='') as csvfile:
     # Add the FDCB size array into the instruction_length.h file
     result.write("\n")
     iterable.seek(0)
-    result.write("char fdcb_code_length[" + str(NB_OF_INST) + "]=\n{\n")
+    result.write("uint8_t fdcb_code_length[" + str(NB_OF_INST) + "]=\n{\n")
     j=0
 
     for row in iterable:

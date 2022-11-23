@@ -13,6 +13,9 @@ int main(int argc, char *argv[])
     char c=0;
 	char command[MAX_LEN];
 	uint16_t i=0;
+	char instruction[MAX_OP_LENGTH*3];
+	uint32_t machineCode=0;
+	uint8_t len=0;
 	Z80Machine machine;
 	
 	/* Init the values	*/
@@ -67,7 +70,28 @@ int main(int argc, char *argv[])
 			{
 				machine.displayExecRegisters();
 				machine.displayMemory("(PC)");
-				std::cout << std::endl << "z exec [cmd]> ";
+				machineCode=machine.getNextInstruction(instruction, &len);
+
+				std::cout << std::endl;
+
+				switch (len)
+				{
+					case ONE_BYTE:
+						printf("z exex [%02X] [%s]> ", machineCode, instruction);
+						break;
+
+					case TWO_BYTES:
+						printf("z exex [%04X] [%s]> ", machineCode, instruction);
+						break;
+
+					case THREE_BYTES:
+						printf("z exex [%06X] [%s]> ", machineCode, instruction);
+						break;
+
+					case FOUR_BYTES:
+						printf("z exex [%08X] [%s]> ", machineCode, instruction);
+						break;
+				}
 			}
 			else
 			{

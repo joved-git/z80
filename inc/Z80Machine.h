@@ -45,6 +45,17 @@ public:
     /// @return True if the mode is execustion.
     bool getExecutionMode();
 
+    /// @brief  Give the next instruction to execute.
+    /// @param  return the instruction as a string.
+    /// @param  return the length of the machine code (in digit).
+    /// @return the machineCode.
+    uint32_t getNextInstruction(char *, uint8_t *);
+
+    /// @brief  Give the next instruction as a string.
+    /// @param  None.
+    /// @return The instruction as a string.
+    char *getInstruction();
+
 private:
     char *mEntry;
     bool mCommandIsEntered;
@@ -53,6 +64,7 @@ private:
 
     Memory *mMemory;                    /* The memory of the Z80                            */
     bool mExecMode;                     /* The mode of the machine (exec or normal/default) */
+    char mInstruction[MAX_OP_LENGTH*3]; /* The decoded instruction                          */
 
     /// @brief  This method find the type of the entry command.
     /// @param  Nothing. 

@@ -1,3 +1,7 @@
+# 0.8.2
+Display next instruction in exec mode.
+Correctf the python prog (forget DD array).
+
 # 0.8.1
 Correct the displayExecRegisters() function (bad double registers).
 
