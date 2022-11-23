@@ -48,6 +48,9 @@ Z80Machine::Z80Machine()
     mRegisterPack.regIX.setValue(0x1200);
     mRegisterPack.regIY.setValue(0x1400);
 
+    /* Set the default mode     */
+    mExecMode=false;
+
     /*
     uint8_t byte=0;
     uint8_t v=natural_code_length[byte];
@@ -716,6 +719,94 @@ int8_t Z80Machine::clean_ixn(char *pOp)
 int8_t Z80Machine::clean_r(char *)
 {
     return 0;
+}
+
+/* Give the execution mode.     */
+bool Z80Machine::getExecutionMode()
+{
+    return mExecMode;
+}
+
+/* Display registers            */
+void Z80Machine::displaySimpleRegisters()
+{
+    printf("\n");
+    printf("B:  [%02X]      C: [%02X]\n", mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue());
+    printf("D:  [%02X]      E: [%02X]\n", mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue());
+    printf("H:  [%02X]      L: [%02X]\n", mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue());
+    printf("A:  [%02X]      F: [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
+        byteToBinary(mRegisterPack.regF.getValue()), 
+        mRegisterPack.regF.getSignFlag(), mRegisterPack.regF.getZeroFlag(), 
+        mRegisterPack.regF.getHalfCarryFlag(), mRegisterPack.regF.getParityOverflowFlag(),
+        mRegisterPack.regF.getAddSubtractFlag(), mRegisterPack.regF.getCarryFlag());
+
+    printf("\n");
+    printf("BC: [%04X]    DE [%04X]\n", mRegisterPack.regBC.getValue(), mRegisterPack.regDE.getValue());
+    printf("HL: [%04X]    AF [%04X]\n", mRegisterPack.regHL.getValue(), mRegisterPack.regAF.getValue());
+    printf("IX: [%04X]    IY [%04X]\n", mRegisterPack.regIX.getValue(), mRegisterPack.regIY.getValue());
+
+    printf("\n");
+    printf("PC: [%04X]    SP [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());
+}
+
+/* Display registers in exec mode           */
+void Z80Machine::displayExecRegisters()
+{
+    printf("\n");
+    printf("B:  [%02X]      C: [%02X]      D:  [%02X]      E: [%02X]      H:  [%02X]      L: [%02X]      A:  [%02X]      F: [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", 
+           mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue(),
+           mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue(),
+           mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue(),
+           mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
+            byteToBinary(mRegisterPack.regF.getValue()), mRegisterPack.regF.getSignFlag(), 
+            mRegisterPack.regF.getZeroFlag(), mRegisterPack.regF.getHalfCarryFlag(), 
+            mRegisterPack.regF.getParityOverflowFlag(), mRegisterPack.regF.getAddSubtractFlag(), 
+            mRegisterPack.regF.getCarryFlag());
+
+    printf("BC: [%04X]    DE [%04X]    HL: [%04X]    AF [%04X]    IX: [%04X]    IY [%04X]\n", 
+        mRegisterPack.regHL.getValue(), mRegisterPack.regAF.getValue(),
+        mRegisterPack.regBC.getValue(), mRegisterPack.regDE.getValue(),
+        mRegisterPack.regIX.getValue(), mRegisterPack.regIY.getValue());
+
+    printf("PC: [%04X]    SP [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());
+}
+
+/* Display memory from (PC)     */
+void Z80Machine::displayMemory(const char *pAddress)
+{
+    uint8_t lenValue=0;
+    uint8_t lenEff=0;
+    uint32_t value=0;
+    //mEntry+=2;
+    lenValue=lenEff=0;
+    char address[MAX_LEN];
+
+    strcpy(address, pAddress);
+
+    if (!strcmp(pAddress, "(PC)"))
+    {
+        value=mRegisterPack.regPC.getValue();
+    }
+    else
+    {
+        if (!strcmp(pAddress, "(SP)"))
+        {
+            value=mRegisterPack.regSP.getValue();
+        }
+        else
+        {
+            value=toValue(address, &lenValue, &lenEff);
+        }
+    }    
+
+    if (lenEff<lenValue)
+    {
+        printf("\nNot a valid address\n"); 
+    }
+    else
+    {
+        dumpMemory(value);
+    }
 }
 
 /* Interpret the machine code   */
@@ -1943,6 +2034,7 @@ bool Z80Machine::analyse()
                 /* OK, display help	*/
                 case CMD_HELP:
                     printf("\n");
+                    printf("!           toggle from normal mode to exec mode.\n");
                     printf("a <code>    translate <code> to assembly langage.\n");
                     printf("              Example: cb22 gives SLA D\n");
                     printf("c <cmd>     translate <cmd> to machine code.\n");
@@ -1972,27 +2064,17 @@ bool Z80Machine::analyse()
                     printf("00x71    - LD (HL), C\n\n");
 
                     break;
+
+                /* Mode switching       */
+                case CMD_EXEC_MODE_TOGGLE:
+                    mExecMode=!mExecMode;
+
+                    break;
+
                 /* Display registers	*/
                 case CMD_REGISTER:
-                    //printf("--- Registers ---\n\n");
-                    printf("\n");
-                    printf("B:  [%02X]      C: [%02X]\n", mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue());
-                    printf("D:  [%02X]      E: [%02X]\n", mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue());
-                    printf("H:  [%02X]      L: [%02X]\n", mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue());
-                    printf("A:  [%02X]      F: [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
-                        byteToBinary(mRegisterPack.regF.getValue()), 
-                        mRegisterPack.regF.getSignFlag(), mRegisterPack.regF.getZeroFlag(), 
-                        mRegisterPack.regF.getHalfCarryFlag(), mRegisterPack.regF.getParityOverflowFlag(),
-                        mRegisterPack.regF.getAddSubtractFlag(), mRegisterPack.regF.getCarryFlag());
+                    displaySimpleRegisters();
 
-                    printf("\n");
-                    printf("BC: [%04X]    DE [%04X]\n", mRegisterPack.regBC.getValue(), mRegisterPack.regDE.getValue());
-                    printf("HL: [%04X]    AF [%04X]\n", mRegisterPack.regHL.getValue(), mRegisterPack.regAF.getValue());
-                    printf("IX: [%04X]    IY [%04X]\n", mRegisterPack.regIX.getValue(), mRegisterPack.regIY.getValue());
-
-                    printf("\n");
-                    printf("PC: [%04X]    SP [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());
-                   
                     break;
 
                 case CMD_ASSEMBLYCODE:
@@ -2059,34 +2141,8 @@ bool Z80Machine::analyse()
                     break;
 
                 case CMD_DISPLAY_MEMORY:
-                    mEntry+=2;
-                    lenValue=lenEff=0;
-
-                    if (!strcmp(mEntry, "(PC)"))
-                    {
-                        value=mRegisterPack.regPC.getValue();
-                    }
-                    else
-                    {
-                        if (!strcmp(mEntry, "(SP)"))
-                        {
-                            value=mRegisterPack.regSP.getValue();
-                        }
-                        else
-                        {
-                            value=toValue(mEntry, &lenValue, &lenEff);
-                        }
-                    }    
-
-                    if (lenEff<lenValue)
-                    {
-                        printf("\nNot a valid address\n"); 
-                    }
-                    else
-                    {
-                        dumpMemory(value);
-                    }
-
+                    displayMemory(mEntry+2);
+                    
                     break;
             }
             break;

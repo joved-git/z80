@@ -25,13 +25,34 @@ public:
     /// @param  Nothing. 
     bool analyse();
 
+    /// @brief  Display registers.
+    /// @param  None.
+    /// @return Nothing.
+    void displaySimpleRegisters();
+
+    /// @brief  Display registers in exec mode.
+    /// @param  None.
+    /// @return Nothing.
+    void displayExecRegisters();
+
+    /// @brief  Display memory from (PC).
+    /// @param  The starting address or (SP) or (PC).
+    /// @return Nothing.
+    void displayMemory(const char *);
+
+    /// @brief  Give the execution mode.
+    /// @param  None.
+    /// @return True if the mode is execustion.
+    bool getExecutionMode();
+
 private:
     char *mEntry;
     bool mCommandIsEntered;
 
-    RegisterPack mRegisterPack;         /* The pack of all the registers    */
+    RegisterPack mRegisterPack;         /* The pack of all the registers                    */
 
-    Memory *mMemory;                    /* The memory of the Z80            */
+    Memory *mMemory;                    /* The memory of the Z80                            */
+    bool mExecMode;                     /* The mode of the machine (exec or normal/default) */
 
     /// @brief  This method find the type of the entry command.
     /// @param  Nothing. 

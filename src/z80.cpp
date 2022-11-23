@@ -63,7 +63,17 @@ int main(int argc, char *argv[])
 
 		if (!exit) 
 		{
-			std::cout << std::endl << "z> ";
+			if (machine.getExecutionMode())
+			{
+				machine.displayExecRegisters();
+				machine.displayMemory("(PC)");
+				std::cout << std::endl << "z exec [cmd]> ";
+			}
+			else
+			{
+				std::cout << std::endl << "z> ";
+			}
+				
 		}
     }
 

@@ -1,3 +1,7 @@
+# 0.8.0
+Introduce the exec mode.
+Create the displaySimpleRegisters(), displayExecRegisters() and the displayMemory() functions.
+
 # 0.7.12
 Add and decode LD (nn),rr.
 

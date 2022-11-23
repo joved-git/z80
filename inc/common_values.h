@@ -50,6 +50,7 @@
 #define CMD_TOBIN               'b'
 #define CMD_EXAMPLE             'e'
 #define CMD_DISPLAY_MEMORY      'm'
+#define CMD_EXEC_MODE_TOGGLE    '!'
 
 #define ERR_NO_ERROR            (0)
 #define ERR_NO_REGISTER         (-1)
