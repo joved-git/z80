@@ -764,8 +764,8 @@ void Z80Machine::displayExecRegisters()
             mRegisterPack.regF.getCarryFlag());
 
     printf("BC: [%04X]    DE [%04X]    HL: [%04X]    AF [%04X]    IX: [%04X]    IY [%04X]\n", 
-        mRegisterPack.regHL.getValue(), mRegisterPack.regAF.getValue(),
         mRegisterPack.regBC.getValue(), mRegisterPack.regDE.getValue(),
+        mRegisterPack.regHL.getValue(), mRegisterPack.regAF.getValue(),
         mRegisterPack.regIX.getValue(), mRegisterPack.regIY.getValue());
 
     printf("PC: [%04X]    SP [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());

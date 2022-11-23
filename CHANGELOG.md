@@ -1,3 +1,6 @@
+# 0.8.1
+Correct the displayExecRegisters() function (bad double registers).
+
 # 0.8.0
 Introduce the exec mode.
 Create the displaySimpleRegisters(), displayExecRegisters() and the displayMemory() functions.
