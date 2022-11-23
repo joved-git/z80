@@ -983,7 +983,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     /* This is a (nn),rr    */
     if ((codeInHexa>>SIZE_2_BYTES & MASK_LDNNRR)==CODE_LDNNRR && len == ed_code_length[CODE_LDNNRR])
     {
-        instruction=CODE_LDNNRR; 
+        instruction=CODE_ED_LDNNRR; 
 
         op1=EXTRACT(codeInHexa, 20, 2) | 0b1000;
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
@@ -1865,12 +1865,31 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     *pLen=ONE_BYTE;
                 }
 
-                 /* Check if it is a LD (nn),A instruction    */
+                /* Check if it is a LD (nn),A instruction    */
                 if (!strcmp(str_op2, "A") && strchr(str_op1, '#') && strchr(str_op1, '(') && strchr(str_op1, ')') && strlen(str_op1)>=4 && strlen(str_op1)<=7 )    
                 {
                     retCode=CODE_LDNNA;
                     /* Clean the r for Op1 */
                     retCheck=clean_r(str_op2);
+
+                    str_ptr=str_op1+1;                      /* Remove '(' and ')'   */
+                    str_ptr[strlen(str_ptr)-1]='\0';
+
+                    word=toValue(str_ptr+1, pLen, &lenEff);
+
+                    retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
+
+                    *pLen=THREE_BYTES;
+                }
+
+                /* Check if it is a LD (nn),rr instruction    */
+                if (strlen(str_op2)==2 && strchr(str_op1, '#') && strchr(str_op1, '(') && strchr(str_op1, ')') && strlen(str_op1)>=4 && strlen(str_op1)<=7 )    
+                {
+                    retCode=CODE_LDNNRR;
+
+                    PUSHBIT(retCode, registerToBit(str_op2), 4);
+                    /* Clean the r for Op1 */
+                    //retCheck=clean_r(str_op2);
 
                     str_ptr=str_op1+1;                      /* Remove '(' and ')'   */
                     str_ptr[strlen(str_ptr)-1]='\0';
