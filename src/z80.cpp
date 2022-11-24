@@ -77,19 +77,19 @@ int main(int argc, char *argv[])
 				switch (len)
 				{
 					case ONE_BYTE:
-						printf("z exex [%02X] [%s]> ", machineCode, instruction);
+						printf("z [%02X] [%s]> ", machineCode, instruction);
 						break;
 
 					case TWO_BYTES:
-						printf("z exex [%04X] [%s]> ", machineCode, instruction);
+						printf("z [%04X] [%s]> ", machineCode, instruction);
 						break;
 
 					case THREE_BYTES:
-						printf("z exex [%06X] [%s]> ", machineCode, instruction);
+						printf("z [%06X] [%s]> ", machineCode, instruction);
 						break;
 
 					case FOUR_BYTES:
-						printf("z exex [%08X] [%s]> ", machineCode, instruction);
+						printf("z [%08X] [%s]> ", machineCode, instruction);
 						break;
 				}
 			}

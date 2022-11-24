@@ -1,6 +1,9 @@
+# 0.8.3
+interpretCode() refactoring is finished. The function is able to display next instruction in exec mode. Yeah !!
+
 # 0.8.2
 Display next instruction in exec mode.
-Correctf the python prog (forget DD array).
+Correct the python prog (forget DD array).
 
 # 0.8.1
 Correct the displayExecRegisters() function (bad double registers).

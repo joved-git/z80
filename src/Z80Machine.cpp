@@ -844,6 +844,8 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     //printf("code=<%s>\n", pCode);
     //codeInHexa=toValue(pCode, &len, &lenEff);                     /* Transform the instruction into real number  */
     
+    sprintf(mInstruction, " not yet decoded ", sop1, sop2);
+
     /* This is a NOP    */
     if ((codeInHexa & MASK_NOP)==CODE_NOP && len == ONE_BYTE)                  
     {
@@ -1086,7 +1088,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a (nn),rr    */
-    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDNNRR)==CODE_LDNNRR && len == ed_code_length[CODE_LDNNRR])
+    if (((codeInHexa>>SIZE_2_BYTES) & MASK_LDNNRR)==CODE_LDNNRR && (len-2) == ed_code_length[CODE_LDNNRR])
     {
         instruction=CODE_ED_LDNNRR; 
 
@@ -1442,12 +1444,12 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             {
                 op1=~op1+1;
                 address=mRegisterPack.regIX.getValue()-op1;
-                sprintf(mInstruction, "\nLD (IX-#%02X),%s", op1, sop2);
+                sprintf(mInstruction, "LD (IX-#%02X),%s", op1, sop2);
             }
             else
             {
                 address=mRegisterPack.regIX.getValue()+op1;
-                sprintf(mInstruction, "\nLD (IX+#%02X),%s", op1, sop2);
+                sprintf(mInstruction, "LD (IX+#%02X),%s", op1, sop2);
             }
 
             if (pMode==INTP_EXECUTE)                                /* Execute LD (IX+d),r  */
@@ -1471,12 +1473,12 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             {
                 op1=~op1+1;
                 address=mRegisterPack.regIX.getValue()-op1;
-                sprintf(mInstruction, "\nLD (IY-#%02X),%s", op1, sop2);
+                sprintf(mInstruction, "LD (IY-#%02X),%s", op1, sop2);
             }
             else
             {
                 address=mRegisterPack.regIX.getValue()+op1;
-                sprintf(mInstruction, "\nLD (IY+#%02X),%s", op1, sop2);
+                sprintf(mInstruction, "LD (IY+#%02X),%s", op1, sop2);
             }
             if (pMode==INTP_EXECUTE)                                /* Execute LD (IY+d),r  */
             {
@@ -1491,10 +1493,12 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
-        case CODE_DD_LDIXNN:                                    /* This is a LD IX,nn    */   
-            if (pMode==INTP_EXECUTE)                               /*xxxjoexxx*/
+        case CODE_DD_LDIXNN:                                    /* This is a LD IX,nn    */ 
+            sprintf(mInstruction, "LD IX,#%04X", op16);
+
+            if (pMode==INTP_EXECUTE)                               
             {
-                printf("\nLD IX,#%04X was executed\n", op16);
+                printf("\n%s was executed\n", mInstruction);
 
                 reg16_1=get16bitsRegisterAddress(REGIX);
                 reg16_1->setValue(op16);
@@ -1502,14 +1506,16 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%08X] is LD IX,#%04X\n", codeInHexa, op16);
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
             }
             break;
     
-        case CODE_FD_LDIYNN:                                    /* This is a LD IX,nn    */   
+        case CODE_FD_LDIYNN:                                    /* This is a LD IY,nn    */ 
+            sprintf(mInstruction, "LD IY,#%04X", op16);
+
             if (pMode==INTP_EXECUTE)
             {
-                printf("\nLD IY,#%04X was executed\n", op16);
+                printf("\n%s was executed\n", mInstruction);
 
                 reg16_1=get16bitsRegisterAddress(REGIY);
                 reg16_1->setValue(op16);
@@ -1517,17 +1523,17 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%08X] is LD IY,#%04X\n", codeInHexa, op16);
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
         case CODE_ED_LDDDNN:                                    /* This is a LD rr,(nn)    */   
-            ret=bitToRegister(op1, sop1);
+            ret=bitToRegister(op1, sop1);                      
+            sprintf(mInstruction, "LD %s,(#%04X)", sop1, op16);
 
             if (pMode==INTP_EXECUTE)
             {
-
-                printf("\nLD %s,(#%04X) was executed\n", sop1, op16);
+                printf("\n%s was executed\n", mInstruction);
 
                 reg16_1=get16bitsRegisterAddress(op1);
                 reg16_1->setValue(mMemory->getAddress(op16));
@@ -1535,44 +1541,49 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%08X] is LD %s,(#%04X)\n", codeInHexa, sop1, op16);
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
         case CODE_LDHLNN:                                    /* This is a LD HL,(nn)    */   
-            if (pMode==INTP_EXECUTE)
+            sprintf(mInstruction, "LD HL,(#%04X)", op16);
+            if (pMode==INTP_EXECUTE)                         
             {
-                printf("\nLD HL,(#%04X) was executed\n", op16);
-
                 reg16_1=get16bitsRegisterAddress(REGHL);
                 reg16_1->setValue(mMemory->getAddress(op16));
+
+                printf("\n%s was executed\n", mInstruction);
             }
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%06X] is LD HL,(#%04X)\n", codeInHexa, op16);
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
-        case CODE_DD_LDIXANN:                                    /* This is a LD IX,(nn)    */   
-            if (pMode==INTP_EXECUTE)
-            {
-                printf("\nLD IX,(#%04X) was executed\n", op16);
+        case CODE_DD_LDIXANN:                                   /* This is a LD IX,(nn)    */   
+            sprintf(mInstruction, "LD IX,(#%04X)", op16);
 
+            if (pMode==INTP_EXECUTE)                            
+            {
                 reg16_1=get16bitsRegisterAddress(REGIX);
                 reg16_1->setValue(mMemory->getAddress(op16));
+
+                printf("\n%s was executed\n", mInstruction);
             }
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%08X] is LD IX,(#%04X)\n", codeInHexa, op16);
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
-        case CODE_FD_LDIYANN:                                    /* This is a LD IY,(nn)    */   
-            if (pMode==INTP_EXECUTE)
+        case CODE_FD_LDIYANN:                                   /* This is a LD IY,(nn)    */
+            sprintf(mInstruction, "LD IY,(#%04X)", op16);
+
+            if (pMode==INTP_EXECUTE)                            
             {
-                printf("\nLD IY,(#%04X) was executed\n", op16);
+                printf("\n%s was executed\n", mInstruction);
 
                 reg16_1=get16bitsRegisterAddress(REGIY);
                 reg16_1->setValue(mMemory->getAddress(op16));
@@ -1580,31 +1591,34 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%08X] is LD IY,(#%04X)\n", codeInHexa, op16);
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
-        case CODE_LDNNHL:                                    /* This is a LD (nn),HL    */   
-            if (pMode==INTP_EXECUTE)
-            {
-                printf("\nLD (#%04X),HL was executed\n", op16);
+        case CODE_LDNNHL:                                       /* This is a LD (nn),HL    */   
+            sprintf(mInstruction, "LD (#%04X),HL", op16);
 
+            if (pMode==INTP_EXECUTE)                            
+            {
                 reg16_1=get16bitsRegisterAddress(REGHL);
                 mMemory->setAddress(op16, reg16_1->getValue());
+
+                printf("\n%s was executed\n", mInstruction);
             }
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%06X] is LD (#%04X),HL\n", codeInHexa, op16);
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
-        case CODE_INCR:                             /* This is a INC R  */
-            if (pMode==INTP_EXECUTE)
-            {
-                ret=bitToRegister(op1, sop1);
-                printf("\nINC %s was executed\n", sop1);
+        case CODE_INCR:                                         /* This is a INC R  */
+            ret=bitToRegister(op1, sop1);
 
+            sprintf(mInstruction, "INC %s", sop1);
+
+            if (pMode==INTP_EXECUTE)                            
+            {
                 reg8_1=get8bitsRegisterAddress(op1);
                 reg8_1->setValue(reg8_1->getValue()+1);
 
@@ -1629,70 +1643,71 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 {
                     mRegisterPack.regF.setParityOverflowFlag(false);
                 }
+
+                printf("\n%s was executed\n", mInstruction);
             }
             
             if (pMode==INTP_DISPLAY)
             {
-                ret=bitToRegister(op1, sop1);
-                ret=bitToRegister(op2, sop2);
-
-                printf("\n[%02X] is INC %s\n", codeInHexa, sop1);
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
-        case CODE_INCRR:                             /* This is a INC rr    */
-            if (pMode==INTP_EXECUTE)
-            {
-                ret=bitToRegister(op1, sop1);
-                
-                printf("\nINC %s was executed\n", sop1);
+        case CODE_INCRR:                                            /* This is a INC rr    */
+            ret=bitToRegister(op1, sop1);
 
+            sprintf(mInstruction, "INC %s", sop1);
+
+            if (pMode==INTP_EXECUTE)                                
+            {
                 reg16_1=get16bitsRegisterAddress(op1);
                 reg16_1->setValue(reg16_1->getValue()+1);
+
+                printf("\n%s was executed\n", mInstruction);
             }
             
             if (pMode==INTP_DISPLAY)
             {
-                ret=bitToRegister(op1, sop1);
-
-                printf("\n[%02X] is INC %s\n", codeInHexa, sop1);
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
-        case CODE_PUSHQQ:                               /* This is a PUSH qq                    */
-            if (pMode==INTP_EXECUTE)
-            {
-                ret=bitToRegister(op1, sop1);
-                
-                printf("\nPUSH %s was executed\n", sop1);
+        case CODE_PUSHQQ:                                       /* This is a PUSH qq                    */
+            ret=bitToRegister(op1, sop1);
 
+            sprintf(mInstruction, "PUSH %s", sop1);
+
+            if (pMode==INTP_EXECUTE)                            
+            {
                 mRegisterPack.regSP.setValue(mRegisterPack.regSP.getValue()-2);
                 reg16_1=get16bitsRegisterAddress(op1);
                 mMemory->setAddress(mRegisterPack.regSP.getValue(), reg16_1->getValue());
+
+                printf("\n%s was executed\n", mInstruction);
             }
             
             if (pMode==INTP_DISPLAY)
             {
-                ret=bitToRegister(op1, sop1);
-
-                printf("\n[%02X] is PUSH %s\n", codeInHexa, sop1);
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
-        case CODE_ED_LDNNRR:                                    /* This is a LD (nn),rr    */   
-            ret=bitToRegister(op1, sop1);
+        case CODE_ED_LDNNRR:                                        /* This is a LD (nn),rr    */   
+            ret=bitToRegister(op1, sop1);                           
+
+            sprintf(mInstruction, "LD (#%04X),%s", op16, sop1);
 
             if (pMode==INTP_EXECUTE)
             {
-                printf("\nLD (#%04X),%s was executed\n", op16, sop1);
-
                 reg16_1=get16bitsRegisterAddress(op1);
                 mMemory->setAddress(op16, reg16_1->getValue());
+
+                printf("\n%s was executed\n", mInstruction);
             }
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%06X] is LD (#%04X),%s\n", codeInHexa, op16, sop1);
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
