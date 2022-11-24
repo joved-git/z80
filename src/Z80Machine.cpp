@@ -734,7 +734,7 @@ bool Z80Machine::getExecutionMode()
 void Z80Machine::displaySimpleRegisters()
 {
     printf("\n");
-    printf("B:  [\033[34;01%02Xm]      C: [%02X]\n", mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue());
+    printf("B:  [\033[33;01m%02X\033[00m]      C: [%02X]\n", mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue());
     printf("D:  [%02X]      E: [%02X]\n", mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue());
     printf("H:  [%02X]      L: [%02X]\n", mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue());
     printf("A:  [%02X]      F: [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
@@ -844,7 +844,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     //printf("code=<%s>\n", pCode);
     //codeInHexa=toValue(pCode, &len, &lenEff);                     /* Transform the instruction into real number  */
     
-    sprintf(mInstruction, " not yet decoded ", sop1, sop2);
+    sprintf(mInstruction, " not yet decoded ");
 
     /* This is a NOP    */
     if ((codeInHexa & MASK_NOP)==CODE_NOP && len == ONE_BYTE)                  

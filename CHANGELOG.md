@@ -1,6 +1,7 @@
 # 0.8.4
 Add 'n' for 'next instruction' command.
 Change interpretCode() to be able to execute instruction without displaying message.
+Execute next instruction.
 
 # 0.8.3
 interpretCode() refactoring is finished. The function is able to display next instruction in exec mode. Yeah !!
