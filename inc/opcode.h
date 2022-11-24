@@ -121,7 +121,8 @@
 
 #define INTP_DISPLAY        (0)
 #define INTP_EXECUTE        (1)
-#define INTP_STORE          (2)
+#define INTP_DETECT         (2)
+#define INTP_EXECUTE_BLIND  (3)
 
 //#define VALUE(a, b)         (LENGTH_##a_##b)
 //#define VALUE_NATURAL(a)    (LENGTH_NATURAL_##a)

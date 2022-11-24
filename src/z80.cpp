@@ -71,6 +71,7 @@ int main(int argc, char *argv[])
 				machine.displayExecRegisters();
 				machine.displayMemory("(PC)");
 				machineCode=machine.getNextInstruction(instruction, &len);
+				//printf("mc=%08X  <%s>  len=%d\n", machineCode, instruction, len);
 
 				std::cout << std::endl;
 
