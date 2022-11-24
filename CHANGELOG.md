@@ -1,3 +1,6 @@
+# 0.8.5
+Add and decode DEC r.
+
 # 0.8.4
 Add 'n' for 'next instruction' command.
 Change interpretCode() to be able to execute instruction without displaying message.

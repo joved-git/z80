@@ -40,6 +40,8 @@
 #define CODE_INCRR          (0b00000011)
 #define CODE_PUSHQQ         (0b11000101)
 #define CODE_LDNNRR         (0b01000011)
+#define CODE_DECR           (0b00000101)
+#define CODE_DECRR          (0b00001011)
 
 #define CODE_DD_LDRIXD      (0b1101110101000110)
 #define CODE_FD_LDRIYD      (0b1111110101000110)    
@@ -81,6 +83,9 @@
 #define MASK_INCRR          (0b11001111)
 #define MASK_PUSHQQ         (0b11001111)
 #define MASK_LDNNRR         (0b11001111)
+#define MASK_DECR           (0b11000111)
+#define MASK_DECRR          (0b11000111)
+
 
 #define ONE_BYTE            (2)
 #define TWO_BYTES           (4)
@@ -123,11 +128,6 @@
 #define INTP_EXECUTE        (1)
 #define INTP_DETECT         (2)
 #define INTP_EXECUTE_BLIND  (3)
-
-//#define VALUE(a, b)         (LENGTH_##a_##b)
-//#define VALUE_NATURAL(a)    (LENGTH_NATURAL_##a)
-//#define LENGTH(a, b)        (LENGTH_##a##b)
-//#define LENGTH1(b, c)        (LENGTH_##c##b)
 
 /****************************/
 /* 0x0A   - LD A,(BC)       */

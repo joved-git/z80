@@ -1074,6 +1074,14 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=EXTRACT(codeInHexa, 4, 2) | 0b1000;;
     }
 
+    /* This is a DEC r */
+    if ((codeInHexa & MASK_DECR)==CODE_DECR && len == natural_code_length[CODE_DECR])
+    {
+        instruction=CODE_DECR;
+               
+        op1=EXTRACT(codeInHexa, 3, 3);
+    }
+
     /* This is a PUSH rr */
     if ((codeInHexa & MASK_PUSHQQ)==CODE_PUSHQQ && len == natural_code_length[CODE_PUSHQQ])
     {
@@ -1690,6 +1698,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 /* Modify flags here    */
                 mRegisterPack.regF.setSignFlag(reg8_1->getSignFlag());
                 mRegisterPack.regF.setZeroFlag(reg8_1->isZero());
+                mRegisterPack.regF.setAddSubtractFlag(false);
 
                 if (reg8_1->getValue()==0x10)
                 {
@@ -1720,6 +1729,52 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+            case CODE_DECR:                                         /* This is a DEC R  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "DEC %s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(op1);
+                reg8_1->setValue(reg8_1->getValue()-1);
+
+                /* Modify flags here    */
+                mRegisterPack.regF.setSignFlag(reg8_1->getSignFlag());
+                mRegisterPack.regF.setZeroFlag(reg8_1->isZero());
+                mRegisterPack.regF.setAddSubtractFlag(true);
+
+                if (reg8_1->getValue()==0x0F)
+                {
+                    mRegisterPack.regF.setHalfCarryFlag(true);
+                }
+                else
+                {
+                    mRegisterPack.regF.setHalfCarryFlag(false);
+                }
+
+                if (reg8_1->getValue()==0x7F)
+                {
+                    mRegisterPack.regF.setParityOverflowFlag(true);
+                }
+                else
+                {
+                    mRegisterPack.regF.setParityOverflowFlag(false);
+                }
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
 
         case CODE_INCRR:                                            /* This is a INC rr    */
             ret=bitToRegister(op1, sop1);
@@ -1887,6 +1942,29 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 if (strlen(str_op1)==2)                             /* Check if it is a INC rr instruction   */
                 {
                     retCode=CODE_INCRR;                              /* Prepare the INC rr                   */
+                    *pLen=ONE_BYTE;
+
+                    retCheck=clean_r(str_op1);
+                    
+                    PUSHBIT(retCode, registerToBit(str_op1), 4);    /* Add the register as bits             */
+                }
+            }
+
+            if (!strcmp(str_inst, "DEC"))                          /* A DEC instruction is present         */
+            {
+                if (strlen(str_op1)==1)                             /* Check if it is a INC r instruction   */
+                {
+                    retCode=CODE_DECR;                              /* Prepare the INC r                    */
+                    *pLen=ONE_BYTE;
+
+                    retCheck=clean_r(str_op1);
+                    
+                    PUSHBIT(retCode, registerToBit(str_op1), 3);    /* Add the register as bits             */
+                }
+
+                if (strlen(str_op1)==2)                             /* Check if it is a INC rr instruction   */
+                {
+                    retCode=CODE_DECRR;                              /* Prepare the INC rr                   */
                     *pLen=ONE_BYTE;
 
                     retCheck=clean_r(str_op1);
