@@ -729,12 +729,11 @@ bool Z80Machine::getExecutionMode()
     return mExecMode;
 }
 
-
 /* Display registers            */
 void Z80Machine::displaySimpleRegisters()
 {
     printf("\n");
-    //printf("B:  [\033[33;01m%02X\033[00m]      C: [%02X]\n", mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue());
+    //printf("[\033[31m31\033[0m][\033[32m32\033[0m][\033[33m33\033[0m][\033[34m34\033[0m][\033[35m35\033[0m]\n"); 
     printf("B:  [%02X]      C: [%02X]\n", mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue());
     printf("D:  [%02X]      E: [%02X]\n", mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue());
     printf("H:  [%02X]      L: [%02X]\n", mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue());
