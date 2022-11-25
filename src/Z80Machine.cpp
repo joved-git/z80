@@ -1041,7 +1041,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     /* xxxjoexxx revoir les len== ci-dessus ^ */
 
     /* This is a LD IX,(nn)    */
-    if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_DD) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDIXANN)==CODE_LDIXANN && len == FD_CODE_LENGTH(CODE_LDIXANN))
+    if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_DD) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDIXANN)==CODE_LDIXANN && len == DD_CODE_LENGTH(CODE_LDIXANN))
     {
         instruction=CODE_DD_LDIXANN; 
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
