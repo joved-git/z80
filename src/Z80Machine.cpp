@@ -809,6 +809,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     Register_16bits *reg16_1=NULL;
     uint16_t address=0x0000;
     uint8_t newVal=0;
+    uint8_t val=0;
     char strInstr[MAX_OP_LENGTH*3];
 
     uint8_t ret;
@@ -1093,6 +1094,13 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         
         /* Extract the value of the register    */
         op1=EXTRACT(codeInHexa, 0,3);
+    }
+
+    /* This is a RLC (HL)  */
+    if (((codeInHexa & FIRST_LOWEST_BYTE) & MASK_RLCHL)==CODE_RLCHL && len == CB_CODE_LENGTH(CODE_RLCHL))
+    {
+        instruction=CODE_CB_RLCHL;
+
     }
 
 
@@ -1872,9 +1880,42 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 reg8_1->setValue(newVal);
 
                 /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
                 H_RESET;
+                PV_IS(EVEN(newVal));
                 N_RESET;
                 C_IS(BIT(reg8_1->getValue(), 0));
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_CB_RLCHL:                                         /* This is a RLC (HL)  */
+            sprintf(mInstruction, "RLC (HL)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Retrive the byte and rotate it  */
+                val=mMemory->get8bitsValue(mRegisterPack.regHL.getValue());
+                newVal=(val<<1) | BIT(val, 7);
+                mMemory->set8bitsValue(mRegisterPack.regHL.getValue(), newVal);
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+                C_IS(BIT(val, 7));
 
                 if (pMode==INTP_EXECUTE)
                 {
@@ -1993,6 +2034,12 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCheck=clean_r(str_op1);
                     
                     PUSHBIT(retCode, registerToBit(str_op1), 0);    /* Add the register as bits             */
+                }
+
+                if (!strcmp(str_op1, "(HL)"))                       /* Check if it is a RLC (HL) instruction*/
+                {
+                    retCode=CODE_CB_RLCHL;                           /* Prepare the RLC r                    */
+                    *pLen=TWO_BYTES;
                 }
             }
 

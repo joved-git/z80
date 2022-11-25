@@ -1,3 +1,7 @@
+# 0.9.1
+Add and decode RLC (HL).
+Correct flag settings for RLC r.
+
 # 0.9.0
 Add new registers (AF', BC', DE' and HL')
 Add 'R' command.
