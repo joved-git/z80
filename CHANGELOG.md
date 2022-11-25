@@ -1,3 +1,7 @@
+# 0.9.0
+Add new registers (AF', BC', DE' and HL')
+Add 'R' command.
+
 # 0.8.7
 Add and decode RLC r.
 

@@ -22,6 +22,11 @@ Z80Machine::Z80Machine()
     mRegisterPack.regIX.set16bitsRegisterType(FULL);
     mRegisterPack.regIY.set16bitsRegisterType(FULL);
 
+    mRegisterPack.regAFp.set16bitsRegisterType(FULL);
+    mRegisterPack.regBCp.set16bitsRegisterType(FULL);
+    mRegisterPack.regDEp.set16bitsRegisterType(FULL);
+    mRegisterPack.regHLp.set16bitsRegisterType(FULL);
+
     /* Initialize registers to 0 exept SP  */
     mRegisterPack.regA.setValue(0x00);
     mRegisterPack.regB.setValue(0x00);
@@ -35,6 +40,11 @@ Z80Machine::Z80Machine()
     mRegisterPack.regIX.setValue(0x0000);
     mRegisterPack.regIY.setValue(0x0000);
     mRegisterPack.regSP.setValue(INITIAL_STACK_POINTER);
+
+    mRegisterPack.regAFp.setValue(0x0000);
+    mRegisterPack.regBCp.setValue(0x0000);
+    mRegisterPack.regDEp.setValue(0x0000);
+    mRegisterPack.regHLp.setValue(0x0000);
 
      /* Initialize some registers (for test)   */
     mRegisterPack.regB.setValue(0x01);
@@ -51,79 +61,14 @@ Z80Machine::Z80Machine()
     /* Set the default mode     */
     mExecMode=false;
 
-    /*
-    uint8_t byte=0;
-    uint8_t v=natural_code_length[byte];
-    printf("v0=%d\n", v);
-    byte=1;
-    v=natural_code_length[byte];
-    printf("v1=%d\n", v);
-    byte=254;
-    v=cb_code_length[byte];
-    printf("v1=%d\n", v);
-    byte=254;
-    v=fdcb_code_length[byte];
-    printf("v1=%d\n", v);
-    */
-
-/*
-    printf("\n\n--- set to tf f ttt\n");
-    mRegisterPack.regF.setSignFlag(true);
-    mRegisterPack.regF.setZeroFlag(false);
-    mRegisterPack.regF.setHalfCarryFlag(false),
-    mRegisterPack.regF.setParityOverflowFlag(true),
-    mRegisterPack.regF.setAddSubtractFlag(true),
-    mRegisterPack.regF.setCarryFlag(true);
-    printf("Flags=%d%dx%dx%d%d%d\n", 
-        mRegisterPack.regF.getSignFlag(),
-        mRegisterPack.regF.getZeroFlag(),
-        mRegisterPack.regF.getHalfCarryFlag(),
-        mRegisterPack.regF.getParityOverflowFlag(),
-        mRegisterPack.regF.getAddSubtractFlag(),
-        mRegisterPack.regF.getCarryFlag()
-    );
-
-    printf("--- set to ft t fff\n");
-    mRegisterPack.regF.setSignFlag(false);
-    mRegisterPack.regF.setZeroFlag(true);
-    mRegisterPack.regF.setHalfCarryFlag(true),
-    mRegisterPack.regF.setParityOverflowFlag(false),
-    mRegisterPack.regF.setAddSubtractFlag(false),
-    mRegisterPack.regF.setCarryFlag(false);
-    printf("Flags=%d%dx%dx%d%d%d\n", 
-        mRegisterPack.regF.getSignFlag(),
-        mRegisterPack.regF.getZeroFlag(),
-        mRegisterPack.regF.getHalfCarryFlag(),
-        mRegisterPack.regF.getParityOverflowFlag(),
-        mRegisterPack.regF.getAddSubtractFlag(),
-        mRegisterPack.regF.getCarryFlag()
-    );
-
-    printf("--- set to tf f ttt\n");
-    mRegisterPack.regF.setSignFlag(true);
-    mRegisterPack.regF.setZeroFlag(false);
-    mRegisterPack.regF.setHalfCarryFlag(false),
-    mRegisterPack.regF.setParityOverflowFlag(true),
-    mRegisterPack.regF.setAddSubtractFlag(true),
-    mRegisterPack.regF.setCarryFlag(true);
-    printf("Flags=%d%dx%dx%d%d%d\n", 
-        mRegisterPack.regF.getSignFlag(),
-        mRegisterPack.regF.getZeroFlag(),
-        mRegisterPack.regF.getHalfCarryFlag(),
-        mRegisterPack.regF.getParityOverflowFlag(),
-        mRegisterPack.regF.getAddSubtractFlag(),
-        mRegisterPack.regF.getCarryFlag()
-    );
-*/
-
-
-    /* Creating the memory  */
+    /* Creating the memory      */
     mMemory=new(Memory);
 }
 
 /* The destructor  */
 Z80Machine::~Z80Machine()
 {
+    /* Destroying the memory    */
     delete(mMemory);
 }
 
@@ -734,22 +679,49 @@ void Z80Machine::displaySimpleRegisters()
 {
     printf("\n");
     //printf("[\033[31m31\033[0m][\033[32m32\033[0m][\033[33m33\033[0m][\033[34m34\033[0m][\033[35m35\033[0m]\n"); 
-    printf("B:  [%02X]      C: [%02X]\n", mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue());
-    printf("D:  [%02X]      E: [%02X]\n", mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue());
-    printf("H:  [%02X]      L: [%02X]\n", mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue());
-    printf("A:  [%02X]      F: [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
+    printf("B  [%02X]      C  [%02X]\n", mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue());
+    printf("D  [%02X]      E  [%02X]\n", mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue());
+    printf("H  [%02X]      L  [%02X]\n", mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue());
+    printf("A  [%02X]      F  [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
         byteToBinary(mRegisterPack.regF.getValue()), 
         mRegisterPack.regF.getSignFlag(), mRegisterPack.regF.getZeroFlag(), 
         mRegisterPack.regF.getHalfCarryFlag(), mRegisterPack.regF.getParityOverflowFlag(),
         mRegisterPack.regF.getAddSubtractFlag(), mRegisterPack.regF.getCarryFlag());
 
     printf("\n");
-    printf("BC: [%04X]    DE [%04X]\n", mRegisterPack.regBC.getValue(), mRegisterPack.regDE.getValue());
-    printf("HL: [%04X]    AF [%04X]\n", mRegisterPack.regHL.getValue(), mRegisterPack.regAF.getValue());
-    printf("IX: [%04X]    IY [%04X]\n", mRegisterPack.regIX.getValue(), mRegisterPack.regIY.getValue());
+    printf("BC [%04X]    DE [%04X]\n", mRegisterPack.regBC.getValue(), mRegisterPack.regDE.getValue());
+    printf("HL [%04X]    AF [%04X]\n", mRegisterPack.regHL.getValue(), mRegisterPack.regAF.getValue());
+    printf("IX [%04X]    IY [%04X]\n", mRegisterPack.regIX.getValue(), mRegisterPack.regIY.getValue());
 
     printf("\n");
-    printf("PC: [%04X]    SP [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());
+    printf("PC [%04X]    SP [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());
+}
+
+/* Display registers            */
+void Z80Machine::displayAllRegisters()
+{
+    printf("\n");
+    //printf("[\033[31m31\033[0m][\033[32m32\033[0m][\033[33m33\033[0m][\033[34m34\033[0m][\033[35m35\033[0m]\n"); 
+    printf("B  [%02X]      C  [%02X]\n", mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue());
+    printf("D  [%02X]      E  [%02X]\n", mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue());
+    printf("H  [%02X]      L  [%02X]\n", mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue());
+    printf("A  [%02X]      F  [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
+        byteToBinary(mRegisterPack.regF.getValue()), 
+        mRegisterPack.regF.getSignFlag(), mRegisterPack.regF.getZeroFlag(), 
+        mRegisterPack.regF.getHalfCarryFlag(), mRegisterPack.regF.getParityOverflowFlag(),
+        mRegisterPack.regF.getAddSubtractFlag(), mRegisterPack.regF.getCarryFlag());
+
+    printf("\n");
+    printf("BC [%04X]    DE [%04X]    BC' [%04X]    DE' [%04X]\n", 
+        mRegisterPack.regBC.getValue(), mRegisterPack.regDE.getValue(), 
+        mRegisterPack.regBCp.getValue(), mRegisterPack.regDEp.getValue());
+    printf("HL [%04X]    AF [%04X]    HL' [%04X]    AF' [%04X]\n", 
+        mRegisterPack.regHL.getValue(), mRegisterPack.regAF.getValue(),
+        mRegisterPack.regHLp.getValue(), mRegisterPack.regAFp.getValue());
+    printf("IX [%04X]    IY [%04X]\n", mRegisterPack.regIX.getValue(), mRegisterPack.regIY.getValue());
+
+    printf("\n");
+    printf("PC [%04X]    SP [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());
 }
 
 
@@ -2426,6 +2398,15 @@ bool Z80Machine::analyse()
                     if (!mExecMode)
                     {
                         displaySimpleRegisters();
+                    }
+
+                    break;
+
+                /* Display all the registers	*/
+                case CMD_ALL_REGISTER:
+                    if (!mExecMode)
+                    {
+                        displayAllRegisters();
                     }
 
                     break;

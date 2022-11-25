@@ -55,6 +55,11 @@ public:
     /// @return Nothing.
     void displaySimpleRegisters();
 
+   /// @brief  Display all registers (included hidden ones).
+    /// @param  None.
+    /// @return Nothing.
+    void displayAllRegisters();
+
     /// @brief  Display registers in exec mode.
     /// @param  None.
     /// @return Nothing.
