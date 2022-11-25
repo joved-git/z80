@@ -1,3 +1,6 @@
+# 0.9.4
+Add and decode RRCA and RRC r instructions.
+
 # 0.9.3
 Add and decode EX AF,AF' and EXX instructions.
 

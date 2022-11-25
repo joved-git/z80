@@ -44,6 +44,7 @@
 #define CODE_RLCA           (0b00000111)                // 0x07
 #define CODE_EXAFAF         (0b00001000)                // 0x08
 #define CODE_LDABC          (0b00001010)                // 0x0A
+#define CODE_RRCA           (0b00001111)                // 0x0F
 #define CODE_LDDEA          (0b00010010)                // 0x12
 #define CODE_LDADE          (0b00011010)                // 0x1A
 #define CODE_LDNNHL         (0b00100010)                // 0x22
@@ -74,6 +75,7 @@
 #define CODE_DECR           (0b00000101)
 #define CODE_DECRR          (0b00001011)
 #define CODE_RLCR           (0b00000000)
+#define CODE_RRCR           (0b00001000)
 
 #define CODE_CB_RLCHL       (0b1100101100000110)        // 0xCB06
 #define CODE_DD_LDIXNN      (0b1101110100100001)        // 0xDD21
@@ -87,6 +89,7 @@
 #define CODE_ED_LDDDNN      (0b1110110101001011)
 #define CODE_ED_LDNNRR      (0b1110110101000011)
 #define CODE_CB_RLCR        (0b1100101100000000)
+#define CODE_CB_RRCR        (0b1100101100001000)
 
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
@@ -124,6 +127,8 @@
 #define MASK_RLCHL          (0b11111111)
 #define MASK_EXAFAF         (0b11111111)
 #define MASK_EXX            (0b11111111)
+#define MASK_RRCA           (0b11111111)
+#define MASK_RRCR           (0b11111000)
 
 #define REGA                (0b111)
 #define REGB                (0b000)

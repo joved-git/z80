@@ -1123,6 +1123,21 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
 
     }
 
+        /* This is a RRCA  */
+    if ((codeInHexa & MASK_RRCA)==CODE_RRCA && len==NATURAL_CODE_LENGTH(CODE_RRCA))
+    {
+        instruction=CODE_RRCA;
+    }
+
+    /* This is a RRC r  */
+    if (((codeInHexa & FIRST_LOWEST_BYTE) & MASK_RRCR)==CODE_RRCR && len == CB_CODE_LENGTH(CODE_RRCR))
+    {
+        instruction=CODE_CB_RRCR;
+        
+        /* Extract the value of the register    */
+        op1=EXTRACT(codeInHexa, 0,3);
+    }
+
     /* This is a EX AF,AF'  */
     if ((codeInHexa & MASK_EXAFAF)==CODE_EXAFAF && len==NATURAL_CODE_LENGTH(CODE_EXAFAF))
     {
@@ -1134,6 +1149,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     {
         instruction=CODE_EXX;
     }
+
 
 
     /*************************************************************************************************************************/
@@ -1961,6 +1977,63 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
+        case CODE_RRCA:                                         /* This is a RRCA  */
+            sprintf(mInstruction, "RRCA");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                newVal=(reg8_1->getValue()>>1) | (BIT(reg8_1->getValue(), 0)<<7);
+                reg8_1->setValue(newVal);
+
+                /* Modify flags here    */
+                H_RESET;
+                N_RESET;
+                C_IS(BIT(reg8_1->getValue(), 7));
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_CB_RRCR:                                         /* This is a RRC r  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "RRC %s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(op1);
+                newVal=(reg8_1->getValue()>>1) | (BIT(reg8_1->getValue(), 0)<<7);
+                reg8_1->setValue(newVal);
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+                C_IS(BIT(reg8_1->getValue(), 7));
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
         case CODE_EXAFAF:                                         /* This is a EX AF,AF'  */
             sprintf(mInstruction, "EX AF,AF'");
 
@@ -2120,6 +2193,12 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 *pLen=ONE_BYTE;
             }
 
+            if (!strcmp(str_inst, "RRCA"))                          /* A RRCA is present     */
+            {
+                retCode=CODE_RRCA;
+                *pLen=ONE_BYTE;
+            }
+
             if (!strcmp(str_inst, "EXX"))                          /* A EXX is present     */
             {
                 retCode=CODE_EXX;
@@ -2145,6 +2224,27 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCode=CODE_CB_RLCHL;                           /* Prepare the RLC r                    */
                     *pLen=TWO_BYTES;
                 }
+            }
+
+            if (!strcmp(str_inst, "RRC"))                           /* A RRC instruction is present         */
+            {
+                if (strlen(str_op1)==1)                             /* Check if it is a RRC r instruction   */
+                {
+                    retCode=CODE_CB_RRCR;                           /* Prepare the RRC r                    */
+                    *pLen=TWO_BYTES;
+
+                    retCheck=clean_r(str_op1);
+                    
+                    PUSHBIT(retCode, registerToBit(str_op1), 0);    /* Add the register as bits             */
+                }
+
+                // Coming soon !!
+                //if (!strcmp(str_op1, "(HL)"))                       /* Check if it is a RLC (HL) instruction*/
+                //{
+                //    retCode=CODE_CB_RRCHL;                           /* Prepare the RLC r                    */
+                //    *pLen=TWO_BYTES;
+                //}
+                
             }
 
             if (!strcmp(str_inst, "INC"))                           /* A INC instruction is present         */
