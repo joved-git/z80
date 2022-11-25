@@ -729,7 +729,7 @@ void Z80Machine::displayAllRegisters()
 void Z80Machine::displayExecRegisters()
 {
     printf("\n");
-    printf("B:  [%02X]      C: [%02X]      D:  [%02X]      E: [%02X]      H:  [%02X]      L: [%02X]      A:  [%02X]      F: [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", 
+    printf("B   [%02X]      C   [%02X]      D   [%02X]      E   [%02X]      H   [%02X]      L   [%02X]      A   [%02X]       F   [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", 
            mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue(),
            mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue(),
            mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue(),
@@ -739,12 +739,15 @@ void Z80Machine::displayExecRegisters()
             mRegisterPack.regF.getParityOverflowFlag(), mRegisterPack.regF.getAddSubtractFlag(), 
             mRegisterPack.regF.getCarryFlag());
 
-    printf("BC: [%04X]    DE [%04X]    HL: [%04X]    AF [%04X]    IX: [%04X]    IY [%04X]\n", 
+    printf("BC  [%04X]    DE  [%04X]    HL  [%04X]    AF  [%04X]    IX  [%04X]    IY  [%04X]\n", 
         mRegisterPack.regBC.getValue(), mRegisterPack.regDE.getValue(),
         mRegisterPack.regHL.getValue(), mRegisterPack.regAF.getValue(),
         mRegisterPack.regIX.getValue(), mRegisterPack.regIY.getValue());
+    printf("BC' [%04X]    DE' [%04X]    HL' [%04X]    AF' [%04X]\n", 
+        mRegisterPack.regBCp.getValue(), mRegisterPack.regDEp.getValue(),
+        mRegisterPack.regHLp.getValue(), mRegisterPack.regAFp.getValue());
 
-    printf("PC: [%04X]    SP [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());
+    printf("PC  [%04X]    SP  [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());
 }
 
 

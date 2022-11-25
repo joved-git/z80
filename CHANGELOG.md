@@ -1,3 +1,6 @@
+# 0.9.2
+Hidden registers integration in the exec mode.
+
 # 0.9.1
 Add and decode RLC (HL).
 Correct flag settings for RLC r.
