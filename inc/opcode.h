@@ -1,9 +1,33 @@
 #ifndef OPCODE_H
 #define OPCODE_H
 
+#define ONE_BYTE            (2)
+#define TWO_BYTES           (4)
+#define THREE_BYTES         (6)
+#define FOUR_BYTES          (8)
+
+#define SIZE_1_BYTE         (8)
+#define SIZE_2_BYTES        (16)
+#define SIZE_3_BYTES        (24)
+#define SIZE_4_BYTES        (32)
+
+#define FIRST_LOWEST_BYTE   (0x000000FF)
+#define SECOND_LOWEST_BYTE  (0x0000FF00)
+#define THIRD_LOWEST_BYTE   (0x00FF0000)
+#define FOURTH_LOWEST_BYTE  (0xFF000000)
+
 #define EXTRACT(a, d, l)    (a>>d & ~(((uint8_t) 0b111111111)<<l)) 
 #define PUSHBIT(a, b, l)    (a=a|(b<<l))
 #define SIGN(a)             (a>>7)
+#define BIT(a, n)           EXTRACT (a, n, 1)
+
+#define NATURAL_CODE_LENGTH(c)  natural_code_length[c]
+#define CB_CODE_LENGTH(c)       (cb_code_length[c]+ONE_BYTE)
+#define ED_CODE_LENGTH(c)       (ed_code_length[c]+ONE_BYTE)
+#define DD_CODE_LENGTH(c)       (dd_code_length[c]+ONE_BYTE)
+#define FD_CODE_LENGTH(c)       (fd_code_length[c]+ONE_BYTE)
+#define DDCB_CODE_LENGTH(c)     (ddcb_code_length[c]+TWO_BYTES)
+#define FDCB_CODE_LENGTH(c)     (fdcb_code_length[c]+TWO_BYTES)
 
 #define ALT_CODE_CB         (0xCB)
 #define ALT_CODE_ED         (0xED)
@@ -13,6 +37,7 @@
 #define CODE_NO_INSTRUCTION (0b11001011)                // 0xDE
 #define CODE_NOP            (0b00000000)                // 0X00
 #define CODE_LDBCA          (0b00000010)                // 0x02
+#define CODE_RLCA           (0b00000111)                // 0x07
 #define CODE_LDABC          (0b00001010)                // 0x0A
 #define CODE_LDDEA          (0b00010010)                // 0x12
 #define CODE_LDADE          (0b00011010)                // 0x1A
@@ -42,6 +67,7 @@
 #define CODE_LDNNRR         (0b01000011)
 #define CODE_DECR           (0b00000101)
 #define CODE_DECRR          (0b00001011)
+#define CODE_RLCR           (0b00000111)
 
 #define CODE_DD_LDRIXD      (0b1101110101000110)
 #define CODE_FD_LDRIYD      (0b1111110101000110)    
@@ -53,6 +79,7 @@
 #define CODE_FD_LDIYANN     (0b1111110100101010)        // 0xFD2A
 #define CODE_ED_LDDDNN      (0b1110110101001011)
 #define CODE_ED_LDNNRR      (0b1110110101000011)
+#define CODE_CB_RLCR        (0b1100101100000000)
 
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
@@ -85,22 +112,8 @@
 #define MASK_LDNNRR         (0b11001111)
 #define MASK_DECR           (0b11000111)
 #define MASK_DECRR          (0b11000111)
-
-
-#define ONE_BYTE            (2)
-#define TWO_BYTES           (4)
-#define THREE_BYTES         (6)
-#define FOUR_BYTES          (8)
-
-#define SIZE_1_BYTE         (8)
-#define SIZE_2_BYTES        (16)
-#define SIZE_3_BYTES        (24)
-#define SIZE_4_BYTES        (32)
-
-#define FIRST_LOWEST_BYTE   (0x000000FF)
-#define SECOND_LOWEST_BYTE  (0x0000FF00)
-#define THIRD_LOWEST_BYTE   (0x00FF0000)
-#define FOURTH_LOWEST_BYTE  (0xFF000000)
+#define MASK_RLCA           (0b11111111)
+#define MASK_RLCR           (0b00000111)
 
 #define REGA                (0b111)
 #define REGB                (0b000)

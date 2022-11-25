@@ -836,6 +836,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     Register_8bits *reg8_2=NULL;
     Register_16bits *reg16_1=NULL;
     uint16_t address=0x0000;
+    uint8_t newVal=0;
     char strInstr[MAX_OP_LENGTH*3];
 
     uint8_t ret;
@@ -1037,29 +1038,31 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
     }
 
+    /* xxxjoexxx revoir les len== ci-dessus ^ */
+
     /* This is a LD IX,(nn)    */
-    if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_DD) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDIXANN)==CODE_LDIXANN && len == FOUR_BYTES)
+    if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_DD) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDIXANN)==CODE_LDIXANN && len == FD_CODE_LENGTH(CODE_LDIXANN))
     {
         instruction=CODE_DD_LDIXANN; 
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
     }
 
     /* This is a LD IY,(nn)    */
-    if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_FD) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDIYANN)==CODE_LDIYANN && len == FOUR_BYTES)
+    if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_FD) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDIYANN)==CODE_LDIYANN && len == FD_CODE_LENGTH(CODE_LDIYANN))
     {
         instruction=CODE_FD_LDIYANN; 
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
     }
 
     /* This is a (nn),HL    */
-    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDNNHL)==CODE_LDNNHL && len == natural_code_length[CODE_LDNNHL])
+    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDNNHL)==CODE_LDNNHL && len == NATURAL_CODE_LENGTH(CODE_LDNNHL))
     {
         instruction=CODE_LDNNHL; 
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
     }
 
     /* This is a INC r */
-    if ((codeInHexa & MASK_INCR)==CODE_INCR && len == natural_code_length[CODE_INCR])
+    if ((codeInHexa & MASK_INCR)==CODE_INCR && len == NATURAL_CODE_LENGTH(CODE_INCR))
     {
         instruction=CODE_INCR;
                
@@ -1067,7 +1070,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a INC rr */
-    if ((codeInHexa & MASK_INCRR)==CODE_INCRR && len == natural_code_length[CODE_INCRR])
+    if ((codeInHexa & MASK_INCRR)==CODE_INCRR && len == NATURAL_CODE_LENGTH(CODE_INCRR))
     {
         instruction=CODE_INCRR;
                
@@ -1075,7 +1078,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a DEC r */
-    if ((codeInHexa & MASK_DECR)==CODE_DECR && len == natural_code_length[CODE_DECR])
+    if ((codeInHexa & MASK_DECR)==CODE_DECR && len == NATURAL_CODE_LENGTH(CODE_DECR))
     {
         instruction=CODE_DECR;
                
@@ -1083,7 +1086,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a PUSH rr */
-    if ((codeInHexa & MASK_PUSHQQ)==CODE_PUSHQQ && len == natural_code_length[CODE_PUSHQQ])
+    if ((codeInHexa & MASK_PUSHQQ)==CODE_PUSHQQ && len == NATURAL_CODE_LENGTH(CODE_PUSHQQ))
     {
         instruction=CODE_PUSHQQ;
                
@@ -1096,12 +1099,28 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a (nn),rr    */
-    if (((codeInHexa>>SIZE_2_BYTES) & MASK_LDNNRR)==CODE_LDNNRR && (len-2) == ed_code_length[CODE_LDNNRR])
+    if (((codeInHexa>>SIZE_2_BYTES) & MASK_LDNNRR)==CODE_LDNNRR && len==ED_CODE_LENGTH(CODE_LDNNRR))
     {
         instruction=CODE_ED_LDNNRR; 
 
         op1=EXTRACT(codeInHexa, 20, 2) | 0b1000;
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
+    }
+
+
+    /* This is a RLCA  */
+    if ((codeInHexa & MASK_RLCA)==CODE_RLCA && len==NATURAL_CODE_LENGTH(CODE_RLCA))
+    {
+        instruction=CODE_RLCA;
+    }
+
+    /* This is a RLC r  */
+    if ((codeInHexa>>SIZE_1_BYTE & MASK_RLCR)==CODE_RLCR && len == CB_CODE_LENGTH(CODE_RLCR))
+    {
+        instruction=CODE_CB_RLCR;
+        
+        /* Extract the value of the register    */
+        op1=EXTRACT(codeInHexa, 0,3);
     }
 
 
@@ -1843,6 +1862,76 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
+        case CODE_RLCA:                                         /* This is a RLCA  */
+            sprintf(mInstruction, "RLCA");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                newVal=(reg8_1->getValue()<<1) | BIT(reg8_1->getValue(), 7);
+                reg8_1->setValue(newVal);
+
+                /* Modify flags here    */
+                H_RESET;
+                N_RESET;
+                C_IS(BIT(reg8_1->getValue(), 0));
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_CB_RLCR:                                         /* This is a RLC r  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "INC %s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(op1);
+                reg8_1->setValue(reg8_1->getValue()+1);
+
+                /* Modify flags here    */
+                mRegisterPack.regF.setSignFlag(reg8_1->getSignFlag());
+                mRegisterPack.regF.setZeroFlag(reg8_1->isZero());
+                mRegisterPack.regF.setAddSubtractFlag(false);
+
+                if (reg8_1->getValue()==0x10)
+                {
+                    mRegisterPack.regF.setHalfCarryFlag(true);
+                }
+                else
+                {
+                    mRegisterPack.regF.setHalfCarryFlag(false);
+                }
+
+                if (reg8_1->getValue()==0x80)
+                {
+                    mRegisterPack.regF.setParityOverflowFlag(true);
+                }
+                else
+                {
+                    mRegisterPack.regF.setParityOverflowFlag(false);
+                }
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
     }
 
     /*************************************************************************************************************************/
@@ -1919,15 +2008,27 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
     switch (nbOfComponents)
     {
         case 1:                                                     /* Only one component in the instruction    */
-            if (!strcmp(str_inst, "NOP"))
+            if (!strcmp(str_inst, "NOP"))                           /* A NOP is present     */
             {
                 retCode=CODE_NOP;
+                *pLen=ONE_BYTE;
+            }
+
+            if (!strcmp(str_inst, "HALT"))                          /* A HALT is present     */
+            {
+                retCode=CODE_HALT;
+                *pLen=ONE_BYTE;
+            }
+
+            if (!strcmp(str_inst, "RLCA"))                          /* A RLCA is present     */
+            {
+                retCode=CODE_RLCA;
                 *pLen=ONE_BYTE;
             }
             break;
 
         case 2:
-            if (!strcmp(str_inst, "INC"))                          /* A INC instruction is present         */
+            if (!strcmp(str_inst, "INC"))                           /* A INC instruction is present         */
             {
                 if (strlen(str_op1)==1)                             /* Check if it is a INC r instruction   */
                 {

@@ -1,3 +1,7 @@
+# 0.8.6
+Add and decode RLCA.
+New macros for easily set/reset flags (see Z80Machine.h)
+
 # 0.8.5
 Add and decode DEC r.
 
