@@ -67,7 +67,7 @@
 #define CODE_LDNNRR         (0b01000011)
 #define CODE_DECR           (0b00000101)
 #define CODE_DECRR          (0b00001011)
-#define CODE_RLCR           (0b00000111)
+#define CODE_RLCR           (0b00000000)
 
 #define CODE_DD_LDRIXD      (0b1101110101000110)
 #define CODE_FD_LDRIYD      (0b1111110101000110)    
@@ -113,7 +113,7 @@
 #define MASK_DECR           (0b11000111)
 #define MASK_DECRR          (0b11000111)
 #define MASK_RLCA           (0b11111111)
-#define MASK_RLCR           (0b00000111)
+#define MASK_RLCR           (0b11111000)
 
 #define REGA                (0b111)
 #define REGB                (0b000)

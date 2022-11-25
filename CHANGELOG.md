@@ -1,3 +1,6 @@
+# 0.8.7
+Add and decode RLC r.
+
 # 0.8.6
 Add and decode RLCA.
 New macros for easily set/reset flags (see Z80Machine.h)

@@ -1115,7 +1115,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a RLC r  */
-    if ((codeInHexa>>SIZE_1_BYTE & MASK_RLCR)==CODE_RLCR && len == CB_CODE_LENGTH(CODE_RLCR))
+    if (((codeInHexa & FIRST_LOWEST_BYTE) & MASK_RLCR)==CODE_RLCR && len == CB_CODE_LENGTH(CODE_RLCR))
     {
         instruction=CODE_CB_RLCR;
         
@@ -1891,35 +1891,18 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         case CODE_CB_RLCR:                                         /* This is a RLC r  */
             ret=bitToRegister(op1, sop1);
 
-            sprintf(mInstruction, "INC %s", sop1);
+            sprintf(mInstruction, "RLC %s", sop1);
 
             if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
             {
                 reg8_1=get8bitsRegisterAddress(op1);
-                reg8_1->setValue(reg8_1->getValue()+1);
+                newVal=(reg8_1->getValue()<<1) | BIT(reg8_1->getValue(), 7);
+                reg8_1->setValue(newVal);
 
                 /* Modify flags here    */
-                mRegisterPack.regF.setSignFlag(reg8_1->getSignFlag());
-                mRegisterPack.regF.setZeroFlag(reg8_1->isZero());
-                mRegisterPack.regF.setAddSubtractFlag(false);
-
-                if (reg8_1->getValue()==0x10)
-                {
-                    mRegisterPack.regF.setHalfCarryFlag(true);
-                }
-                else
-                {
-                    mRegisterPack.regF.setHalfCarryFlag(false);
-                }
-
-                if (reg8_1->getValue()==0x80)
-                {
-                    mRegisterPack.regF.setParityOverflowFlag(true);
-                }
-                else
-                {
-                    mRegisterPack.regF.setParityOverflowFlag(false);
-                }
+                H_RESET;
+                N_RESET;
+                C_IS(BIT(reg8_1->getValue(), 0));
 
                 if (pMode==INTP_EXECUTE)
                 {
@@ -2028,6 +2011,19 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
             break;
 
         case 2:
+            if (!strcmp(str_inst, "RLC"))                           /* A RLC instruction is present         */
+            {
+                if (strlen(str_op1)==1)                             /* Check if it is a RLC r instruction   */
+                {
+                    retCode=CODE_CB_RLCR;                           /* Prepare the RLC r                    */
+                    *pLen=TWO_BYTES;
+
+                    retCheck=clean_r(str_op1);
+                    
+                    PUSHBIT(retCode, registerToBit(str_op1), 0);    /* Add the register as bits             */
+                }
+            }
+
             if (!strcmp(str_inst, "INC"))                           /* A INC instruction is present         */
             {
                 if (strlen(str_op1)==1)                             /* Check if it is a INC r instruction   */
