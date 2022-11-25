@@ -1,3 +1,6 @@
+# 0.9.3
+Add and decode EX AF,AF' and EXX instructions.
+
 # 0.9.2
 Hidden registers integration in the exec mode.
 

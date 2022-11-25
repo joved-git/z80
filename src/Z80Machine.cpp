@@ -490,6 +490,22 @@ Register_16bits *Z80Machine::get16bitsRegisterAddress(uint8_t pReg)
         case REGIY:
             regReturn=&(mRegisterPack.regIY);
             break;
+
+        case REGAFP:
+            regReturn=&(mRegisterPack.regAFp);
+            break;
+
+        case REGBCP:
+            regReturn=&(mRegisterPack.regBCp);
+            break;
+        
+        case REGDEP:
+            regReturn=&(mRegisterPack.regDEp);
+            break;
+        
+        case REGHLP:
+            regReturn=&(mRegisterPack.regHLp);
+            break;
     }
 
     return(regReturn);
@@ -810,6 +826,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     Register_8bits *reg8_1=NULL;
     Register_8bits *reg8_2=NULL;
     Register_16bits *reg16_1=NULL;
+    Register_16bits *reg16_2=NULL;
     uint16_t address=0x0000;
     uint8_t newVal=0;
     uint8_t val=0;
@@ -1104,6 +1121,18 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     {
         instruction=CODE_CB_RLCHL;
 
+    }
+
+    /* This is a EX AF,AF'  */
+    if ((codeInHexa & MASK_EXAFAF)==CODE_EXAFAF && len==NATURAL_CODE_LENGTH(CODE_EXAFAF))
+    {
+        instruction=CODE_EXAFAF;
+    }
+
+    /* This is a EXX        */
+    if ((codeInHexa & MASK_EXX)==CODE_EXX && len==NATURAL_CODE_LENGTH(CODE_EXX))
+    {
+        instruction=CODE_EXX;
     }
 
 
@@ -1931,6 +1960,72 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+        case CODE_EXAFAF:                                         /* This is a EX AF,AF'  */
+            sprintf(mInstruction, "EX AF,AF'");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Switch AF and AF'    */
+                reg16_1=get16bitsRegisterAddress(REGAF);
+                reg16_2=get16bitsRegisterAddress(REGAFP);
+                
+                op16=reg16_1->getValue();
+                reg16_1->setValue(reg16_2->getValue());
+                reg16_2->setValue(op16);
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_EXX:                                          /* This is a EXX         */
+            sprintf(mInstruction, "EXX");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Switch BC and BC'    */
+                reg16_1=get16bitsRegisterAddress(REGBC);
+                reg16_2=get16bitsRegisterAddress(REGBCP);
+                
+                op16=reg16_1->getValue();
+                reg16_1->setValue(reg16_2->getValue());
+                reg16_2->setValue(op16);
+
+                /* Switch DE and DE'    */
+                reg16_1=get16bitsRegisterAddress(REGDE);
+                reg16_2=get16bitsRegisterAddress(REGDEP);
+                
+                op16=reg16_1->getValue();
+                reg16_1->setValue(reg16_2->getValue());
+                reg16_2->setValue(op16);
+
+                /* Switch HL and HL'    */
+                reg16_1=get16bitsRegisterAddress(REGHL);
+                reg16_2=get16bitsRegisterAddress(REGHLP);
+                
+                op16=reg16_1->getValue();
+                reg16_1->setValue(reg16_2->getValue());
+                reg16_2->setValue(op16);
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
     }
 
     /*************************************************************************************************************************/
@@ -2022,6 +2117,12 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
             if (!strcmp(str_inst, "RLCA"))                          /* A RLCA is present     */
             {
                 retCode=CODE_RLCA;
+                *pLen=ONE_BYTE;
+            }
+
+            if (!strcmp(str_inst, "EXX"))                          /* A EXX is present     */
+            {
+                retCode=CODE_EXX;
                 *pLen=ONE_BYTE;
             }
             break;
@@ -2283,6 +2384,13 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 }
 
             }
+
+            if (!strcmp(str_inst, "EX") && !strcmp(str_op1, "AF") && !strcmp(str_op2,"AF'"))                          /* A EXX is present     */
+            {
+                retCode=CODE_EXAFAF;
+                *pLen=ONE_BYTE;
+            }
+
             break;
             
     }
