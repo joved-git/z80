@@ -1091,7 +1091,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         }
     }
 
-    /* This is a (nn),rr    */
+    /* This is a LD (nn),rr    */
     if (((codeInHexa>>SIZE_2_BYTES) & MASK_LDNNRR)==CODE_LDNNRR && len==ED_CODE_LENGTH(CODE_LDNNRR))
     {
         instruction=CODE_ED_LDNNRR; 
@@ -1108,9 +1108,10 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a RLC r  */
-    if (((codeInHexa & FIRST_LOWEST_BYTE) & MASK_RLCR)==CODE_RLCR && len == CB_CODE_LENGTH(CODE_RLCR))
+    if (((codeInHexa & FIRST_TWO_LOWEST_BYTES) & MASK_RLCR)==CODE_CB_RLCR && len == CB_CODE_LENGTH(CODE_RLCR))
     {
         instruction=CODE_CB_RLCR;
+        printf("I see a RLC r\n");
         
         /* Extract the value of the register    */
         op1=EXTRACT(codeInHexa, 0,3);
@@ -1135,7 +1136,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         instruction=CODE_CB_RRCR;
         
         /* Extract the value of the register    */
-        op1=EXTRACT(codeInHexa, 0,3);
+        op1=EXTRACT(codeInHexa, 0, 3);
     }
 
     /* This is a EX AF,AF'  */
@@ -1150,7 +1151,13 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         instruction=CODE_EXX;
     }
 
-
+    /* This is a ADD A,r */
+    if ((codeInHexa & MASK_ADDAR)==CODE_ADDAR && len == NATURAL_CODE_LENGTH(CODE_ADDAR))
+    {
+        instruction=CODE_ADDAR;
+               
+        op1=EXTRACT(codeInHexa, 0, 3);
+    }
 
     /*************************************************************************************************************************/
 
@@ -1743,26 +1750,26 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 reg8_1->setValue(reg8_1->getValue()+1);
 
                 /* Modify flags here    */
-                mRegisterPack.regF.setSignFlag(reg8_1->getSignFlag());
-                mRegisterPack.regF.setZeroFlag(reg8_1->isZero());
-                mRegisterPack.regF.setAddSubtractFlag(false);
+                S_IS(SIGN(reg8_1->getSignFlag()));
+                Z_IS(ZERO(reg8_1->getSignFlag()));
+                N_RESET;
 
                 if (reg8_1->getValue()==0x10)
                 {
-                    mRegisterPack.regF.setHalfCarryFlag(true);
+                    H_SET;
                 }
                 else
                 {
-                    mRegisterPack.regF.setHalfCarryFlag(false);
+                    H_RESET;
                 }
 
                 if (reg8_1->getValue()==0x80)
                 {
-                    mRegisterPack.regF.setParityOverflowFlag(true);
+                    PV_SET;
                 }
                 else
                 {
-                    mRegisterPack.regF.setParityOverflowFlag(false);
+                    PV_RESET;
                 }
 
                 if (pMode==INTP_EXECUTE)
@@ -1788,9 +1795,9 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 reg8_1->setValue(reg8_1->getValue()-1);
 
                 /* Modify flags here    */
-                mRegisterPack.regF.setSignFlag(reg8_1->getSignFlag());
-                mRegisterPack.regF.setZeroFlag(reg8_1->isZero());
-                mRegisterPack.regF.setAddSubtractFlag(true);
+                S_IS(SIGN(reg8_1->getSignFlag()));
+                Z_IS(ZERO(reg8_1->getSignFlag()));
+                N_SET;
 
                 if (reg8_1->getValue()==0x0F)
                 {
@@ -2099,12 +2106,91 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+        case CODE_ADDAR:                                         /* This is a ADD A,r  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "ADD A,%s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg8_2=get8bitsRegisterAddress(op1);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfCarryOnAdd(reg8_1->getValue(), reg8_2->getValue()));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkCarryOnAdd(reg8_1->getValue(), reg8_2->getValue()));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), reg8_2->getValue()))
+
+                reg8_1->setValue(reg8_1->getValue() + reg8_2->getValue());
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
     }
 
     /*************************************************************************************************************************/
 
     
     return 0;
+}
+
+/* Check if it will be an half carry on an addition.    */
+bool Z80Machine::checkHalfCarryOnAdd(uint8_t pB1, uint8_t pB2)
+{
+    if ((pB1 & 0x0F) + (pB2 & 0x0F)>0x0F)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+/* Check if it will be a carry on an addition.          */
+bool Z80Machine::checkCarryOnAdd(uint8_t pB1, uint8_t pB2)
+{
+    if (pB1 + pB2 > 0xFF)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+/* Check if it will be an overflow on an addition.      */
+bool Z80Machine::checkOverflowOnAdd(uint8_t pB1, uint8_t pB2)
+{
+    if ((SIGN(pB1)==SIGN(pB2)) && (SIGN(pB1) != SIGN(pB1+pB2)))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 /* Used to cut the instruction  */
@@ -2483,6 +2569,21 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     *pLen=THREE_BYTES;
                 }
 
+            }
+
+            if (!strcmp(str_inst, "ADD"))                            /* A ADD instruction is present  */
+            {
+                /* Check if it is a LD, r,r' instruction    */
+                if (!strcmp(str_op1, "A") && strlen(str_op2)==1)       
+                {
+                    retCode=CODE_ADDAR;                              /* Prepare the LD r,r'  */
+                    *pLen=ONE_BYTE;
+
+                    retCheck=clean_r(str_op1);
+                    retCheck=clean_r(str_op2);
+                    
+                    PUSHBIT(retCode, registerToBit(str_op2), 0);    /* Add the second register as bits   */
+                }
             }
 
             if (!strcmp(str_inst, "EX") && !strcmp(str_op1, "AF") && !strcmp(str_op2,"AF'"))                          /* A EXX is present     */

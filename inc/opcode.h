@@ -11,10 +11,12 @@
 #define SIZE_3_BYTES            (24)
 #define SIZE_4_BYTES            (32)
 
-#define FIRST_LOWEST_BYTE       (0x000000FF)
-#define SECOND_LOWEST_BYTE      (0x0000FF00)
-#define THIRD_LOWEST_BYTE       (0x00FF0000)
-#define FOURTH_LOWEST_BYTE      (0xFF000000)
+#define FIRST_LOWEST_BYTE           (0x000000FF)
+#define SECOND_LOWEST_BYTE          (0x0000FF00)
+#define THIRD_LOWEST_BYTE           (0x00FF0000)
+#define FOURTH_LOWEST_BYTE          (0xFF000000)
+#define FIRST_TWO_LOWEST_BYTES      (0x0000FFFF)
+#define FIRST_THREE_LOWEST_BYTES    (0x00FFFFFF)
 
 #define EXTRACT(a, d, l)        (a>>d & ~(((uint8_t) 0b111111111)<<l)) 
 #define PUSHBIT(a, b, l)        (a=a|(b<<l))
@@ -76,6 +78,7 @@
 #define CODE_DECRR          (0b00001011)
 #define CODE_RLCR           (0b00000000)
 #define CODE_RRCR           (0b00001000)
+#define CODE_ADDAR          (0b10000000)
 
 #define CODE_CB_RLCHL       (0b1100101100000110)        // 0xCB06
 #define CODE_DD_LDIXNN      (0b1101110100100001)        // 0xDD21
@@ -123,12 +126,14 @@
 #define MASK_DECR           (0b11000111)
 #define MASK_DECRR          (0b11000111)
 #define MASK_RLCA           (0b11111111)
-#define MASK_RLCR           (0b11111000)
 #define MASK_RLCHL          (0b11111111)
 #define MASK_EXAFAF         (0b11111111)
 #define MASK_EXX            (0b11111111)
 #define MASK_RRCA           (0b11111111)
 #define MASK_RRCR           (0b11111000)
+#define MASK_ADDAR          (0b11111000)
+
+#define MASK_RLCR           (0b1111111111111000)
 
 #define REGA                (0b111)
 #define REGB                (0b000)

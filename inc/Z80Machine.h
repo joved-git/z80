@@ -192,6 +192,22 @@ private:
     /// @param  The operand as a string.
     /// @return OK or error code (bas operand).
     int8_t clean_ixn(char *);
+
+    /// @brief  Check if it will be an half carry on an addition.
+    /// @param  The 2 bytes to add.
+    /// @return true if it will be a half carry.
+    bool checkHalfCarryOnAdd(uint8_t, uint8_t);
+
+
+    /// @brief  Check if it will be a carry on an addition.
+    /// @param  The 2 bytes to add.
+    /// @return true if it will be a carry.
+    bool checkCarryOnAdd(uint8_t, uint8_t);
+
+    /// @brief  Check if it will be an overflow on an addition.
+    /// @param  The 2 bytes to add.
+    /// @return true if it will be an overflow.
+    bool checkOverflowOnAdd(uint8_t, uint8_t);
 };	
 
 #endif

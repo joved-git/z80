@@ -1,3 +1,6 @@
+# 0.9.5
+Add and decode ADD A,r instruction.
+
 # 0.9.4
 Add and decode RRCA and RRC r instructions.
 
