@@ -7,6 +7,8 @@
 
 #include "opcode.h"
 
+#define DEBUG_DISPLAY_INSTR_DATA            
+
 #define EOL                 	'\n'            /* The user has typed Enter                                 */                             
 #define MAX_LEN	            	256             /* Max length of an entry                                   */
 #define MAX_LEN_FOR_A_CODE  	8               /* 4 bytes is the max size of a machine code instruction    */

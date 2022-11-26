@@ -835,7 +835,9 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     uint8_t ret;
     char sop1[MAX_OP_LENGTH], sop2[MAX_OP_LENGTH];
 
-    //printf("code=<%s>\n", pCode);
+#ifdef DEBUG_DISPLAY_INSTR_DATA 
+    printf("code=<%08X> / len=%d\n", codeInHexa, len);
+#endif
     //codeInHexa=toValue(pCode, &len, &lenEff);                     /* Transform the instruction into real number  */
     
     sprintf(mInstruction, " not yet decoded ");
@@ -960,7 +962,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD r,(IX+d)    */
-    if ((codeInHexa>>SIZE_2_BYTES==ALT_CODE_DD) && ((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE & MASK_LDRIXD)==CODE_LDRIXD && len == THREE_BYTES)
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_LDRIXD)==CODE_DD_LDRIXD && len == DD_CODE_LENGTH(CODE_DD_LDRIXD))
     {
         instruction=CODE_DD_LDRIXD; 
         op1=EXTRACT(codeInHexa, 11, 3);
@@ -1003,8 +1005,10 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD IX,nn    */
-    if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_DD) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDIXNN)==CODE_LDIXNN && len == FOUR_BYTES)
+    //if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_DD) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDIXNN)==CODE_LDIXNN && len == FOUR_BYTES)
+    if (((codeInHexa>>SIZE_2_BYTES) & MASK_LDIXNN)==CODE_DD_LDIXNN && len == DD_CODE_LENGTH(CODE_DD_LDIXNN))
     {
+        printf("LD IX,nn");
         instruction=CODE_DD_LDIXNN; 
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
     }
@@ -1017,7 +1021,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD dd,(nn)    */
-    if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_ED) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDDDNN)==CODE_LDDDNN && len == FOUR_BYTES)
+    if (((codeInHexa>>SIZE_2_BYTES) & MASK_LDDDNN)==CODE_ED_LDDDNN && len == ED_CODE_LENGTH(CODE_ED_LDDDNN))
     {
         instruction=CODE_ED_LDDDNN; 
         op1=EXTRACT(codeInHexa, 20, 2) | 0b1000;
@@ -1034,7 +1038,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     /* xxxjoexxx revoir les len== ci-dessus ^ */
 
     /* This is a LD IX,(nn)    */
-    if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_DD) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDIXANN)==CODE_LDIXANN && len == DD_CODE_LENGTH(CODE_LDIXANN))
+    if (((codeInHexa>>SIZE_2_BYTES) & MASK_LDIXANN)==CODE_DD_LDIXANN && len == DD_CODE_LENGTH(CODE_DD_LDIXANN))
     {
         instruction=CODE_DD_LDIXANN; 
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
@@ -1092,7 +1096,9 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD (nn),rr    */
-    if (((codeInHexa>>SIZE_2_BYTES) & MASK_LDNNRR)==CODE_LDNNRR && len==ED_CODE_LENGTH(CODE_LDNNRR))
+    /* xxxjoexxx*/
+    
+    if (((codeInHexa>>SIZE_2_BYTES)  & MASK_LDNNRR)==CODE_ED_LDNNRR && len==ED_CODE_LENGTH(CODE_ED_LDNNRR))
     {
         instruction=CODE_ED_LDNNRR; 
 
@@ -1108,17 +1114,16 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a RLC r  */
-    if (((codeInHexa & FIRST_TWO_LOWEST_BYTES) & MASK_RLCR)==CODE_CB_RLCR && len == CB_CODE_LENGTH(CODE_RLCR))
+    if (((codeInHexa & FIRST_TWO_LOWEST_BYTES) & MASK_RLCR)==CODE_CB_RLCR && len == CB_CODE_LENGTH(CODE_CB_RLCR))
     {
         instruction=CODE_CB_RLCR;
-        printf("I see a RLC r\n");
         
         /* Extract the value of the register    */
         op1=EXTRACT(codeInHexa, 0,3);
     }
 
     /* This is a RLC (HL)  */
-    if (((codeInHexa & FIRST_LOWEST_BYTE) & MASK_RLCHL)==CODE_RLCHL && len == CB_CODE_LENGTH(CODE_RLCHL))
+    if (((codeInHexa & FIRST_TWO_LOWEST_BYTES) & MASK_RLCHL)==CODE_CB_RLCHL && len == CB_CODE_LENGTH(CODE_CB_RLCHL))
     {
         instruction=CODE_CB_RLCHL;
 
@@ -1131,7 +1136,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a RRC r  */
-    if (((codeInHexa & FIRST_LOWEST_BYTE) & MASK_RRCR)==CODE_RRCR && len == CB_CODE_LENGTH(CODE_RRCR))
+    if (((codeInHexa & FIRST_TWO_LOWEST_BYTES) & MASK_RRCR)==CODE_CB_RRCR && len == CB_CODE_LENGTH(CODE_CB_RRCR))
     {
         instruction=CODE_CB_RRCR;
         
@@ -1876,7 +1881,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             break;
 
         case CODE_ED_LDNNRR:                                        /* This is a LD (nn),rr    */   
-            ret=bitToRegister(op1, sop1);                           
+            ret=bitToRegister(op1, sop1);               
 
             sprintf(mInstruction, "LD (#%04X),%s", op16, sop1);
 
@@ -2431,7 +2436,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 }
 
                 /* Check if it is a LD rr,nn instruction    */
-                if (strlen(str_op1)==2 && ((strlen(str_op2)==2) || (strlen(str_op2)==3)|| (strlen(str_op2)==4)|| (strlen(str_op2)==5)))       
+                if (strlen(str_op1)==2 && ((strlen(str_op2)==2) || (strlen(str_op2)==3)|| (strlen(str_op2)==4)|| (strlen(str_op2)==5)) && !strchr(str_op2, '(') && !strchr(str_op2, ')'))       
                 {
                     /* Clean the n for Op2 and r for Op1 */
                     retCheck=clean_r(str_op1);
@@ -2553,7 +2558,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 /* Check if it is a LD (nn),rr instruction    */
                 if (strlen(str_op2)==2 && strchr(str_op1, '#') && strchr(str_op1, '(') && strchr(str_op1, ')') && strlen(str_op1)>=4 && strlen(str_op1)<=7 )    
                 {
-                    retCode=CODE_LDNNRR;
+                    retCode=CODE_ED_LDNNRR;
 
                     PUSHBIT(retCode, registerToBit(str_op2), 4);
                     /* Clean the r for Op1 */
@@ -2566,7 +2571,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
                     retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
 
-                    *pLen=THREE_BYTES;
+                    *pLen=FOUR_BYTES;
                 }
 
             }
