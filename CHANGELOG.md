@@ -1,3 +1,6 @@
+# 0.9.9
+Add and decode LD (nn),IX.
+
 # 0.9.8
 Decode LD IX,(nn), LD IY,(nn), LD rr,(nn).
 Correct the cutInstruction() method.

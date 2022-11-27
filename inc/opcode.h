@@ -79,6 +79,7 @@
 
 /* DD instruction codes     */
 #define CODE_DD_LDIXNN      (0b1101110100100001)        // 0xDD21   // LD IX,nn      
+#define CODE_DD_LDNNIX      (0b1101110100100010)        // 0xDD22   // LD (nn),IX
 #define CODE_DD_LDIXANN     (0b1101110100101010)        // 0xDD2A   // LD IX,(nn)
 #define CODE_DD_LDRIXD      (0b1101110101000110)                    // LD r,(IX+d)
 #define CODE_DD_LDIXDR      (0b1101110101110000)                    // LD (IX+d),r      
@@ -130,6 +131,7 @@
 #define MASK_LDRIYD         (0b1111111111000111)
 #define MASK_LDIXDR         (0b1111111111111000)
 #define MASK_LDIYDR         (0b1111111111111000)
+#define MASK_LDNNIX         (0b1111111111111111)
 
 /* 8-bit registers binary codes */
 #define REGA                (0b111)

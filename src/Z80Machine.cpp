@@ -1024,7 +1024,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     /* This is a LD IX,nn    */
     if (((codeInHexa>>SIZE_2_BYTES) & MASK_LDIXNN)==CODE_DD_LDIXNN && len == DD_CODE_LENGTH(CODE_DD_LDIXNN))
     {
-        printf("LD IX,nn");
         instruction=CODE_DD_LDIXNN; 
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
     }
@@ -1112,8 +1111,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD (nn),rr    */
-    /* xxxjoexxx*/
-    
     if (((codeInHexa>>SIZE_2_BYTES)  & MASK_LDNNRR)==CODE_ED_LDNNRR && len==ED_CODE_LENGTH(CODE_ED_LDNNRR))
     {
         instruction=CODE_ED_LDNNRR; 
@@ -1179,6 +1176,14 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                
         op1=EXTRACT(codeInHexa, 0, 3);
     }
+
+    /* This is a LD (nn),IX    */
+    if (((codeInHexa>>SIZE_2_BYTES) & MASK_LDNNIX)==CODE_DD_LDNNIX && len == DD_CODE_LENGTH(CODE_DD_LDNNIX))
+    {
+        instruction=CODE_DD_LDNNIX; 
+        op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
+    }
+
 
     /*************************************************************************************************************************/
 
@@ -1540,7 +1545,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 sprintf(mInstruction,"LD %s,(IY+#%02X)", sop1, op2);
             }
             
-            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                                /* Execute LD r,(IY+d)*/
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                      /* Execute LD r,(IY+d)*/
             {
                 reg8_1=get8bitsRegisterAddress(op1);
                 reg8_1->setValue(mMemory->get8bitsValue(address));
@@ -1746,6 +1751,26 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
             {
                 reg16_1=get16bitsRegisterAddress(REGHL);
+                mMemory->setAddress(op16, reg16_1->getValue());
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DD_LDNNIX:                                       /* This is a LD (nn),IX    */   
+            sprintf(mInstruction, "LD (#%04X),IX", op16);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg16_1=get16bitsRegisterAddress(REGIX);
                 mMemory->setAddress(op16, reg16_1->getValue());
 
                 if (pMode==INTP_EXECUTE)
@@ -2493,7 +2518,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 {
                     /* Clean the n for Op2 and r for Op1 */
                     //retCheck=clean_r(str_op1);
-                    retCheck=clean_inn(str_op2);                /* Clean the (nn) opearand ande remove '(' and ')'  */
+                    retCheck=clean_inn(str_op2);                /* Clean the (nn) operand ande remove '(' and ')'  */
                     word=toValue(str_op2+1, pLen, &lenEff);
 
                     if (!strcmp(str_op1, "IX"))
@@ -2621,25 +2646,38 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     *pLen=THREE_BYTES;
                 }
 
-                /* Check if it is a LD (nn),rr instruction    */
+                /* Check if it is a LD (nn),rr, LD (nn),IX or LD (nn),IY instruction    */
                 if (strlen(str_op2)==2 && strchr(str_op1, '#') && strchr(str_op1, '(') && strchr(str_op1, ')') && strlen(str_op1)>=4 && strlen(str_op1)<=7 )    
                 {
-                    retCode=CODE_ED_LDNNRR;
+                    if (!strcmp(str_op2, "IX"))
+                    {
+                        retCode=CODE_DD_LDNNIX;
+                    }
 
-                    PUSHBIT(retCode, registerToBit(str_op2), 4);
-                    /* Clean the r for Op1 */
-                    //retCheck=clean_r(str_op2);
+                    if (!strcmp(str_op2, "IY"))
+                    {
+                        //retCode=CODE_FD_LDNNIY;
+                    }
 
-                    str_ptr=str_op1+1;                      /* Remove '(' and ')'   */
-                    str_ptr[strlen(str_ptr)-1]='\0';
+                    if (!strcmp(str_op2, "BC") || !strcmp(str_op2, "DE") || !strcmp(str_op2, "HL") || !strcmp(str_op2, "SP"))
+                    {
+                        retCode=CODE_ED_LDNNRR;
+                        PUSHBIT(retCode, registerToBit(str_op2), 4);                /* Add the first register as bits   */
+                    }
+                   /********/ 
+                    //1 retCode=CODE_ED_LDNNRR;
 
-                    word=toValue(str_ptr+1, pLen, &lenEff);
+                    //1 PUSHBIT(retCode, registerToBit(str_op2), 4);
+                    //1 str_ptr=str_op1+1;                      /* Remove '(' and ')'   */
+                    //1 str_ptr[strlen(str_ptr)-1]='\0';
+
+                    retCheck=clean_inn(str_op1);                /* Clean the (nn) operand ande remove '(' and ')'  */
+                    word=toValue(str_op1+1, pLen, &lenEff);
 
                     retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
 
                     *pLen=FOUR_BYTES;
                 }
-
             }
 
             if (!strcmp(str_inst, "ADD"))                            /* A ADD instruction is present  */
