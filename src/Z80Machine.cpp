@@ -557,7 +557,7 @@ int8_t Z80Machine::clean_n(char *pOp)
 }
 
 
-/* Clean the n operand    */
+/* Clean the nn operand    */
 int8_t Z80Machine::clean_nn(char *pOp)
 {
     uint8_t retCode=ERR_NO_ERROR;
@@ -617,8 +617,25 @@ int8_t Z80Machine::clean_nn(char *pOp)
         }
     }
 
-    //printf("op_out=<%s>\n", pOp);
+    return retCode;
+}
 
+/* Clean the (nn) operand    */
+int8_t Z80Machine::clean_inn(char *pOp)
+{
+    uint8_t retCode=ERR_NO_ERROR;
+    char *posChar;
+    char op[MAX_OP_LENGTH*3];
+    uint8_t len=0;
+
+    //printf("op_in =<%s>\n", pOp);
+
+    strcpy(op,pOp+1);                  /* Remove '(' and ')'   */
+    op[strlen(op)-1]='\0';
+    
+    retCode=clean_nn(op);
+
+    strcpy(pOp, op);
     return retCode;
 }
 
@@ -2202,6 +2219,7 @@ int8_t Z80Machine::cutInstruction(char *pInstruction, char *pInst, char *pOp1, c
 {
     int8_t nbOfComp=0;
     int8_t retCheck=0;
+    uint8_t len=0;
     char *charPos;
 
     pOp1[0]='\0';
@@ -2228,9 +2246,12 @@ int8_t Z80Machine::cutInstruction(char *pInstruction, char *pInst, char *pOp1, c
             nbOfComp=2;
         }
         else
-        {
-            pOp1[charPos-pOp1]='\0';
+        {                                       /* Extract op1 and op2      */
+            len=strlen(charPos);
             strcpy(pOp2, charPos+1);
+            pOp2[len-1]='\0';
+            pOp1[charPos-pOp1]='\0';
+            
             nbOfComp=3;
         }
     }
@@ -2259,8 +2280,10 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
     nbOfComponents=cutInstruction(pInstruction, str_inst, str_op1, str_op2);
 
-    //printf(">>> %s %s,%s\n", str_inst, str_op1, str_op2);
-    //printf("comp=%d\n", nbOfComponents);
+#ifdef DEBUG_DISPLAY_CUTI_DATA
+    printf(">>> <%s> <%s>,<%s>\n", str_inst, str_op1, str_op2);
+    printf("comp=%d\n", nbOfComponents);
+#endif
 
     switch (nbOfComponents)
     {
@@ -2460,6 +2483,36 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_LDRRNN;
                         PUSHBIT(retCode, registerToBit(str_op1), 4);                /* Add the first register as bits   */
                         *pLen=THREE_BYTES;
+                    }
+
+                    retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);     /* Prepare the LD rr,nn   */              
+                }
+
+                /* Check if it is a LD rr,(nn), LD IX,(nn) or a LD IY,(nn) instruction    */
+                if (strlen(str_op1)==2 && (strlen(str_op2)>=4 && strlen(str_op2)<=7) && strchr(str_op2, '(') && strchr(str_op2, ')') && strchr(str_op2, '#'))
+                {
+                    /* Clean the n for Op2 and r for Op1 */
+                    //retCheck=clean_r(str_op1);
+                    retCheck=clean_inn(str_op2);                /* Clean the (nn) opearand ande remove '(' and ')'  */
+                    word=toValue(str_op2+1, pLen, &lenEff);
+
+                    if (!strcmp(str_op1, "IX"))
+                    {
+                        retCode=CODE_DD_LDIXANN;
+                        *pLen=FOUR_BYTES;
+                    }
+
+                    if (!strcmp(str_op1, "IY"))
+                    {
+                        retCode=CODE_FD_LDIYANN;
+                        *pLen=FOUR_BYTES;
+                    }
+
+                    if (!strcmp(str_op1, "BC") || !strcmp(str_op1, "DE") || !strcmp(str_op1, "HL") || !strcmp(str_op1, "SP"))
+                    {
+                        retCode=CODE_ED_LDDDNN;
+                        PUSHBIT(retCode, registerToBit(str_op1), 4);                /* Add the first register as bits   */
+                        *pLen=FOUR_BYTES;
                     }
 
                     retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);     /* Prepare the LD rr,nn   */              

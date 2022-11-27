@@ -1,3 +1,7 @@
+# 0.9.8
+Decode LD IX,(nn), LD IY,(nn), LD rr,(nn).
+Correct the cutInstruction() method.
+
 # 0.9.7
 Handle the ticket #1. In phase between add and decode instruction.
 Decode LD IX,nn and LD IY,nn.
