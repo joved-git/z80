@@ -1,3 +1,7 @@
+# 0.9.7
+Handle the ticket #1. In phase between add and decode instruction.
+Decode LD IX,nn and LD IY,nn.
+
 # 0.9.6
 Correct the bad decoding (header problem).
 Close the ticket #5.

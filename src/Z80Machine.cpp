@@ -1487,7 +1487,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
-        case CODE_LDRRNN:                                    /* This is a LD rr,nn    */   
+        case CODE_LDRRNN:                                    /* This is a LD rr,nn          */   
             ret=bitToRegister(op1, sop1);
             sprintf(mInstruction, "LD %s,#%04X", sop1, op16);
             
@@ -2434,21 +2434,35 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     *pLen=TWO_BYTES;
                 }
 
-                /* Check if it is a LD rr,nn instruction    */
+                /* Check if it is a LD rr,nn, LD IX,nn or a LD IY,nn instruction    */
                 if (strlen(str_op1)==2 && ((strlen(str_op2)==2) || (strlen(str_op2)==3)|| (strlen(str_op2)==4)|| (strlen(str_op2)==5)) && !strchr(str_op2, '(') && !strchr(str_op2, ')'))       
                 {
                     /* Clean the n for Op2 and r for Op1 */
-                    retCheck=clean_r(str_op1);
+                    //retCheck=clean_r(str_op1);
                     retCheck=clean_nn(str_op2);
 
                     word=toValue(str_op2+1, pLen, &lenEff);
 
-                    retCode=CODE_LDRRNN;
-                    
-                    PUSHBIT(retCode, registerToBit(str_op1), 4);                /* Add the first register as bits   */
+                    if (!strcmp(str_op1, "IX"))
+                    {
+                        retCode=CODE_DD_LDIXNN;
+                        *pLen=FOUR_BYTES;
+                    }
 
-                    retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);     /* Prepare the LD rr,nn   */
-                    *pLen=THREE_BYTES;
+                    if (!strcmp(str_op1, "IY"))
+                    {
+                        retCode=CODE_FD_LDIYNN;
+                        *pLen=FOUR_BYTES;
+                    }
+
+                    if (!strcmp(str_op1, "BC") || !strcmp(str_op1, "DE") || !strcmp(str_op1, "HL") || !strcmp(str_op1, "SP"))
+                    {
+                        retCode=CODE_LDRRNN;
+                        PUSHBIT(retCode, registerToBit(str_op1), 4);                /* Add the first register as bits   */
+                        *pLen=THREE_BYTES;
+                    }
+
+                    retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);     /* Prepare the LD rr,nn   */              
                 }
 
                 /* Check if it is a LD r,(IX+n) instruction    */
