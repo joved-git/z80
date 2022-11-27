@@ -1,5 +1,6 @@
 # 0.9.6
 Correct the bad decoding (header problem).
+Close the ticket #5.
 
 # 0.9.5
 Add and decode ADD A,r instruction.

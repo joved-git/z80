@@ -7,7 +7,7 @@
 
 #include "opcode.h"
 
-#define DEBUG_DISPLAY_INSTR_DATA            
+//#define DEBUG_DISPLAY_INSTR_DATA            
 
 #define EOL                 	'\n'            /* The user has typed Enter                                 */                             
 #define MAX_LEN	            	256             /* Max length of an entry                                   */

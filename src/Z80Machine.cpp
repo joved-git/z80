@@ -981,7 +981,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD r,(IY+d)    */
-    if ((codeInHexa>>SIZE_2_BYTES==ALT_CODE_FD) && ((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE & MASK_LDRIYD)==CODE_LDRIYD && len == THREE_BYTES)
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_LDRIYD)==CODE_FD_LDRIYD && len == FD_CODE_LENGTH(CODE_FD_LDRIYD))
     {
         instruction=CODE_FD_LDRIYD; 
         op1=EXTRACT(codeInHexa, 11, 3);
@@ -989,7 +989,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD (IX+d),r    */
-    if ((codeInHexa>>SIZE_2_BYTES==ALT_CODE_DD) && ((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE & MASK_LDIXDR)==CODE_LDIXDR && len == THREE_BYTES)
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_LDIXDR)==CODE_DD_LDIXDR && len == DD_CODE_LENGTH(CODE_DD_LDIXDR))
     {
         instruction=CODE_DD_LDIXDR;
         op1=codeInHexa & FIRST_LOWEST_BYTE;
@@ -997,7 +997,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD (IY+d),r    */
-    if ((codeInHexa>>SIZE_2_BYTES==ALT_CODE_FD) && ((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE & MASK_LDIYDR)==CODE_LDIYDR && len == THREE_BYTES)
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_LDIYDR)==CODE_FD_LDIYDR && len == DD_CODE_LENGTH(CODE_FD_LDIYDR))
     {
         instruction=CODE_FD_LDIYDR; 
         op1=codeInHexa & FIRST_LOWEST_BYTE;
@@ -1005,7 +1005,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD IX,nn    */
-    //if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_DD) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDIXNN)==CODE_LDIXNN && len == FOUR_BYTES)
     if (((codeInHexa>>SIZE_2_BYTES) & MASK_LDIXNN)==CODE_DD_LDIXNN && len == DD_CODE_LENGTH(CODE_DD_LDIXNN))
     {
         printf("LD IX,nn");
@@ -1014,7 +1013,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD IY,nn    */
-    if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_FD) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDIYNN)==CODE_LDIYNN && len == FOUR_BYTES)
+    if (((codeInHexa>>SIZE_2_BYTES) & MASK_LDIYNN)==CODE_FD_LDIYNN && len == FD_CODE_LENGTH(CODE_FD_LDIYNN))
     {
         instruction=CODE_FD_LDIYNN; 
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
@@ -1045,7 +1044,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD IY,(nn)    */
-    if ((codeInHexa>>SIZE_3_BYTES==ALT_CODE_FD) && ((codeInHexa & THIRD_LOWEST_BYTE)>>SIZE_2_BYTES & MASK_LDIYANN)==CODE_LDIYANN && len == FD_CODE_LENGTH(CODE_LDIYANN))
+    if (((codeInHexa>>SIZE_2_BYTES) & MASK_LDIYANN)==CODE_FD_LDIYANN && len == DD_CODE_LENGTH(CODE_FD_LDIYANN))
     {
         instruction=CODE_FD_LDIYANN; 
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
