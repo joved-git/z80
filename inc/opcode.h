@@ -88,7 +88,7 @@
 #define CODE_FD_LDIYNN      (0b1111110100100001)        // 0xFD21   // LD IY,nn 
 #define CODE_FD_LDIYANN     (0b1111110100101010)        // 0xFD2A   // LD YX,(nn)
 #define CODE_FD_LDRIYD      (0b1111110101000110)        //          // LD r,(IY+d)
-#define CODE_FD_LDIYDR      (0b1111111101110000)                    // LD (IY+d),r
+#define CODE_FD_LDIYDR      (0b1111110101110000)                    // LD (IY+d),r
 
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)

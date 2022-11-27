@@ -1,4 +1,7 @@
-# 0.9.9
+# 0.9.10
+Decode LD (IX+d),r and LD (IY+d),r.
+
+#  0.9.9
 Add and decode LD (nn),IX.
 
 # 0.9.8

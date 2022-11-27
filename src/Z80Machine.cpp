@@ -2262,8 +2262,12 @@ int8_t Z80Machine::cutInstruction(char *pInstruction, char *pInst, char *pOp1, c
     }
     else 
     {
+        //uint8_t pos=charPos-pInst;
+        //printf("pos=%d\n", pos);
         strcpy(pOp1, charPos+1);
         pInst[charPos-pInst]='\0';
+        //pInst[pos]='\0';
+        //printf("inst=%s\n", pInst);
         
         /* Is there a ',' into the instruction ?  */
         if (!(charPos=strchr(pOp1, ',')))
@@ -2543,7 +2547,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);     /* Prepare the LD rr,nn   */              
                 }
 
-                /* Check if it is a LD r,(IX+n) instruction    */
+                /* Check if it is a LD r,(IX+d) instruction    */
                 if (strlen(str_op1)==1 && ((strlen(str_op2)==7) || (strlen(str_op2)==8)) && (strstr(str_op2, "IX") || strstr(str_op2, "IY")))       
                 {
                     /* Clean the (IX+d) or (IY+d) for Op2 and r for Op1 */
@@ -2563,6 +2567,32 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     PUSHBIT(retCode, registerToBit(str_op1), 3);                /* Add the first register as bits   */
 
                     retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);     /* Prepare the LD r,(IX+d) or the LD r,(IY+d)  */
+
+                    *pLen=THREE_BYTES;
+                }
+
+                /* Check if it is a LD (IX+d),r or LD (IY+d),r instruction   */
+                if (strlen(str_op2)==1 && ((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")))       
+                {
+                    /* Clean the  r for Op2 */
+                    retCheck=clean_r(str_op2);
+
+                    if (strstr(str_op1, "IX"))
+                    {
+                        retCode=CODE_DD_LDIXDR;
+                    }
+
+                    if (strstr(str_op1, "IY"))
+                    {
+                        retCode=CODE_FD_LDIYDR;
+                    }
+
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op1);
+
+                    PUSHBIT(retCode, registerToBit(str_op2), 0);                /* Add the register as bits   */
+                    retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);     /* Prepare the LD r,(IX+d) or the LD r,(IY+d)  */
 
                     *pLen=THREE_BYTES;
                 }
