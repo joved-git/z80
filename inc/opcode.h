@@ -67,6 +67,7 @@
 #define CODE_DECR           (0b00000101)
 #define CODE_DECRR          (0b00001011)
 #define CODE_ADDAR          (0b10000000)
+#define CODE_ADCAR          (0b10001000)
 
 /* CB instructions codes    */
 #define CODE_CB_RLCR        (0b1100101100000000)                    // RLC r
@@ -117,6 +118,7 @@
 #define MASK_EXX            (0b11111111)
 #define MASK_RRCA           (0b11111111)
 #define MASK_ADDAR          (0b11111000)
+#define MASK_ADCAR          (0b11111000)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)

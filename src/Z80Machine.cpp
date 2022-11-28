@@ -848,6 +848,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     uint8_t newVal=0;
     uint8_t val=0;
     char strInstr[MAX_OP_LENGTH*3];
+    uint8_t carry=0;
 
     uint8_t ret;
     char sop1[MAX_OP_LENGTH], sop2[MAX_OP_LENGTH];
@@ -1173,6 +1174,14 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if ((codeInHexa & MASK_ADDAR)==CODE_ADDAR && len == NATURAL_CODE_LENGTH(CODE_ADDAR))
     {
         instruction=CODE_ADDAR;
+               
+        op1=EXTRACT(codeInHexa, 0, 3);
+    }
+
+        /* This is a ADC A,r */
+    if ((codeInHexa & MASK_ADCAR)==CODE_ADCAR && len == NATURAL_CODE_LENGTH(CODE_ADCAR))
+    {
+        instruction=CODE_ADCAR;
                
         op1=EXTRACT(codeInHexa, 0, 3);
     }
@@ -2216,6 +2225,46 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+        case CODE_ADCAR:                                         /* This is a ADC A,r  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "ADC A,%s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg8_2=get8bitsRegisterAddress(op1);
+                carry=mRegisterPack.regF.getCarryFlag()?1:0;
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfCarryOnAdd(reg8_1->getValue(), reg8_2->getValue()+carry));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkCarryOnAdd(reg8_1->getValue(), reg8_2->getValue()+carry));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), reg8_2->getValue()+carry))
+
+                reg8_1->setValue(reg8_1->getValue() + reg8_2->getValue()+carry);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
     }
 
     /*************************************************************************************************************************/
@@ -2744,14 +2793,40 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCode=(retCode<<SIZE_1_BYTE)+toValue(str_op2+1, pLen, &lenEff);
                     *pLen=TWO_BYTES;
                 }
+
+                /* Check if it is a LD (HL),r instruction    */
+                if (!strcmp(str_op1,"(HL)") && (strlen(str_op2)==1))       
+                {
+                    retCode=CODE_LDHLR;
+                    /* Clean the n for Op2 */
+                    retCheck=clean_r(str_op2);
+
+                    PUSHBIT(retCode, registerToBit(str_op2), 0);
+                    *pLen=ONE_BYTE;
+                }
             }
 
             if (!strcmp(str_inst, "ADD"))                            /* A ADD instruction is present  */
             {
-                /* Check if it is a LD, r,r' instruction    */
+                /* Check if it is a ADD A,r' instruction    */
                 if (!strcmp(str_op1, "A") && strlen(str_op2)==1)       
                 {
                     retCode=CODE_ADDAR;                              /* Prepare the LD r,r'  */
+                    *pLen=ONE_BYTE;
+
+                    retCheck=clean_r(str_op1);
+                    retCheck=clean_r(str_op2);
+                    
+                    PUSHBIT(retCode, registerToBit(str_op2), 0);    /* Add the second register as bits   */
+                }
+            }
+
+            if (!strcmp(str_inst, "ADC"))                            /* A ADC instruction is present  */
+            {
+                /* Check if it is a ADC A,r' instruction    */
+                if (!strcmp(str_op1, "A") && strlen(str_op2)==1)       
+                {
+                    retCode=CODE_ADCAR;                              /* Prepare the LD r,r'  */
                     *pLen=ONE_BYTE;
 
                     retCheck=clean_r(str_op1);

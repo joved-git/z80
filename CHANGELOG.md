@@ -1,3 +1,7 @@
+# 0.9.13
+Decode LD (HL),r.
+Add and decode ADC A,r.
+
 # 0.9.12
 Decode LD (HL),n.
 Modify decoding of LD a,n. Add presence of '#' in the second operand.
