@@ -2497,7 +2497,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 }
 
                 /* Check if it is a LD r,n instruction    */
-                if (strlen(str_op1)==1 && ((strlen(str_op2)==2) || (strlen(str_op2)==3)))       
+                if (strlen(str_op1)==1 && ((strlen(str_op2)==2) || (strlen(str_op2)==3)) && strchr(str_op2, '#'))       
                 {
                     /* Clean the n for Op2 and r for Op1 */
                     retCheck=clean_r(str_op1);
@@ -2732,6 +2732,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
 
                     *pLen=FOUR_BYTES;
+                }
+
+                /* Check if it is a LD (HL),n instruction    */
+                if (!strcmp(str_op1,"(HL)") && ((strlen(str_op2)==2) || (strlen(str_op2)==3)) && strchr(str_op2, '#'))       
+                {
+                    retCode=CODE_LDHLN;
+                    /* Clean the n for Op2 */
+                    retCheck=clean_n(str_op2);
+
+                    retCode=(retCode<<SIZE_1_BYTE)+toValue(str_op2+1, pLen, &lenEff);
+                    *pLen=TWO_BYTES;
                 }
             }
 

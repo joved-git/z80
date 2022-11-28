@@ -1,3 +1,7 @@
+# 0.9.12
+Decode LD (HL),n.
+Modify decoding of LD a,n. Add presence of '#' in the second operand.
+
 # 0.9.11
 Decode LD (nn),IY.
 Correct INC r/DEC r: flags zero and sign not correctly set.
