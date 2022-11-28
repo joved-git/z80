@@ -1184,7 +1184,12 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
     }
 
-
+    /* This is a LD (nn),IY    */
+    if (((codeInHexa>>SIZE_2_BYTES) & MASK_LDNNIY)==CODE_FD_LDNNIY && len == DD_CODE_LENGTH(CODE_FD_LDNNIY))
+    {
+        instruction=CODE_FD_LDNNIY; 
+        op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
+    }
     /*************************************************************************************************************************/
 
     switch (instruction)
@@ -1785,6 +1790,26 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
+        case CODE_FD_LDNNIY:                                       /* This is a LD (nn),IY    */   
+            sprintf(mInstruction, "LD (#%04X),IY", op16);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg16_1=get16bitsRegisterAddress(REGIY);
+                mMemory->setAddress(op16, reg16_1->getValue());
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
         case CODE_INCR:                                         /* This is a INC R  */
             ret=bitToRegister(op1, sop1);
 
@@ -1796,8 +1821,8 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 reg8_1->setValue(reg8_1->getValue()+1);
 
                 /* Modify flags here    */
-                S_IS(SIGN(reg8_1->getSignFlag()));
-                Z_IS(ZERO(reg8_1->getSignFlag()));
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
                 N_RESET;
 
                 if (reg8_1->getValue()==0x10)
@@ -1841,8 +1866,8 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 reg8_1->setValue(reg8_1->getValue()-1);
 
                 /* Modify flags here    */
-                S_IS(SIGN(reg8_1->getSignFlag()));
-                Z_IS(ZERO(reg8_1->getSignFlag()));
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
                 N_SET;
 
                 if (reg8_1->getValue()==0x0F)
@@ -2686,7 +2711,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
                     if (!strcmp(str_op2, "IY"))
                     {
-                        //retCode=CODE_FD_LDNNIY;
+                        retCode=CODE_FD_LDNNIY;
                     }
 
                     if (!strcmp(str_op2, "BC") || !strcmp(str_op2, "DE") || !strcmp(str_op2, "HL") || !strcmp(str_op2, "SP"))

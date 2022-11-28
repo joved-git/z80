@@ -1,3 +1,7 @@
+# 0.9.11
+Decode LD (nn),IY.
+Correct INC r/DEC r: flags zero and sign not correctly set.
+
 # 0.9.10
 Decode LD (IX+d),r and LD (IY+d),r.
 

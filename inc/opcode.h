@@ -86,6 +86,7 @@
 
 /* FD instruction codes     */
 #define CODE_FD_LDIYNN      (0b1111110100100001)        // 0xFD21   // LD IY,nn 
+#define CODE_FD_LDNNIY      (0b1111110100100010)        // 0xFD22   // LD (nn),IY
 #define CODE_FD_LDIYANN     (0b1111110100101010)        // 0xFD2A   // LD YX,(nn)
 #define CODE_FD_LDRIYD      (0b1111110101000110)        //          // LD r,(IY+d)
 #define CODE_FD_LDIYDR      (0b1111110101110000)                    // LD (IY+d),r
@@ -132,6 +133,7 @@
 #define MASK_LDIXDR         (0b1111111111111000)
 #define MASK_LDIYDR         (0b1111111111111000)
 #define MASK_LDNNIX         (0b1111111111111111)
+#define MASK_LDNNIY         (0b1111111111111111)
 
 /* 8-bit registers binary codes */
 #define REGA                (0b111)
