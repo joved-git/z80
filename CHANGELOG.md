@@ -1,3 +1,9 @@
+# 0.9.14
+Add and decode ADD A,(HL) and ADC A,(HL).
+Add and decode ADD HL,rr.
+Add and decode ADD IX,pp.
+Add and decode ADD IY,qq.
+
 # 0.9.13
 Decode LD (HL),r.
 Add and decode ADC A,r.

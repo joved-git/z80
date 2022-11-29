@@ -41,6 +41,8 @@
 #define STRING_REGIAF           "(AF)"
 #define STRING_REGSP            "SP"
 #define STRING_REGISP           "(SP)"
+#define STRING_REGIX            "IX"
+#define STRING_REGIY            "IY"
 
 #define CMD_HELP                'h'
 #define CMD_MACHINECODE         'c'

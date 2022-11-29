@@ -54,6 +54,8 @@
 #define CODE_LDNNA          (0b00110010)                // 0x32
 #define CODE_LDHLN          (0b00110110)                // 0x36
 #define CODE_LDANN          (0b00111010)                // 0x3A
+#define CODE_ADDAHL         (0b10000110)                // 0x86     // ADD A,(HL)
+#define CODE_ADCAHL         (0b10001110)                // 0x8E     // ADC A,(HL)
 #define CODE_EXX            (0b11011001)                // 0xD9
 #define CODE_LDRR           (0b01000000)                
 #define CODE_LDRHL          (0b01000110)
@@ -68,6 +70,7 @@
 #define CODE_DECRR          (0b00001011)
 #define CODE_ADDAR          (0b10000000)
 #define CODE_ADCAR          (0b10001000)
+#define CODE_ADDHLRR        (0b00001001)
 
 /* CB instructions codes    */
 #define CODE_CB_RLCR        (0b1100101100000000)                    // RLC r
@@ -83,7 +86,8 @@
 #define CODE_DD_LDNNIX      (0b1101110100100010)        // 0xDD22   // LD (nn),IX
 #define CODE_DD_LDIXANN     (0b1101110100101010)        // 0xDD2A   // LD IX,(nn)
 #define CODE_DD_LDRIXD      (0b1101110101000110)                    // LD r,(IX+d)
-#define CODE_DD_LDIXDR      (0b1101110101110000)                    // LD (IX+d),r      
+#define CODE_DD_LDIXDR      (0b1101110101110000)                    // LD (IX+d),r     
+#define CODE_DD_ADDIXPP     (0b1101110100001001)                    // LD IX,pp
 
 /* FD instruction codes     */
 #define CODE_FD_LDIYNN      (0b1111110100100001)        // 0xFD21   // LD IY,nn 
@@ -91,6 +95,7 @@
 #define CODE_FD_LDIYANN     (0b1111110100101010)        // 0xFD2A   // LD YX,(nn)
 #define CODE_FD_LDRIYD      (0b1111110101000110)        //          // LD r,(IY+d)
 #define CODE_FD_LDIYDR      (0b1111110101110000)                    // LD (IY+d),r
+#define CODE_FD_ADDIYQQ     (0b1111110100001001)                    // LD IY,qq
 
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
@@ -119,6 +124,9 @@
 #define MASK_RRCA           (0b11111111)
 #define MASK_ADDAR          (0b11111000)
 #define MASK_ADCAR          (0b11111000)
+#define MASK_ADDAHL         (0b11111111)
+#define MASK_ADCAHL         (0b11111111)
+#define MASK_ADDHLRR        (0b11001111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)
@@ -136,6 +144,8 @@
 #define MASK_LDIYDR         (0b1111111111111000)
 #define MASK_LDNNIX         (0b1111111111111111)
 #define MASK_LDNNIY         (0b1111111111111111)
+#define MASK_ADDIXPP        (0b1111111111001111)
+#define MASK_ADDIYQQ        (0b1111111111001111)
 
 /* 8-bit registers binary codes */
 #define REGA                (0b111)

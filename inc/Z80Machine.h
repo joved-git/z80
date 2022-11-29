@@ -198,16 +198,27 @@ private:
     /// @return OK or error code (bas operand).
     int8_t clean_ixn(char *);
 
-    /// @brief  Check if it will be an half carry on an addition.
+    /// @brief  Check if it will be an half carry on an 8-bit addition.
     /// @param  The 2 bytes to add.
     /// @return true if it will be a half carry.
-    bool checkHalfCarryOnAdd(uint8_t, uint8_t);
+    bool checkHalfCarryOnAdd8(uint8_t, uint8_t);
 
 
-    /// @brief  Check if it will be a carry on an addition.
+    /// @brief  Check if it will be a carry on an 8-bit addition.
     /// @param  The 2 bytes to add.
     /// @return true if it will be a carry.
-    bool checkCarryOnAdd(uint8_t, uint8_t);
+    bool checkCarryOnAdd8(uint8_t, uint8_t);
+
+        /// @brief  Check if it will be an half carry on an 16-bit addition.
+    /// @param  The 2 bytes to add.
+    /// @return true if it will be a half carry.
+    bool checkHalfCarryOnAdd16(uint16_t, uint16_t);
+
+
+    /// @brief  Check if it will be a carry on an 16-bit addition.
+    /// @param  The 2 bytes to add.
+    /// @return true if it will be a carry.
+    bool checkCarryOnAdd16(uint16_t, uint16_t);
 
     /// @brief  Check if it will be an overflow on an addition.
     /// @param  The 2 bytes to add.

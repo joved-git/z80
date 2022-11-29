@@ -141,7 +141,7 @@ uint8_t Z80Machine::registerToBit(char *pRegister)
             retBit=(uint8_t) (REGDE) & 0b00000011;
         }
 
-        if (!strcmp(pRegister, "HL"))
+        if (!strcmp(pRegister, "HL") || !strcmp(pRegister, "IX") || !strcmp(pRegister, "IY"))
         {
             retBit=(uint8_t) (REGHL) & 0b00000011;
         }
@@ -225,6 +225,14 @@ uint8_t Z80Machine::bitToRegister(uint8_t pBit, char *pRetChar)
 
         case REGISP:
             strcpy(pRetChar, STRING_REGISP);
+            break;
+
+        case REGIX:
+            strcpy(pRetChar, STRING_REGIX);
+            break;
+
+        case REGIY:
+            strcpy(pRetChar, STRING_REGIY);
             break;
 
         default:
@@ -1178,12 +1186,24 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=EXTRACT(codeInHexa, 0, 3);
     }
 
+    /* This is a ADD A,(HL) */
+    if ((codeInHexa & MASK_ADDAHL)==CODE_ADDAHL && len == NATURAL_CODE_LENGTH(CODE_ADDAHL))
+    {
+        instruction=CODE_ADDAHL;
+    }
+
         /* This is a ADC A,r */
     if ((codeInHexa & MASK_ADCAR)==CODE_ADCAR && len == NATURAL_CODE_LENGTH(CODE_ADCAR))
     {
         instruction=CODE_ADCAR;
                
         op1=EXTRACT(codeInHexa, 0, 3);
+    }
+
+    /* This is a ADC A,(HL) */
+    if ((codeInHexa & MASK_ADCAHL)==CODE_ADCAHL && len == NATURAL_CODE_LENGTH(CODE_ADCAHL))
+    {
+        instruction=CODE_ADCAHL;
     }
 
     /* This is a LD (nn),IX    */
@@ -1198,6 +1218,30 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     {
         instruction=CODE_FD_LDNNIY; 
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
+    }
+
+    /* This is a ADD HL,rr      */
+    if ((codeInHexa & MASK_ADDHLRR)==CODE_ADDHLRR && len == NATURAL_CODE_LENGTH(CODE_ADDHLRR))
+    {
+        instruction=CODE_ADDHLRR;
+               
+        op1=EXTRACT(codeInHexa, 4, 2) | 0b1000;
+    }
+
+    /* This is a ADD IX,pp      */
+    if ((codeInHexa & MASK_ADDIXPP)==CODE_DD_ADDIXPP && len == DD_CODE_LENGTH(CODE_DD_ADDIXPP))
+    {
+        instruction=CODE_DD_ADDIXPP;
+               
+        op2=EXTRACT(codeInHexa, 4, 2) | 0b1000;
+    }
+
+    /* This is a ADD IY,qq      */
+    if ((codeInHexa & MASK_ADDIYQQ)==CODE_FD_ADDIYQQ && len == FD_CODE_LENGTH(CODE_FD_ADDIYQQ))
+    {
+        instruction=CODE_FD_ADDIYQQ;
+               
+        op2=EXTRACT(codeInHexa, 4, 2) | 0b1000;
     }
     /*************************************************************************************************************************/
 
@@ -2199,15 +2243,53 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
 
                 /* Modify flags here before operation   */
                 /* Is there an Half Carry ?             */
-                H_IS(checkHalfCarryOnAdd(reg8_1->getValue(), reg8_2->getValue()));
+                H_IS(checkHalfCarryOnAdd8(reg8_1->getValue(), reg8_2->getValue()));
                 
                 /* Is there a Carry ?                   */
-                C_IS(checkCarryOnAdd(reg8_1->getValue(), reg8_2->getValue()));
+                C_IS(checkCarryOnAdd8(reg8_1->getValue(), reg8_2->getValue()));
                 
                 /* IS there an overflow ?               */
                 PV_IS(checkOverflowOnAdd(reg8_1->getValue(), reg8_2->getValue()))
 
                 reg8_1->setValue(reg8_1->getValue() + reg8_2->getValue());
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ADDAHL:                                         /* This is a ADD A,HL  */
+            sprintf(mInstruction, "ADD A,(HL)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg16_1=get16bitsRegisterAddress(REGHL);
+                val=mMemory->get8bitsValue(reg16_1->getValue());
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfCarryOnAdd8(reg8_1->getValue(), val));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkCarryOnAdd8(reg8_1->getValue(), val));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), val))
+
+                reg8_1->setValue(reg8_1->getValue() + val);
 
                 /* Modify flags here after operation    */
                 S_IS(SIGN(reg8_1->getValue()));
@@ -2239,10 +2321,10 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
 
                 /* Modify flags here before operation   */
                 /* Is there an Half Carry ?             */
-                H_IS(checkHalfCarryOnAdd(reg8_1->getValue(), reg8_2->getValue()+carry));
+                H_IS(checkHalfCarryOnAdd8(reg8_1->getValue(), reg8_2->getValue()+carry));
                 
                 /* Is there a Carry ?                   */
-                C_IS(checkCarryOnAdd(reg8_1->getValue(), reg8_2->getValue()+carry));
+                C_IS(checkCarryOnAdd8(reg8_1->getValue(), reg8_2->getValue()+carry));
                 
                 /* IS there an overflow ?               */
                 PV_IS(checkOverflowOnAdd(reg8_1->getValue(), reg8_2->getValue()+carry))
@@ -2265,6 +2347,161 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+        case CODE_ADCAHL:                                         /* This is a ADC A,(HL)  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "ADC A,(HL)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg16_1=get16bitsRegisterAddress(REGHL);
+                val=mMemory->get8bitsValue(reg16_1->getValue());
+                carry=mRegisterPack.regF.getCarryFlag()?1:0;
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfCarryOnAdd8(reg8_1->getValue(), val + carry));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkCarryOnAdd8(reg8_1->getValue(), val + carry));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), val + carry))
+
+                reg8_1->setValue(reg8_1->getValue() + val + carry);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ADDHLRR:                                         /* This is a ADD HL,rr  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "ADD HL,%s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg16_1=get16bitsRegisterAddress(REGHL);
+                reg16_2=get16bitsRegisterAddress(op1);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfCarryOnAdd16(reg16_1->getValue(), reg16_2->getValue()));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkCarryOnAdd16(reg16_1->getValue(), reg16_2->getValue()));
+
+                reg16_1->setValue(reg16_1->getValue() + reg16_2->getValue());
+
+                /* Modify flags here after operation    */
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DD_ADDIXPP:                                         /* This is a ADD IX,pp  */
+            /* Change HL to IX  */
+            if (op2==REGHL)
+            {
+                op2=REGIX;
+            }
+
+            ret=bitToRegister(op2, sop2);
+
+            sprintf(mInstruction, "ADD IX,%s", sop2);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg16_1=get16bitsRegisterAddress(REGIX);
+                reg16_2=get16bitsRegisterAddress(op2);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfCarryOnAdd16(reg16_1->getValue(), reg16_2->getValue()));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkCarryOnAdd16(reg16_1->getValue(), reg16_2->getValue()));
+
+                reg16_1->setValue(reg16_1->getValue() + reg16_2->getValue());
+
+                /* Modify flags here after operation    */
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FD_ADDIYQQ:                                         /* This is a ADD IY,qq  */
+            /* Change HL to IX  */
+            if (op2==REGHL)
+            {
+                op2=REGIY;
+            }
+
+            ret=bitToRegister(op2, sop2);
+
+            sprintf(mInstruction, "ADD IY,%s", sop2);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg16_1=get16bitsRegisterAddress(REGIY);
+                reg16_2=get16bitsRegisterAddress(op2);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfCarryOnAdd16(reg16_1->getValue(), reg16_2->getValue()));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkCarryOnAdd16(reg16_1->getValue(), reg16_2->getValue()));
+
+                reg16_1->setValue(reg16_1->getValue() + reg16_2->getValue());
+
+                /* Modify flags here after operation    */
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
     }
 
     /*************************************************************************************************************************/
@@ -2273,8 +2510,8 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     return 0;
 }
 
-/* Check if it will be an half carry on an addition.    */
-bool Z80Machine::checkHalfCarryOnAdd(uint8_t pB1, uint8_t pB2)
+/* Check if it will be an half carry on an 8-bit addition.    */
+bool Z80Machine::checkHalfCarryOnAdd8(uint8_t pB1, uint8_t pB2)
 {
     if ((pB1 & 0x0F) + (pB2 & 0x0F)>0x0F)
     {
@@ -2287,10 +2524,37 @@ bool Z80Machine::checkHalfCarryOnAdd(uint8_t pB1, uint8_t pB2)
 }
 
 
-/* Check if it will be a carry on an addition.          */
-bool Z80Machine::checkCarryOnAdd(uint8_t pB1, uint8_t pB2)
+/* Check if it will be a carry on an 8-bit addition.          */
+bool Z80Machine::checkCarryOnAdd8(uint8_t pB1, uint8_t pB2)
 {
     if (pB1 + pB2 > 0xFF)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+/* Check if it will be an half carry on an 16-bit addition.    */
+bool Z80Machine::checkHalfCarryOnAdd16(uint16_t pB1, uint16_t pB2)
+{
+    if ((pB1 & 0x0FFF) + (pB2 & 0x0FFF)>0x0FFF)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+/* Check if it will be a carry on an 16-bit addition.          */
+bool Z80Machine::checkCarryOnAdd16(uint16_t pB1, uint16_t pB2)
+{
+    if (pB1 + pB2 > 0xFFFF)
     {
         return true;
     }
@@ -2808,16 +3072,49 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
             if (!strcmp(str_inst, "ADD"))                            /* A ADD instruction is present  */
             {
-                /* Check if it is a ADD A,r' instruction    */
+                /* Check if it is a ADD A,r instruction    */
                 if (!strcmp(str_op1, "A") && strlen(str_op2)==1)       
                 {
-                    retCode=CODE_ADDAR;                              /* Prepare the LD r,r'  */
+                    retCode=CODE_ADDAR;                              /* Prepare the ADD r,r'  */
                     *pLen=ONE_BYTE;
 
                     retCheck=clean_r(str_op1);
                     retCheck=clean_r(str_op2);
                     
                     PUSHBIT(retCode, registerToBit(str_op2), 0);    /* Add the second register as bits   */
+                }
+
+                /* Check if it is a ADD A,(HL) instruction    */
+                if (!strcmp(str_op1, "A") && !strcmp(str_op2, "(HL)"))       
+                {
+                    retCode=CODE_ADDAHL;                              /* Prepare the ADD A,(HL)  */
+                    *pLen=ONE_BYTE;
+                }
+
+                /* Check if it is a ADD HL,rr instruction    */
+                if (!strcmp(str_op1, "HL") && strlen(str_op2)==2 && !strchr(str_op2, '#'))       
+                {
+                    retCode=CODE_ADDHLRR;                                       /* Prepare the ADD HL,rr  */
+                    PUSHBIT(retCode, registerToBit(str_op2), 4);                /* Add the first register as bits   */
+                    *pLen=ONE_BYTE;
+                }
+
+                /* Check if it is a ADD IX,pp instruction    */
+                if (!strcmp(str_op1, "IX") && strlen(str_op2)==2 && !strchr(str_op2, '#'))       
+                {
+                    retCode=CODE_DD_ADDIXPP;     
+                                                                                /* Prepare the ADD IY,qq            */
+                    PUSHBIT(retCode, registerToBit(str_op2), 4);                /* Add the first register as bits   */
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a ADD IY,qq instruction    */
+                if (!strcmp(str_op1, "IY") && strlen(str_op2)==2 && !strchr(str_op2, '#'))       
+                {
+                    retCode=CODE_FD_ADDIYQQ;     
+                                                                                /* Prepare the ADD IY,qq            */
+                    PUSHBIT(retCode, registerToBit(str_op2), 4);                /* Add the first register as bits   */
+                    *pLen=TWO_BYTES;
                 }
             }
 
@@ -2826,13 +3123,20 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 /* Check if it is a ADC A,r' instruction    */
                 if (!strcmp(str_op1, "A") && strlen(str_op2)==1)       
                 {
-                    retCode=CODE_ADCAR;                              /* Prepare the LD r,r'  */
+                    retCode=CODE_ADCAR;                              /* Prepare the ADC A,r  */
                     *pLen=ONE_BYTE;
 
                     retCheck=clean_r(str_op1);
                     retCheck=clean_r(str_op2);
                     
                     PUSHBIT(retCode, registerToBit(str_op2), 0);    /* Add the second register as bits   */
+                }
+
+                /* Check if it is a ADC A,(HL) instruction    */
+                if (!strcmp(str_op1, "A") && !strcmp(str_op2, "(HL)"))       
+                {
+                    retCode=CODE_ADCAHL;                              /* Prepare the ADC r,(HL)  */
+                    *pLen=ONE_BYTE;
                 }
             }
 
