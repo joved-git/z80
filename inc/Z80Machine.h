@@ -116,6 +116,16 @@ private:
     /// @return The result of the command (see opcode.h).
     uint8_t bitToRegister(uint8_t, char *);
 
+    /// @brief  Convert the uint8_t value into the name of the condition.
+    /// @param  The converted condition in a char * (ready to be printed). 
+    /// @return The result of the command (see opcode.h).
+    uint8_t bitToCondition(uint8_t, char *);
+
+    /// @brief  Tell if the given condition is true or not.
+    /// @param  The condition (in binary) that must be checked. 
+    /// @return The result of the command. True if the given condition is true.
+    bool isConditionTrue(uint8_t);
+
     /// @brief  Convert the name of the register into its binary value.
     /// @param  The register as a char *. 
     /// @return The binary code for the register (see opcode.h).

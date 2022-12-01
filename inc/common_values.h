@@ -7,8 +7,9 @@
 
 #include "opcode.h"
 
-//#define DEBUG_DISPLAY_INSTR_DATA    
-//#define DEBUG_DISPLAY_CUTI_DATA          
+#define DEBUG_DISPLAY_INSTR_DATA              /* Dsiplay data that will be executer   */
+#define DEBUG_DISPLAY_CUTI_DATA               /* Display data after cutting it        */ 
+#define DEBUG_DISPLAY_FINDCODE_DATA           /* Display data after decoding it       */
 
 #define EOL                 	'\n'            /* The user has typed Enter                                 */                             
 #define MAX_LEN	            	256             /* Max length of an entry                                   */
@@ -61,6 +62,7 @@
 #define ERR_NO_ERROR            (0)
 #define ERR_NO_REGISTER         (-1)
 #define ERR_BAD_OPERAND         (-2)
+#define ERR_NO_CONDITION        (-3)
 
 #define FLAG_SIGN               (0b10000000)
 #define FLAG_ZERO               (0b01000000)
@@ -68,6 +70,16 @@
 #define FLAG_PARITY_OVERFLOW    (0b00000100)
 #define FLAG_ADD_SUBTRACT       (0b00000010)
 #define FLAG_CARRY              (0b00000001)
+
+#define STRING_COND_UNDEFINED   "?"
+#define STRING_CONDNZ           "NZ"
+#define STRING_CONDZ            "Z"
+#define STRING_CONDNC           "NC"
+#define STRING_CONDC            "C"
+#define STRING_CONDPO           "PO"
+#define STRING_CONDPE           "PE"
+#define STRING_CONDP            "P"
+#define STRING_CONDM            "M"
 
 enum typeOfEntry
     {

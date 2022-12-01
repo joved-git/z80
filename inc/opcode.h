@@ -41,22 +41,24 @@
 
 /* Natural instruction codes    */
 #define CODE_NO_INSTRUCTION (0b11001011)                // 0xDE
-#define CODE_NOP            (0b00000000)                // 0X00
-#define CODE_LDBCA          (0b00000010)                // 0x02
-#define CODE_RLCA           (0b00000111)                // 0x07
-#define CODE_EXAFAF         (0b00001000)                // 0x08
-#define CODE_LDABC          (0b00001010)                // 0x0A
-#define CODE_RRCA           (0b00001111)                // 0x0F
-#define CODE_LDDEA          (0b00010010)                // 0x12
-#define CODE_LDADE          (0b00011010)                // 0x1A
-#define CODE_LDNNHL         (0b00100010)                // 0x22
-#define CODE_LDHLNN         (0b00101010)                // 0x2A
-#define CODE_LDNNA          (0b00110010)                // 0x32
-#define CODE_LDHLN          (0b00110110)                // 0x36
-#define CODE_LDANN          (0b00111010)                // 0x3A
+#define CODE_NOP            (0b00000000)                // 0X00     // NOP
+#define CODE_LDBCA          (0b00000010)                // 0x02     // LD (BC),A
+#define CODE_RLCA           (0b00000111)                // 0x07     // RLCA
+#define CODE_EXAFAF         (0b00001000)                // 0x08     // EX AF,AF'
+#define CODE_LDABC          (0b00001010)                // 0x0A     // LD A,(BC)
+#define CODE_RRCA           (0b00001111)                // 0x0F     // RRCA
+#define CODE_LDDEA          (0b00010010)                // 0x12     // LD (DE),A
+#define CODE_LDADE          (0b00011010)                // 0x1A     // LD A,(DE)
+#define CODE_LDNNHL         (0b00100010)                // 0x22     // LD (nn),HL
+#define CODE_LDHLNN         (0b00101010)                // 0x2A     // LD HL,(nn)
+#define CODE_LDNNA          (0b00110010)                // 0x32     // LD (nn),A
+#define CODE_LDHLN          (0b00110110)                // 0x36     // LD (HL),n
+#define CODE_LDANN          (0b00111010)                // 0x3A     // LD A,(nn)
 #define CODE_ADDAHL         (0b10000110)                // 0x86     // ADD A,(HL)
 #define CODE_ADCAHL         (0b10001110)                // 0x8E     // ADC A,(HL)
-#define CODE_EXX            (0b11011001)                // 0xD9
+#define CODE_CALLCCNN       (0b11000100)                            // CALL cc,nn
+#define CODE_CALLNN         (0b11001101)                // 0xCD     // CALL nn
+#define CODE_EXX            (0b11011001)                // 0xD9     // EXX
 #define CODE_LDRR           (0b01000000)                
 #define CODE_LDRHL          (0b01000110)
 #define CODE_LDHLR          (0b01110000)
@@ -76,7 +78,8 @@
 #define CODE_CB_RLCR        (0b1100101100000000)                    // RLC r
 #define CODE_CB_RRCR        (0b1100101100001000)                    // RRC r
 #define CODE_CB_RLCHL       (0b1100101100000110)        // 0xCB06   // RLC (HL) 
-#define CODE_CB_BITBR       (0b1100101101000000)                    // BIT n,r
+#define CODE_CB_BITBR       (0b1100101101000000)                    // BIT b,r
+#define CODE_CB_BITBHL      (0b1100101101000110)                    // BIT b,(HL)
 
 /* ED instruction codes     */
 #define CODE_ED_LDNNRR      (0b1110110101000011)        //          // LD (nn),rr
@@ -128,6 +131,8 @@
 #define MASK_ADDAHL         (0b11111111)
 #define MASK_ADCAHL         (0b11111111)
 #define MASK_ADDHLRR        (0b11001111)
+#define MASK_CALLNN         (0b11111111)
+#define MASK_CALLCCNN       (0b11000111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)
@@ -148,6 +153,7 @@
 #define MASK_ADDIXPP        (0b1111111111001111)
 #define MASK_ADDIYQQ        (0b1111111111001111)
 #define MASK_BITBR          (0b1111111111000000)
+#define MASK_BITBHL         (0b1111111111000111)
 
 /* 8-bit registers binary codes */
 #define REGA                (0b111)
@@ -166,6 +172,7 @@
 #define REGAF               (0b1100)
 #define REGIX               (0b1101)
 #define REGIY               (0b1110)
+#define REGPC               (0b1111)
 
 #define REGBCP              (0b10000)
 #define REGDEP              (0b10001)
@@ -192,6 +199,16 @@
 #define BINARY_5            (0b101)
 #define BINARY_6            (0b110)
 #define BINARY_7            (0b111)
+
+/* 3-bit conditions binary codes */
+#define CONDNZ              (0b000)
+#define CONDZ               (0b001)
+#define CONDNC              (0b010)
+#define CONDC               (0b011)
+#define CONDPO              (0b100)
+#define CONDPE              (0b101)
+#define CONDP               (0b110)
+#define CONDM               (0b111)
 
 /****************************/
 /* 0x0A   - LD A,(BC)       */

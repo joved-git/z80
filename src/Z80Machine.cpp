@@ -251,6 +251,97 @@ uint8_t Z80Machine::bitToRegister(uint8_t pBit, char *pRetChar)
 }
 
 
+/* Convert the uint8_t value into the name of the condition */
+uint8_t Z80Machine::bitToCondition(uint8_t pBit, char *pRetChar)
+{
+    uint8_t ret=0;
+
+    switch (pBit)
+    {
+        case CONDNZ:
+            strcpy(pRetChar, STRING_CONDNZ);
+            break;
+
+        case CONDZ:
+            strcpy(pRetChar, STRING_CONDZ);
+            break;
+
+        case CONDNC:
+            strcpy(pRetChar, STRING_CONDNC);
+            break;
+
+        case CONDC:
+            strcpy(pRetChar, STRING_CONDC);
+            break;
+
+        case CONDPO:
+            strcpy(pRetChar, STRING_CONDPO);
+            break;
+
+        case CONDPE:
+            strcpy(pRetChar, STRING_CONDPE);
+            break;
+
+        case CONDP:
+            strcpy(pRetChar, STRING_CONDP);
+            break;
+
+        case CONDM:
+            strcpy(pRetChar, STRING_CONDM);
+            break;
+        default:
+            strcpy(pRetChar, STRING_COND_UNDEFINED);
+            ret=ERR_NO_CONDITION;
+    }
+
+    return ret;
+}
+
+
+/* Tell if the given condition is true or not   */
+bool Z80Machine::isConditionTrue(uint8_t pCond)
+{
+    bool retCond=false;
+
+    switch (pCond)
+    {
+        case CONDNZ:
+            retCond=!mRegisterPack.regF.getZeroFlag();
+            break;
+
+        case CONDZ:
+            retCond=mRegisterPack.regF.getZeroFlag();
+            break;
+
+        case CONDNC:
+            retCond=!mRegisterPack.regF.getCarryFlag();
+            break;
+
+        case CONDC:
+            retCond=mRegisterPack.regF.getCarryFlag();
+            break;
+
+        case CONDPO:
+            retCond=!mRegisterPack.regF.getParityOverflowFlag();
+            break;
+
+        case CONDPE:
+            retCond=mRegisterPack.regF.getParityOverflowFlag();
+            break;
+
+        case CONDP:
+            retCond=!mRegisterPack.regF.getSignFlag();
+            break;
+
+        case CONDM:
+            retCond=mRegisterPack.regF.getSignFlag();
+            break;
+    }
+
+    return retCond;
+}
+
+
 /* Change lowercase to uppercase into the entry */
 void Z80Machine::toUpper(char *pEntry)
 {
@@ -496,6 +587,10 @@ Register_16bits *Z80Machine::get16bitsRegisterAddress(uint8_t pReg)
 
         case REGSP:
             regReturn=&(mRegisterPack.regSP);
+            break;
+
+        case REGPC:
+            regReturn=&(mRegisterPack.regPC);
             break;
 
         case REGIX:
@@ -1082,7 +1177,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
     }
 
-    /* This is a (nn),HL    */
+    /* This is a LD (nn),HL    */
     if ((codeInHexa>>SIZE_2_BYTES & MASK_LDNNHL)==CODE_LDNNHL && len == NATURAL_CODE_LENGTH(CODE_LDNNHL))
     {
         instruction=CODE_LDNNHL; 
@@ -1259,6 +1354,32 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=EXTRACT(codeInHexa, 3, 3);          /* This is b    */
         op2=EXTRACT(codeInHexa, 0, 3);          /* This is r    */
     }
+
+    /* This is a BIT b,(HL) */
+    if ((codeInHexa & MASK_BITBHL)==CODE_CB_BITBHL && len == CB_CODE_LENGTH(CODE_CB_BITBHL))
+    {
+        instruction=CODE_CB_BITBHL;
+               
+        op1=EXTRACT(codeInHexa, 3, 3);          /* This is b    */
+    }
+
+    /* This is a CALL nn */
+    if ((codeInHexa>>SIZE_2_BYTES & MASK_CALLNN)==CODE_CALLNN && len == NATURAL_CODE_LENGTH(CODE_CALLNN))
+    {
+        instruction=CODE_CALLNN;
+             
+        op16=EXTRACT(codeInHexa, 0, 16);
+    }
+
+    /* This is a CALL cc,nn */
+    if ((codeInHexa>>SIZE_2_BYTES & MASK_CALLCCNN)==CODE_CALLCCNN && len == NATURAL_CODE_LENGTH(CODE_CALLCCNN))
+    {
+        instruction=CODE_CALLCCNN;
+        op1=EXTRACT(codeInHexa, 19, 3);
+        op16=EXTRACT(codeInHexa, 0, 16);
+    }
+
+    // bottom 1
     /*************************************************************************************************************************/
 
     switch (instruction)
@@ -2544,7 +2665,83 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+        case CODE_CB_BITBHL:                                         /* This is a BIT b,(HL)  */
+            sprintf(mInstruction, "BIT %d,(HL)", op1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg16_1=get16bitsRegisterAddress(REGHL);
+                newVal=mMemory->get8bitsValue(reg16_1->getValue());
+
+                /* Modify flags here    */
+                Z_IS(BIT(newVal, op1)==1?0:1);
+                H_SET;
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+       case CODE_CALLNN:                                       /* This is a CALL nn                    */
+            sprintf(mInstruction, "CALL #%04X", op16);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                mRegisterPack.regSP.setValue(mRegisterPack.regSP.getValue()-2);             /* The SP is changing       */
+                reg16_1=get16bitsRegisterAddress(REGPC);
+                mMemory->setAddress(mRegisterPack.regSP.getValue(), reg16_1->getValue());   /* Save the PC              */
+                reg16_1->setValue(op16);                                                     /* The PC is changing       */
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+       case CODE_CALLCCNN:                                       /* This is a CALL cc,nn                    */
+           ret=bitToCondition(op1, sop1);
+           sprintf(mInstruction, "CALL %s,#%04X", sop1, op16);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                if (isConditionTrue(op1))
+                {
+                    mRegisterPack.regSP.setValue(mRegisterPack.regSP.getValue()-2);             /* The SP is changing       */
+                    reg16_1=get16bitsRegisterAddress(REGPC);
+                    mMemory->setAddress(mRegisterPack.regSP.getValue(), reg16_1->getValue());   /* Save the PC              */
+                    reg16_1->setValue(op16);                                                    /* The PC is changing       */
+                }                             
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
     }
+
+    
 
     /* bottom 2*/
     /*************************************************************************************************************************/
@@ -2831,7 +3028,23 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         strcpy(str_op1, "SP");
                     }
 
-                    PUSHBIT(retCode, registerToBit(str_op1), 4);    /* Add the register as bits             */
+                    PUSHBIT(retCode, registerToBit(str_op1), 4);        /* Add the register as bits             */
+                }
+            }
+
+            if (!strcmp(str_inst, "CALL"))                              /* A CALL instruction is present         */
+            {
+                /* Check if it is a CALL nn instruction   */
+                if ((strlen(str_op1)>=4 && strlen(str_op1)<=7) && strchr(str_op1, '#'))
+                {
+                    retCode=CODE_CALLNN;                                /* Prepare the CALL nn                    */
+                    
+                    retCheck=clean_nn(str_op1);                         /* Clean the (nn) operand   */
+                    word=toValue(str_op1+1, pLen, &lenEff);
+
+                    retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);     /* Add the nn into the code */      
+
+                    *pLen=THREE_BYTES;
                 }
             }
             break;    
@@ -3195,12 +3408,41 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 if (strlen(str_op1)==1 && strlen(str_op2)==1)       
                 {
                     retCode=CODE_CB_BITBR;                              /* Prepare the BIT n,r  */
-                    uint8_t bb=retCode&FIRST_LOWEST_BYTE;
                     //printf("rc=%s reg=%d bit=%d\n", byteToBinary(bb), registerToBit(str_op2), numberToBit(str_op1));
                     PUSHBIT(retCode, registerToBit(str_op2), 0);        /* Add the register as bits     */
                     PUSHBIT(retCode, numberToBit(str_op1), 3);          /* Add the bit number as bits   */
 
                     *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a BIT n(HL) instruction    */
+                if (strlen(str_op1)==1 && !strcmp(str_op2, "(HL)"))       
+                {
+                    // To do
+                    retCode=CODE_CB_BITBHL;                               /* Prepare the BIT n,(HL) */
+                    //PUSHBIT(retCode, registerToBit(str_op2), 0);        /* Add the register as bits     */
+                    PUSHBIT(retCode, numberToBit(str_op1), 3);            /* Add the bit number as bits   */
+                    //
+                    *pLen=TWO_BYTES;
+                }
+            }
+
+            if (!strcmp(str_inst, "CALL"))                              /* A CALL instruction is present         */
+            {
+                /* Check if it is a CALL cc,nn instruction   */
+                if ((strlen(str_op1)==1 || strlen(str_op1)==2) && (strlen(str_op2)>=4 && strlen(str_op2)<=7) && strchr(str_op2, '#'))
+                {
+                    retCode=CODE_CALLCCNN;                              /* Prepare the CALL cc,nn                    */
+                    
+                    // To be done.
+                    // retCheck=clean_cond(str_op1);
+                    retCheck=clean_nn(str_op2);                         /* Clean the (nn) operand   */
+                    word=toValue(str_op2+1, pLen, &lenEff);
+
+                    PUSHBIT(retCode, op1, 19);
+                    retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);     /* Add the nn into the code */      
+
+                    *pLen=THREE_BYTES;
                 }
             }
 
@@ -3208,9 +3450,10 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
             
     }
 
-    //printf("rc=<%04X>\n", retCode);
-    //printf("ln=%d\n", *pLen);
-
+#ifdef DEBUG_DISPLAY_FINDCODE_DATA
+    printf("rc=<%04X>\n", retCode);
+    printf("ln=%d\n", *pLen);
+#endif
     return retCode;
 
 
