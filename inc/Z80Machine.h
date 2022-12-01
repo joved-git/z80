@@ -131,6 +131,11 @@ private:
     /// @return The binary code for the register (see opcode.h).
     uint8_t registerToBit(char *);
 
+    /// @brief  Convert the name of the condition into its binary value.
+    /// @param  The condition as a char *. 
+    /// @return The binary code for the register (see opcode.h).
+    uint8_t conditionToBit(char *);
+
     /// @brief  Convert the 3-bit number (string) into its binary value (from 0 to 7).
     /// @param  The register as a char *. 
     /// @return The binary code for the register (see opcode.h).

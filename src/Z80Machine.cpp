@@ -156,6 +156,57 @@ uint8_t Z80Machine::registerToBit(char *pRegister)
 
 }
 
+
+/* Condition to bit converter  */
+uint8_t Z80Machine::conditionToBit(char *pCondition)
+{
+    uint8_t retBit=0;
+    
+    if (!strcmp(pCondition, STRING_CONDNZ))
+    {
+        retBit=CONDNZ;
+    }
+
+    if (!strcmp(pCondition, STRING_CONDZ))
+    {
+        retBit=CONDZ;
+    }
+
+    if (!strcmp(pCondition, STRING_CONDNC))
+    {
+        retBit=CONDNC;
+    }
+
+    if (!strcmp(pCondition, STRING_CONDC))
+    {
+        retBit=CONDC;
+    }
+    
+    if (!strcmp(pCondition, STRING_CONDPO))
+    {
+        retBit=CONDPO;
+    }
+
+    if (!strcmp(pCondition, STRING_CONDPE))
+    {
+        retBit=CONDPE;
+    }
+
+    if (!strcmp(pCondition, STRING_CONDP))
+    {
+        retBit=CONDP;
+    }
+
+    if (!strcmp(pCondition, STRING_CONDM))
+    {
+        retBit=CONDM;
+    }
+    
+    return retBit;
+
+}
+
+
 /* Convert the 3-bit number (string) into its binary value (from 0 to 7)    */
 uint8_t Z80Machine::numberToBit(char *pNumber)
 {
@@ -3439,9 +3490,8 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCheck=clean_nn(str_op2);                         /* Clean the (nn) operand   */
                     word=toValue(str_op2+1, pLen, &lenEff);
 
-                    PUSHBIT(retCode, op1, 19);
+                    PUSHBIT(retCode, conditionToBit(str_op1), 3);
                     retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);     /* Add the nn into the code */      
-
                     *pLen=THREE_BYTES;
                 }
             }
