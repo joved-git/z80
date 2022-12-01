@@ -34,7 +34,10 @@ public:
     bool getAddSubtractFlag();
     bool getCarryFlag();
 
-    
+    /* Get and set bits     */
+    uint8_t getBit(uint8_t);
+    void setBit(uint8_t);
+    void resetBit(uint8_t);
 
 private:
     uint8_t mValue;

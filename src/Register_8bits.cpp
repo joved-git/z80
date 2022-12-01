@@ -95,3 +95,20 @@ bool Register_8bits::isZero()
         return false;
     }
 }
+
+/* Get and set bits     */
+uint8_t Register_8bits::getBit(uint8_t pBit)
+{
+    return EXTRACT(mValue, pBit, 1);
+}
+
+void Register_8bits::setBit(uint8_t pBit)
+{
+    PUSHBIT(mValue, 1, pBit);
+}
+    
+    
+void Register_8bits::resetBit(uint8_t pBit)
+{
+    PUSHBIT(mValue, 0, pBit);
+}

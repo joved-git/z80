@@ -121,6 +121,11 @@ private:
     /// @return The binary code for the register (see opcode.h).
     uint8_t registerToBit(char *);
 
+    /// @brief  Convert the 3-bit number (string) into its binary value (from 0 to 7).
+    /// @param  The register as a char *. 
+    /// @return The binary code for the register (see opcode.h).
+    uint8_t numberToBit(char *);
+
     /// @brief  Interpret the entry (hexa), tranlate it in machine code then display or execute it.
     /// @param  The entry code to be interpreted.
     /// @param  The length of the entry code (2 = 1 byte = ONE_BYTE).

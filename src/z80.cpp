@@ -27,9 +27,6 @@ int main(int argc, char *argv[])
     std::cout << "Type h if you want some help..." << std::endl << std::endl;
     std::cout << "z> ";
 
-	/* Set the register pack to the command	*/
-	//newCommand.setRegisterPack(&regPack);
-
 	/* Do what you do or quit !	*/
     while (!exit)
     {

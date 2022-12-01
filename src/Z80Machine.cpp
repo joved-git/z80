@@ -156,6 +156,13 @@ uint8_t Z80Machine::registerToBit(char *pRegister)
 
 }
 
+/* Convert the 3-bit number (string) into its binary value (from 0 to 7)    */
+uint8_t Z80Machine::numberToBit(char *pNumber)
+{
+    uint8_t retBit=pNumber[0]-'0';
+    return retBit;
+}
+
 /* Bit to register converter     */
 uint8_t Z80Machine::bitToRegister(uint8_t pBit, char *pRetChar)
 {
@@ -1242,6 +1249,15 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         instruction=CODE_FD_ADDIYQQ;
                
         op2=EXTRACT(codeInHexa, 4, 2) | 0b1000;
+    }
+
+    /* This is a BIT b,r */
+    if ((codeInHexa & MASK_BITBR)==CODE_CB_BITBR && len == CB_CODE_LENGTH(CODE_CB_BITBR))
+    {
+        instruction=CODE_CB_BITBR;
+               
+        op1=EXTRACT(codeInHexa, 3, 3);          /* This is b    */
+        op2=EXTRACT(codeInHexa, 0, 3);          /* This is r    */
     }
     /*************************************************************************************************************************/
 
@@ -2502,8 +2518,35 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+        case CODE_CB_BITBR:                                         /* This is a BIT b,r  */
+            ret=bitToRegister(op2, sop2);
+
+            sprintf(mInstruction, "BIT %d,%s", op1, sop2);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(op2);
+
+                /* Modify flags here    */
+                Z_IS(reg8_1->getBit(op1)==1?0:1);
+                H_SET;
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
     }
 
+    /* bottom 2*/
     /*************************************************************************************************************************/
 
     
@@ -3144,6 +3187,21 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
             {
                 retCode=CODE_EXAFAF;
                 *pLen=ONE_BYTE;
+            }
+
+            if (!strcmp(str_inst, "BIT"))                               /* A BIT instruction is present  */
+            {
+                /* Check if it is a BIT n,r instruction    */
+                if (strlen(str_op1)==1 && strlen(str_op2)==1)       
+                {
+                    retCode=CODE_CB_BITBR;                              /* Prepare the BIT n,r  */
+                    uint8_t bb=retCode&FIRST_LOWEST_BYTE;
+                    //printf("rc=%s reg=%d bit=%d\n", byteToBinary(bb), registerToBit(str_op2), numberToBit(str_op1));
+                    PUSHBIT(retCode, registerToBit(str_op2), 0);        /* Add the register as bits     */
+                    PUSHBIT(retCode, numberToBit(str_op1), 3);          /* Add the bit number as bits   */
+
+                    *pLen=TWO_BYTES;
+                }
             }
 
             break;

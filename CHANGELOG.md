@@ -1,3 +1,7 @@
+# 0.9.15
+Add and decode BIT n,r.
+PUSHBIT() is now able to push '0'.
+
 # 0.9.14
 Add and decode ADD A,(HL) and ADC A,(HL).
 Add and decode ADD HL,rr.

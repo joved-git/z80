@@ -19,7 +19,7 @@
 #define FIRST_THREE_LOWEST_BYTES    (0x00FFFFFF)
 
 #define EXTRACT(a, d, l)        (a>>d & ~(((uint8_t) 0b111111111)<<l)) 
-#define PUSHBIT(a, b, l)        (a=a|(b<<l))
+#define PUSHBIT(a, b, l)        (b==0?a=a&~(1<<l):a=a|(b<<l))
 #define SIGN(a)                 (a>>7)
 #define ZERO(a)                 (a==0?1:0)
 #define EVEN(a)                 (BIT(a, 0)==0?1:0)     
@@ -76,6 +76,7 @@
 #define CODE_CB_RLCR        (0b1100101100000000)                    // RLC r
 #define CODE_CB_RRCR        (0b1100101100001000)                    // RRC r
 #define CODE_CB_RLCHL       (0b1100101100000110)        // 0xCB06   // RLC (HL) 
+#define CODE_CB_BITBR       (0b1100101101000000)                    // BIT n,r
 
 /* ED instruction codes     */
 #define CODE_ED_LDNNRR      (0b1110110101000011)        //          // LD (nn),rr
@@ -146,6 +147,7 @@
 #define MASK_LDNNIY         (0b1111111111111111)
 #define MASK_ADDIXPP        (0b1111111111001111)
 #define MASK_ADDIYQQ        (0b1111111111001111)
+#define MASK_BITBR          (0b1111111111000000)
 
 /* 8-bit registers binary codes */
 #define REGA                (0b111)
@@ -180,6 +182,16 @@
 #define INTP_EXECUTE        (1)
 #define INTP_DETECT         (2)
 #define INTP_EXECUTE_BLIND  (3)
+
+/* 3-bit number in binary   */
+#define BINARY_0            (0b000)
+#define BINARY_1            (0b001)
+#define BINARY_2            (0b010)
+#define BINARY_3            (0b011)
+#define BINARY_4            (0b100)
+#define BINARY_5            (0b101)
+#define BINARY_6            (0b110)
+#define BINARY_7            (0b111)
 
 /****************************/
 /* 0x0A   - LD A,(BC)       */
