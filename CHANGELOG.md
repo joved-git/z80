@@ -1,7 +1,10 @@
+# 0.9.17
+Decode CALL cc,nn.
+
 # 0.9.16
 Add and decode BIT b,(HL).
 Add and decode CALL nn.
-Add and decode CALL cc,nn.
+Add CALL cc,nn.
 
 # 0.9.15
 Add and decode BIT b,r.
