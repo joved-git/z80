@@ -31,8 +31,8 @@
 #define ED_CODE_LENGTH(c)       (ed_code_length[c & FIRST_LOWEST_BYTE]+ONE_BYTE)
 #define DD_CODE_LENGTH(c)       (dd_code_length[c & FIRST_LOWEST_BYTE]+ONE_BYTE)
 #define FD_CODE_LENGTH(c)       (fd_code_length[c & FIRST_LOWEST_BYTE]+ONE_BYTE)
-#define DDCB_CODE_LENGTH(c)     (ddcb_code_length[c]+TWO_BYTES)
-#define FDCB_CODE_LENGTH(c)     (fdcb_code_length[c]+TWO_BYTES)
+#define DDCB_CODE_LENGTH(c)     (ddcb_code_length[c & FIRST_LOWEST_BYTE]+TWO_BYTES)
+#define FDCB_CODE_LENGTH(c)     (fdcb_code_length[c & FIRST_LOWEST_BYTE]+TWO_BYTES)
 
 #define ALT_CODE_CB             (0xCB)
 #define ALT_CODE_ED             (0xED)
@@ -101,6 +101,12 @@
 #define CODE_FD_LDIYDR      (0b1111110101110000)                    // LD (IY+d),r
 #define CODE_FD_ADDIYQQ     (0b1111110100001001)                    // LD IY,qq
 
+/* DDCB instruction codes   */
+#define CODE_DDCB_RLCIXD    (0b11011101110010110000000000000110)     // RLC (IX+d)
+
+/* FDCB instruction codes   */
+#define CODE_FDCB_RLCIYD    (0b11111101110010110000000000000110)     // RLC (IY+d)
+
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
 #define MASK_LDRHL          (0b11000111)
@@ -154,6 +160,10 @@
 #define MASK_ADDIYQQ        (0b1111111111001111)
 #define MASK_BITBR          (0b1111111111000000)
 #define MASK_BITBHL         (0b1111111111000111)
+
+/* 32-bit mask  */
+#define MASK_RLCIXD         (0b11111111111111110000000011111111)
+#define MASK_RLCIYD         (0b11111111111111110000000011111111)
 
 /* 8-bit registers binary codes */
 #define REGA                (0b111)
