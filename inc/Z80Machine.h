@@ -86,6 +86,11 @@ public:
     /// @return The instruction as a string.
     char *getInstruction();
 
+    /// @brief  Load a file with codes or instructions.
+    /// @param  The file to load.
+    /// @return Nothing.
+    void loadCode(const char *);
+
 private:
     char *mEntry;
     bool mCommandIsEntered;

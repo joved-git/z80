@@ -471,8 +471,11 @@ typeOfEntry Z80Machine::findEntryType()
     {
         type=COMMAND;
 
-        /* Convert string into uppercase but not the first car of the command   */
-        toUpper(mEntry+1);
+        /* Convert string into uppercase but not the first car of the command and not for the load command   */
+        if (mEntry[0]!=CMD_LOAD_CODE)
+        {
+            toUpper(mEntry+1);
+        }
     }
     else 
     {
@@ -990,6 +993,51 @@ char *Z80Machine::getInstruction()
     return mInstruction;
 }
 
+
+/* Load a file with codes or instructions   */
+void Z80Machine::loadCode(const char *pFilename)
+{
+    FILE *file=NULL;
+    bool notTheEnd=true;
+    //char aLine[MAX_OP_LENGTH*3];
+    char aLine[MAX_OP_LENGTH*3];
+    size_t len=-1;
+    
+    if (!(file=fopen(pFilename, "rw")))
+    {
+        printf("Cannot open <%s>, please check it.\n", pFilename);
+    }
+    else
+    {
+        printf(" OK, opening <%s>.\n", pFilename);
+
+        int i=1;
+
+        while (fgets(aLine, MAX_OP_LENGTH*3, file) != NULL)
+        {
+            printf("%d: %s", i++, aLine);
+        }
+
+        /*
+        while (notTheEnd)
+        {
+            len=fread(aLine, 256, 1, file);
+            //printf("len=%d\n", len);
+            //printf("%s\n", aLine);
+
+            if (len==0)
+            {
+                notTheEnd=false;
+            }
+            else
+            {
+                printf("%d: %s\n", len, aLine);
+            }
+        }*/
+
+        fclose(file);
+    }
+}
 
 /* Interpret the machine code   */
 uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMode)
@@ -3619,8 +3667,6 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
     printf("ln=%d\n", *pLen);
 #endif
     return retCode;
-
-
 }
 
 /* Give the next instruction to execute.    */
@@ -3692,6 +3738,7 @@ bool Z80Machine::analyse()
     uint32_t machineCode=0;
     uint32_t codeInHexa=0;
     char instruction[MAX_OP_LENGTH*3];
+    char *entryOp;
 
     if (mCommandIsEntered)
     {
@@ -3701,176 +3748,198 @@ bool Z80Machine::analyse()
         {
             case COMMAND:
                 switch (mEntry[0]) {
-
-                /* I have to exit	*/
-                case CMD_EXIT:
-                    retValue=true;
-                    break;
-            
-                /* OK, display help	*/
-                case CMD_HELP:
-                    if (mExecMode)
-                    {
-                        printf("\n");
-                        printf("!           toggle from Normal mode to Exec mode.\n");
-                        printf("a <code>    translate <code> to assembly langage.\n");
-                        printf("              Example: cb22 gives SLA D\n");
-                        printf("c <cmd>     translate <cmd> to machine code.\n");
-                        printf("              Example: ld c,b gives 0x41\n");
-                        printf("R           display all registers.\n");
-                        printf("m <addr>    dump 16 bytes memory from <addr>.\n");
-                        printf("m (SP)      dump 16 bytes memory from (SP).\n");
-                        printf("m (PC)      dump 16 bytes memory from (PC).\n");
-                        printf("n           execute the next instruction (only in Exec mode).\n");
-                        printf("x <dec>     convert <dec> to hexa.\n");
-                        printf("d <hex>     convert <hex> to decimal.\n");
-                        printf("b <hex>     convert <hex> to binary.\n");
-                        printf("q           quit me.\n");
-                        printf("\n");
-                        printf("<cmd>       execute the command.\n");
-                        printf("<code>      execute the code.\n");
-                    }
-                    else
-                    {
-                        printf("\n");
-                        printf("!           toggle from Normal mode to Exec mode.\n");
-                        printf("a <code>    translate <code> to assembly langage.\n");
-                        printf("              Example: cb22 gives SLA D\n");
-                        printf("c <cmd>     translate <cmd> to machine code.\n");
-                        printf("              Example: ld c,b gives 0x41\n");
-                        printf("r           display main registers.\n");
-                        printf("R           display all registers.\n");
-                        printf("m <addr>    dump 16 bytes memory from <addr>.\n");
-                        printf("m (SP)      dump 16 bytes memory from (SP).\n");
-                        printf("m (PC)      dump 16 bytes memory from (PC).\n");
-                        printf("x <dec>     convert <dec> to hexa.\n");
-                        printf("d <hex>     convert <hex> to decimal.\n");
-                        printf("b <hex>     convert <hex> to binary.\n");
-                        printf("q           quit me.\n");
-                        printf("\n");
-                        printf("<cmd>       execute the command.\n");
-                        printf("<code>      execute the code.\n");
-                    }
-                    break;
-          
-                case CMD_EXAMPLE:
-                    printf("\n");
-                    printf("0x32aaaa - LD (aaaa),A\n");
-                    printf("0x36nn   - LD (HL),n\n");
-                    printf("0x3Aaaaa - LD A,(aaaa)\n");
-                    printf("00x46    - LD B,(HL)\n"); 
-                    printf("00x4E    - LD C,(HL)\n"); 
-                    printf("00x70    - LD (HL), B\n");
-                    printf("00x71    - LD (HL), C\n\n");
-
-                    break;
-
-                /* Mode switching       */
-                case CMD_EXEC_MODE_TOGGLE:
-                    mExecMode=!mExecMode;
-
-                    break;
-
-                /* Display registers	*/
-                case CMD_REGISTER:
-                    if (!mExecMode)
-                    {
-                        displaySimpleRegisters();
-                    }
-
-                    break;
-
-                /* Display all the registers	*/
-                case CMD_ALL_REGISTER:
-                    if (!mExecMode)
-                    {
-                        displayAllRegisters();
-                    }
-
-                    break;
-
-                case CMD_ASSEMBLYCODE:
-                    mEntry+=2;
-                    codeInHexa=toValue(mEntry, &lenValue, &lenEff);                     /* Transform the instruction into real number  */
-                    interpretCode(codeInHexa, lenValue, INTP_DISPLAY);
-                    
-                    break;
+                    /* I have to exit	*/
+                    case CMD_EXIT:
+                        retValue=true;
+                        break;
                 
-                case CMD_MACHINECODE:
-                    mEntry+=2;
-                    machineCode=findMachineCode(mEntry, &lenValue);
-                    interpretCode(machineCode, lenValue, INTP_DISPLAY);
-                    
-                    break;
+                    /* OK, display help	*/
+                    case CMD_HELP:
+                        if (mExecMode)
+                        {
+                            printf("\n");
+                            printf("!           toggle from Normal mode to Exec mode.\n");
+                            printf("a <code>    translate <code> to assembly langage.\n");
+                            printf("              Example: cb22 gives SLA D\n");
+                            printf("c <cmd>     translate <cmd> to machine code.\n");
+                            printf("              Example: ld c,b gives 0x41\n");
+                            printf("R           display all registers.\n");
+                            printf("m <addr>    dump 16 bytes memory from <addr>.\n");
+                            printf("m (SP)      dump 16 bytes memory from (SP).\n");
+                            printf("m (PC)      dump 16 bytes memory from (PC).\n");
+                            printf("n           execute the next instruction (only in Exec mode).\n");
+                            printf("l <file>    load a file with codes or instructions.\n");
+                            printf("x <dec>     convert <dec> to hexa.\n");
+                            printf("d <hex>     convert <hex> to decimal.\n");
+                            printf("b <hex>     convert <hex> to binary.\n");
+                            printf("q           quit me.\n");
+                            printf("\n");
+                            printf("<cmd>       execute the command.\n");
+                            printf("<code>      execute the code.\n");
+                        }
+                        else
+                        {
+                            printf("\n");
+                            printf("!           toggle from Normal mode to Exec mode.\n");
+                            printf("a <code>    translate <code> to assembly langage.\n");
+                            printf("              Example: cb22 gives SLA D\n");
+                            printf("c <cmd>     translate <cmd> to machine code.\n");
+                            printf("              Example: ld c,b gives 0x41\n");
+                            printf("r           display main registers.\n");
+                            printf("R           display all registers.\n");
+                            printf("m <addr>    dump 16 bytes memory from <addr>.\n");
+                            printf("m (SP)      dump 16 bytes memory from (SP).\n");
+                            printf("m (PC)      dump 16 bytes memory from (PC).\n");
+                            printf("l <file>    load a file with codes or instructions.\n");
+                            printf("x <dec>     convert <dec> to hexa.\n");
+                            printf("d <hex>     convert <hex> to decimal.\n");
+                            printf("b <hex>     convert <hex> to binary.\n");
+                            printf("q           quit me.\n");
+                            printf("\n");
+                            printf("<cmd>       execute the command.\n");
+                            printf("<code>      execute the code.\n");
+                        }
+                        break;
+            
+                    case CMD_EXAMPLE:
+                        printf("\n");
+                        printf("0x32aaaa - LD (aaaa),A\n");
+                        printf("0x36nn   - LD (HL),n\n");
+                        printf("0x3Aaaaa - LD A,(aaaa)\n");
+                        printf("00x46    - LD B,(HL)\n"); 
+                        printf("00x4E    - LD C,(HL)\n"); 
+                        printf("00x70    - LD (HL), B\n");
+                        printf("00x71    - LD (HL), C\n\n");
 
-                case CMD_TODEC:
-                    mEntry+=2;
-                    mEntry[FOUR_BYTES]='\0';
-                    value=toValue(mEntry, &lenValue, &lenEff);
+                        break;
 
-                    if (lenEff<lenValue)
-                    {
-                        printf("\nNot an hexa number\n");
-                    }
-                    else
-                    {
-                        printf("\n0x%s = %ud\n", mEntry, value);
-                    }
-                    
-                    break;
+                    /* Mode switching       */
+                    case CMD_EXEC_MODE_TOGGLE:
+                        mExecMode=!mExecMode;
 
-                case CMD_TOHEXA:
-                    mEntry+=2;
+                        break;
 
-                    valDec=toDec(mEntry);
+                    /* Display registers	*/
+                    case CMD_REGISTER:
+                        if (!mExecMode)
+                        {
+                            displaySimpleRegisters();
+                        }
 
-                    if (valDec>0)
-                    {
-                        printf("\n%sd = 0x%X\n", mEntry, valDec);
-                    }
-                    else
-                    {
-                        printf("\nNot a decimal number\n");
-                    }
-                    
-                    break;
+                        break;
 
-                case CMD_TOBIN:
-                    mEntry+=2;
-                    mEntry[ONE_BYTE]='\0';                             /* Only one byte    */
+                    /* Display all the registers	*/
+                    case CMD_ALL_REGISTER:
+                        if (!mExecMode)
+                        {
+                            displayAllRegisters();
+                        }
 
-                    value=toValue(mEntry, &lenValue, &lenEff);
+                        break;
 
-                    if (lenEff<lenValue)
-                    {
-                        printf("\nNot a decimal number\n"); 
-                    }
-                    else
-                    {
-                        printf("\n0x%s = 0b%s\n", mEntry, byteToBinary((uint8_t) value));
-                    }
-                    
-                    break;
-
-                case CMD_DISPLAY_MEMORY:
-                    displayMemory(mEntry+2);
-                    
-                    break;
-
-                case CMD_NEXT_INSTRUCTION:
-                    if (mExecMode)
-                    {
-                        /* Retrieve the instruction         */
-                        machineCode=getNextInstruction(instruction, &lenValue);
-
-                        /* Execute the instruction          */
-                        interpretCode(machineCode, lenValue, INTP_EXECUTE_BLIND);
+                    case CMD_ASSEMBLYCODE:
+                        mEntry+=2;
+                        codeInHexa=toValue(mEntry, &lenValue, &lenEff);                     /* Transform the instruction into real number  */
+                        interpretCode(codeInHexa, lenValue, INTP_DISPLAY);
                         
-                        /* Go to next instruction           */
-                        mRegisterPack.regPC.setValue(mRegisterPack.regPC.getValue() + (lenValue/2));
-                    }
-            }
-            break;
+                        break;
+                    
+                    case CMD_MACHINECODE:
+                        mEntry+=2;
+                        machineCode=findMachineCode(mEntry, &lenValue);
+                        interpretCode(machineCode, lenValue, INTP_DISPLAY);
+                        
+                        break;
+
+                    case CMD_TODEC:
+                        mEntry+=2;
+                        mEntry[FOUR_BYTES]='\0';
+                        value=toValue(mEntry, &lenValue, &lenEff);
+
+                        if (lenEff<lenValue)
+                        {
+                            printf("\nNot an hexa number\n");
+                        }
+                        else
+                        {
+                            printf("\n0x%s = %ud\n", mEntry, value);
+                        }
+                        
+                        break;
+
+                    case CMD_TOHEXA:
+                        mEntry+=2;
+
+                        valDec=toDec(mEntry);
+
+                        if (valDec>0)
+                        {
+                            printf("\n%sd = 0x%X\n", mEntry, valDec);
+                        }
+                        else
+                        {
+                            printf("\nNot a decimal number\n");
+                        }
+                        
+                        break;
+
+                    case CMD_TOBIN:
+                        mEntry+=2;
+                        mEntry[ONE_BYTE]='\0';                             /* Only one byte    */
+
+                        value=toValue(mEntry, &lenValue, &lenEff);
+
+                        if (lenEff<lenValue)
+                        {
+                            printf("\nNot a decimal number\n"); 
+                        }
+                        else
+                        {
+                            printf("\n0x%s = 0b%s\n", mEntry, byteToBinary((uint8_t) value));
+                        }
+                        
+                        break;
+
+                    case CMD_DISPLAY_MEMORY:
+                        displayMemory(mEntry+2);
+                        
+                        break;
+
+                    case CMD_NEXT_INSTRUCTION:
+                        if (mExecMode)
+                        {
+                            /* Retrieve the instruction         */
+                            machineCode=getNextInstruction(instruction, &lenValue);
+
+                            /* Execute the instruction          */
+                            interpretCode(machineCode, lenValue, INTP_EXECUTE_BLIND);
+                            
+                            /* Go to next instruction           */
+                            mRegisterPack.regPC.setValue(mRegisterPack.regPC.getValue() + (lenValue/2));
+                        }
+                        break;
+
+                    case CMD_LOAD_CODE:
+                        if (!(entryOp=strchr(mEntry, ' ')))
+                        {
+                            printf("\nPlease, give me something to load !!\n");
+                        }
+                        else
+                        {
+                            if (strlen(mEntry)<3)
+                            {
+                                printf("\nPlease, give me something to load !!\n");
+                            }
+                            else
+                            {
+                                printf("\nTry to load %s ...", mEntry+2);
+                                loadCode(mEntry+2);
+                            }
+                        }
+                        
+                        break;
+                }
+                break;
 
             case CODE:
                 codeInHexa=toValue(mEntry, &lenValue, &lenEff);                     /* Transform the instruction into real number  */

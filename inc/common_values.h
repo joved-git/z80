@@ -24,6 +24,8 @@
 
 #define INITIAL_STACK_POINTER	(0x0000)		/* Initial value for the Stack Pointer						*/
 
+//#define CODEFILE_LOCATION       "../codefile"
+
 #define STRING_REG_UNDEFINED    "?"
 #define STRING_REGA             "A"
 #define STRING_REGB             "B"
@@ -57,6 +59,7 @@
 #define CMD_EXAMPLE             'e'
 #define CMD_DISPLAY_MEMORY      'm'
 #define CMD_NEXT_INSTRUCTION    'n'
+#define CMD_LOAD_CODE           'l'
 #define CMD_EXEC_MODE_TOGGLE    '!'
 
 #define ERR_NO_ERROR            (0)

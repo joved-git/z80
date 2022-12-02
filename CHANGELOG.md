@@ -1,5 +1,8 @@
+# 1.0.0
+Add the load command.
+
 # 0.9.18
-Add and decode RLC (IX+d) and RLC (IY+d). First inverted instruction code.
+Add and decode RLC (IX+d) and RLC (IY+d). First inverted instruction codes.
 
 # 0.9.17
 Decode CALL cc,nn.
