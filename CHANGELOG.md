@@ -1,5 +1,5 @@
 # 1.0.0
-Add the load command.
+Add the load command. Interprete the org #nn directive.
 
 # 0.9.18
 Add and decode RLC (IX+d) and RLC (IY+d). First inverted instruction codes.

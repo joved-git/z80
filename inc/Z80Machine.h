@@ -86,11 +86,6 @@ public:
     /// @return The instruction as a string.
     char *getInstruction();
 
-    /// @brief  Load a file with codes or instructions.
-    /// @param  The file to load.
-    /// @return Nothing.
-    void loadCode(const char *);
-
 private:
     char *mEntry;
     bool mCommandIsEntered;
@@ -249,6 +244,16 @@ private:
     /// @param  The 2 bytes to add.
     /// @return true if it will be an overflow.
     bool checkOverflowOnAdd(uint8_t, uint8_t);
+
+    /// @brief  Load a file with codes or instructions.
+    /// @param  The file to load.
+    /// @return Nothing.
+    void loadCode(const char *);
+
+    /// @brief  Clean the line from an asm  file.
+    /// @param  The line to clean (before/after).
+    /// @return Nothing.
+    void clean_line(char *);
 };	
 
 #endif

@@ -676,6 +676,36 @@ Register_16bits *Z80Machine::get16bitsRegisterAddress(uint8_t pReg)
 }
 
 
+/* Clean the line from an asm  file */
+void Z80Machine::clean_line(char *pStr)
+{
+    bool noChar=true;
+    uint8_t i=0;
+    uint8_t j=0;  
+    char retStr[MAX_INSTR_LENGTH];
+
+    for (i=0; i<strlen(pStr); i++)
+    {
+        //printf("<%c>", pStr[i]);
+        if (pStr[i]!=' ' && pStr[i]!='\t')
+        {
+            noChar=false;
+            //printf("false\n");
+        }
+
+        if (!noChar && pStr[i]!=10)
+        {
+            retStr[j++]=pStr[i];   
+        }
+    }
+
+    retStr[j]='\0';
+    toUpper(retStr);
+
+    strcpy(pStr, retStr);
+}
+
+
 /* Clean the n operand    */
 int8_t Z80Machine::clean_n(char *pOp)
 {
@@ -999,23 +1029,47 @@ void Z80Machine::loadCode(const char *pFilename)
 {
     FILE *file=NULL;
     bool notTheEnd=true;
-    //char aLine[MAX_OP_LENGTH*3];
-    char aLine[MAX_OP_LENGTH*3];
-    size_t len=-1;
+    char aLine[MAX_INSTR_LENGTH];
+    uint8_t len=-1;
+    uint32_t machineCode=0;
+    int8_t i=0;
+    uint16_t address;
     
     if (!(file=fopen(pFilename, "rw")))
     {
-        printf("Cannot open <%s>, please check it.\n", pFilename);
+        printf(" Cannot open <%s>, please check it.\n", pFilename);
     }
     else
     {
         printf(" OK, opening <%s>.\n", pFilename);
 
-        int i=1;
-
-        while (fgets(aLine, MAX_OP_LENGTH*3, file) != NULL)
+        while (fgets(aLine, MAX_INSTR_LENGTH, file) != NULL)
         {
-            printf("%d: %s", i++, aLine);
+            clean_line(aLine);
+
+            if (strlen(aLine)!=0)
+            {
+                machineCode=findMachineCode(aLine, &len);
+
+                if (strstr(aLine, "ORG"))
+                {
+                    address=mRegisterPack.regPC.getValue();
+                }
+
+                if (machineCode!=0xFFFFFFFF)
+                {
+                    for (i=(len/2)-1; i>=0; i--)
+                    {
+                        //printf("put %02X into #%04X\n", machineCode & FIRST_LOWEST_BYTE, address+i);
+                        mMemory->set8bitsValue(address+i, machineCode & FIRST_LOWEST_BYTE);
+                        machineCode=machineCode >> SIZE_1_BYTE;
+                    }
+                    
+                    address+=(len/2);
+                }
+                //printf("[%08X] = %s\n", machineCode, aLine);
+                //printf("%d (%ld): <%s>\n", i++, strlen(aLine), aLine);
+            }
         }
 
         /*
@@ -3081,7 +3135,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
     nbOfComponents=cutInstruction(pInstruction, str_inst, str_op1, str_op2);
 
 #ifdef DEBUG_DISPLAY_CUTI_DATA
-    printf(">>> <%s> <%s>,<%s>\n", str_inst, str_op1, str_op2);
+    printf(">>> <%s> <%s> <%s>\n", str_inst, str_op1, str_op2);
     printf("comp=%d\n", nbOfComponents);
 #endif
 
@@ -3120,6 +3174,18 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
             break;
 
         case 2:
+            if (!strcmp(str_inst, "ORG"))                           /* A ORG directive is present         */
+            {
+                /* Check if it is a ORG nn instruction   */
+                if ((strlen(str_op1)>=4 && strlen(str_op1)<=7) && strchr(str_op1, '#'))
+                {
+                    retCheck=clean_nn(str_op1);                         /* Clean the (nn) operand   */
+                    word=toValue(str_op1+1, pLen, &lenEff);
+
+                    mRegisterPack.regPC.setValue(word);
+                }
+            }
+
             if (!strcmp(str_inst, "RLC"))                           /* A RLC instruction is present         */
             {
                 if (strlen(str_op1)==1)                             /* Check if it is a RLC r instruction   */
