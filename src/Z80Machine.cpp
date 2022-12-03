@@ -1417,7 +1417,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if (((codeInHexa & FIRST_TWO_LOWEST_BYTES) & MASK_RRCR)==CODE_CB_RRCR && len == CB_CODE_LENGTH(CODE_CB_RRCR))
     {
         instruction=CODE_CB_RRCR;
-        printf("1: RRC r\n");
         /* Extract the value of the register    */
         op1=EXTRACT(codeInHexa, 0, 3);
     }
@@ -1426,7 +1425,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if (((codeInHexa & FIRST_TWO_LOWEST_BYTES) & MASK_RRCHL)==CODE_CB_RRCHL && len == CB_CODE_LENGTH(CODE_CB_RRCHL))
     {
         instruction=CODE_CB_RRCHL;
-        printf("1: RRC (HL)\n");
     }
 
 
@@ -1552,6 +1550,20 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if (((codeInHexa & MASK_RLCIYD)==CODE_FDCB_RLCIYD && len == FDCB_CODE_LENGTH(CODE_FDCB_RLCIYD)))
     {
         instruction=CODE_FDCB_RLCIYD;
+        op1=EXTRACT(codeInHexa,8, 8);
+    }
+
+    /* This is a RRC (IX+d) */
+    if (((codeInHexa & MASK_RRCIXD)==CODE_DDCB_RRCIXD && len == DDCB_CODE_LENGTH(CODE_DDCB_RRCIXD)))
+    {
+        instruction=CODE_DDCB_RRCIXD;
+        op1=EXTRACT(codeInHexa,8, 8);
+    }
+
+    /* This is a RRC (IY+d) */
+    if (((codeInHexa & MASK_RRCIYD)==CODE_FDCB_RRCIYD && len == FDCB_CODE_LENGTH(CODE_FDCB_RRCIYD)))
+    {
+        instruction=CODE_FDCB_RRCIYD;
         op1=EXTRACT(codeInHexa,8, 8);
     }
 
@@ -2397,7 +2409,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
 
             if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
             {
-                /* Retrive the byte and rotate it  */
+                /* Retrieve the byte and rotate it  */
                 val=mMemory->get8bitsValue(mRegisterPack.regHL.getValue());
                 newVal=(val<<1) | BIT(val, 7);
                 mMemory->set8bitsValue(mRegisterPack.regHL.getValue(), newVal);
@@ -2432,7 +2444,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 newVal=(val>>1) | (BIT(val, 0)<<7);
                 mMemory->set8bitsValue(mRegisterPack.regHL.getValue(), newVal);
 
-                /**/
                 /* Modify flags here    */
                 S_IS(SIGN(newVal));
                 Z_IS(ZERO(newVal));
@@ -2440,17 +2451,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 PV_IS(EVEN(newVal));
                 N_RESET;
                 C_IS(BIT(newVal, 7));
-                /**/
-                //
-
-                /* Modify flags here    */
-                /*S_IS(SIGN(newVal));
-                Z_IS(ZERO(newVal));
-                H_RESET;
-                PV_IS(EVEN(newVal));
-                N_RESET;
-                C_IS(BIT(val, 7));
-                */
 
                 if (pMode==INTP_EXECUTE)
                 {
@@ -2973,7 +2973,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
 
             if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                       /* Execute RLC (IX+d)    */
             {
-                /* Retrive the byte and rotate it  */
+                /* Retrieve the byte and rotate it  */
                 val=mMemory->get8bitsValue(address);
                 newVal=(val<<1) | BIT(val, 7);
                 mMemory->set8bitsValue(address, newVal);
@@ -3013,7 +3013,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
 
             if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                       /* Execute RLC (IY+d)    */
             {
-                /* Retrive the byte and rotate it  */
+                /* Retrieve the byte and rotate it  */
                 val=mMemory->get8bitsValue(address);
                 newVal=(val<<1) | BIT(val, 7);
                 mMemory->set8bitsValue(address, newVal);
@@ -3025,6 +3025,87 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 PV_IS(EVEN(newVal));
                 N_RESET;
                 C_IS(BIT(val, 7));
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DDCB_RRCIXD:                                          /* This is a RRC (IX+d)  */        
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIX.getValue()-op1;
+                sprintf(mInstruction, "RRC (IX-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op1;
+                sprintf(mInstruction, "RRC (IX+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                       /* Execute RLC (IX+d)    */
+            {
+                /* Retrieve the byte and rotate it  */
+                /* From RRC (HL)    */
+                val=mMemory->get8bitsValue(address);    
+                newVal=(val>>1) | (BIT(val, 0)<<7);
+                mMemory->set8bitsValue(address, newVal);
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+                C_IS(BIT(newVal, 7));
+               
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FDCB_RRCIYD:                                          /* This is a RRC (IY+d)  */        
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIY.getValue()-op1;
+                sprintf(mInstruction, "RRC (IY-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op1;
+                sprintf(mInstruction, "RRC (IY+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                       /* Execute RLC (IY+d)    */
+            {
+                /* Retrieve the byte and rotate it  */
+                val=mMemory->get8bitsValue(address);
+                newVal=(val>>1) | (BIT(val, 0)<<7);
+                mMemory->set8bitsValue(address, newVal);
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+                C_IS(BIT(newVal, 7));
 
                 if (pMode==INTP_EXECUTE)
                 {
@@ -3277,7 +3358,6 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
             if (!strcmp(str_inst, "RRC"))                           /* A RRC instruction is present         */
             {
-                printf("THIS IS A RRC...\n");
                 if (strlen(str_op1)==1)                             /* Check if it is a RRC r instruction   */
                 {
                     retCode=CODE_CB_RRCR;                           /* Prepare the RRC r                    */
@@ -3292,6 +3372,26 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 {
                     retCode=CODE_CB_RRCHL;                           /* Prepare the RRC (HL))                    */
                     *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a RRC (IX+d) or RRC (IY+d) instruction  */
+                if (((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")) && strchr(str_op1, '(') && strchr(str_op1, ')') && strchr(str_op1, '+'))
+                {
+                    if (strstr(str_op1, "IX"))
+                    {
+                        retCode=CODE_DDCB_RRCIXD;
+                    }
+
+                    if (strstr(str_op1, "IY"))
+                    {
+                        retCode=CODE_FDCB_RRCIYD;
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op1);
+                    retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the RLC (IX+d) or the RLC (IY+d)  */
+
+                    *pLen=FOUR_BYTES;
                 }
                 
             }
