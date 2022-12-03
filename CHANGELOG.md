@@ -1,3 +1,7 @@
+# 1.0.1
+Search the file into the codefile directory. Handle Windows or Linux compilation.
+Add and decode RRC (HL), RRC (IX+d) and RRC (IY+d) instruction.
+
 # 1.0.0
 Add the load command. Interprete the org #nn directive.
 

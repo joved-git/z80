@@ -7,6 +7,18 @@
 
 #include "opcode.h"
 
+#if defined(__WIN32__)
+#define WIN
+#else
+#define LINUX
+#endif
+
+#ifdef WIN
+#define ASM_FILE_LOCATION       "..\\codefile\\"
+#else
+#define ASM_FILE_LOCATION       "../codefile/"
+#endif
+
 //#define DEBUG_DISPLAY_INSTR_DATA              /* Dsiplay data that will be executer   */
 //#define DEBUG_DISPLAY_CUTI_DATA               /* Display data after cutting it        */ 
 //#define DEBUG_DISPLAY_FINDCODE_DATA           /* Display data after decoding it       */

@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     char c=0;
 	char command[MAX_LEN];
 	uint16_t i=0;
-	char instruction[MAX_OP_LENGTH*3];
+	char instruction[MAX_INSTR_LENGTH];
 	uint32_t machineCode=0;
 	uint8_t len=0;
 	Z80Machine machine;

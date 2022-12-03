@@ -90,11 +90,11 @@ private:
     char *mEntry;
     bool mCommandIsEntered;
 
-    RegisterPack mRegisterPack;         /* The pack of all the registers                    */
+    RegisterPack mRegisterPack;          /* The pack of all the registers                    */
 
-    Memory *mMemory;                    /* The memory of the Z80                            */
-    bool mExecMode;                     /* The mode of the machine (exec or normal/default) */
-    char mInstruction[MAX_OP_LENGTH*3]; /* The decoded instruction                          */
+    Memory *mMemory;                     /* The memory of the Z80                            */
+    bool mExecMode;                      /* The mode of the machine (exec or normal/default) */
+    char mInstruction[MAX_INSTR_LENGTH]; /* The decoded instruction                          */
 
     /// @brief  This method find the type of the entry command.
     /// @param  Nothing. 

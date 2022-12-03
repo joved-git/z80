@@ -1033,8 +1033,8 @@ void Z80Machine::loadCode(const char *pFilename)
     uint8_t len=-1;
     uint32_t machineCode=0;
     int8_t i=0;
-    uint16_t address;
-    
+    uint16_t address=0x0000;
+
     if (!(file=fopen(pFilename, "rw")))
     {
         printf(" Cannot open <%s>, please check it.\n", pFilename);
@@ -1407,7 +1407,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
 
     }
 
-        /* This is a RRCA  */
+    /* This is a RRCA  */
     if ((codeInHexa & MASK_RRCA)==CODE_RRCA && len==NATURAL_CODE_LENGTH(CODE_RRCA))
     {
         instruction=CODE_RRCA;
@@ -1417,10 +1417,18 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if (((codeInHexa & FIRST_TWO_LOWEST_BYTES) & MASK_RRCR)==CODE_CB_RRCR && len == CB_CODE_LENGTH(CODE_CB_RRCR))
     {
         instruction=CODE_CB_RRCR;
-        
+        printf("1: RRC r\n");
         /* Extract the value of the register    */
         op1=EXTRACT(codeInHexa, 0, 3);
     }
+
+    /* This is a RRC (HL)  */
+    if (((codeInHexa & FIRST_TWO_LOWEST_BYTES) & MASK_RRCHL)==CODE_CB_RRCHL && len == CB_CODE_LENGTH(CODE_CB_RRCHL))
+    {
+        instruction=CODE_CB_RRCHL;
+        printf("1: RRC (HL)\n");
+    }
+
 
     /* This is a EX AF,AF'  */
     if ((codeInHexa & MASK_EXAFAF)==CODE_EXAFAF && len==NATURAL_CODE_LENGTH(CODE_EXAFAF))
@@ -2414,6 +2422,48 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
+        case CODE_CB_RRCHL:                                         /* This is a RRC (HL)  */
+            sprintf(mInstruction, "RRC (HL)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Retrieve the byte and rotate it  */
+                val=mMemory->get8bitsValue(mRegisterPack.regHL.getValue());    
+                newVal=(val>>1) | (BIT(val, 0)<<7);
+                mMemory->set8bitsValue(mRegisterPack.regHL.getValue(), newVal);
+
+                /**/
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+                C_IS(BIT(newVal, 7));
+                /**/
+                //
+
+                /* Modify flags here    */
+                /*S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+                C_IS(BIT(val, 7));
+                */
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
         case CODE_RRCA:                                         /* This is a RRCA  */
             sprintf(mInstruction, "RRCA");
 
@@ -3227,6 +3277,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
             if (!strcmp(str_inst, "RRC"))                           /* A RRC instruction is present         */
             {
+                printf("THIS IS A RRC...\n");
                 if (strlen(str_op1)==1)                             /* Check if it is a RRC r instruction   */
                 {
                     retCode=CODE_CB_RRCR;                           /* Prepare the RRC r                    */
@@ -3237,12 +3288,11 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     PUSHBIT(retCode, registerToBit(str_op1), 0);    /* Add the register as bits             */
                 }
 
-                // Coming soon !!
-                //if (!strcmp(str_op1, "(HL)"))                       /* Check if it is a RLC (HL) instruction*/
-                //{
-                //    retCode=CODE_CB_RRCHL;                           /* Prepare the RLC r                    */
-                //    *pLen=TWO_BYTES;
-                //}
+                if (!strcmp(str_op1, "(HL)"))                       /* Check if it is a RRC (HL) instruction*/
+                {
+                    retCode=CODE_CB_RRCHL;                           /* Prepare the RRC (HL))                    */
+                    *pLen=TWO_BYTES;
+                }
                 
             }
 
@@ -3803,7 +3853,8 @@ bool Z80Machine::analyse()
     uint32_t value=0;
     uint32_t machineCode=0;
     uint32_t codeInHexa=0;
-    char instruction[MAX_OP_LENGTH*3];
+    char instruction[MAX_INSTR_LENGTH];
+    char filename[MAX_LEN];
     char *entryOp;
 
     if (mCommandIsEntered)
@@ -3998,11 +4049,12 @@ bool Z80Machine::analyse()
                             }
                             else
                             {
-                                printf("\nTry to load %s ...", mEntry+2);
-                                loadCode(mEntry+2);
+                                strcpy(filename, ASM_FILE_LOCATION);
+                                strcat(filename, mEntry+2);
+                                printf("\nTry to load %s ...", filename);
+                                loadCode(filename);
                             }
-                        }
-                        
+                        }        
                         break;
                 }
                 break;

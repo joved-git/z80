@@ -78,6 +78,7 @@
 #define CODE_CB_RLCR        (0b1100101100000000)                    // RLC r
 #define CODE_CB_RRCR        (0b1100101100001000)                    // RRC r
 #define CODE_CB_RLCHL       (0b1100101100000110)        // 0xCB06   // RLC (HL) 
+#define CODE_CB_RRCHL       (0b1100101100001110)        // 0xCB0E   // RRC (HL) 
 #define CODE_CB_BITBR       (0b1100101101000000)                    // BIT b,r
 #define CODE_CB_BITBHL      (0b1100101101000110)                    // BIT b,(HL)
 
@@ -144,6 +145,7 @@
 #define MASK_RLCR           (0b1111111111111000)
 #define MASK_RRCR           (0b1111111111111000)
 #define MASK_RLCHL          (0b1111111111111111)
+#define MASK_RRCHL          (0b1111111111111111)
 #define MASK_LDNNRR         (0b1111111111001111)
 #define MASK_LDDDNN         (0b1111111111001111)
 #define MASK_LDIXNN         (0b1111111111111111)
