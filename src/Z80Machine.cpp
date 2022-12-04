@@ -1072,23 +1072,6 @@ void Z80Machine::loadCode(const char *pFilename)
             }
         }
 
-        /*
-        while (notTheEnd)
-        {
-            len=fread(aLine, 256, 1, file);
-            //printf("len=%d\n", len);
-            //printf("%s\n", aLine);
-
-            if (len==0)
-            {
-                notTheEnd=false;
-            }
-            else
-            {
-                printf("%d: %s\n", len, aLine);
-            }
-        }*/
-
         fclose(file);
     }
 }
@@ -1118,7 +1101,11 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     char sop1[MAX_OP_LENGTH], sop2[MAX_OP_LENGTH];
 
 #ifdef DEBUG_DISPLAY_INSTR_DATA 
-    printf("code=<%08X> / len=%d\n", codeInHexa, len);
+    printf("codee=<%08X> / len=%d\n", codeInHexa, len);
+    //printf("code=<%08X>\n", codeInHexa);
+    //printf("len=%d\n", len);
+    //printf("toto\n");
+    //printf("DECR -1\n");
 #endif
     //codeInHexa=toValue(pCode, &len, &lenEff);                     /* Transform the instruction into real number  */
     
@@ -1565,6 +1552,13 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     {
         instruction=CODE_FDCB_RRCIYD;
         op1=EXTRACT(codeInHexa,8, 8);
+    }
+
+    /* This is a DEC rr */
+    if (((codeInHexa & MASK_DECRR)==CODE_DECRR && len == NATURAL_CODE_LENGTH(CODE_DECRR)))
+    {
+        instruction=CODE_DECRR;
+        op1=EXTRACT(codeInHexa,4, 2) | 0b1000;
     }
 
     // bottom 1
@@ -3118,6 +3112,29 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+        case CODE_DECRR:                                            /* This is a DEC rr    */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "DEC %s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                                
+            {
+                reg16_1=get16bitsRegisterAddress(op1);
+                reg16_1->setValue(reg16_1->getValue()-1);
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+
+            break;
     }
 
 
@@ -3431,9 +3448,9 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     PUSHBIT(retCode, registerToBit(str_op1), 3);    /* Add the register as bits             */
                 }
 
-                if (strlen(str_op1)==2)                             /* Check if it is a INC rr instruction   */
+                if (strlen(str_op1)==2)                             /* Check if it is a DEC rr instruction   */
                 {
-                    retCode=CODE_DECRR;                              /* Prepare the INC rr                   */
+                    retCode=CODE_DECRR;                              /* Prepare the DEC rr                   */
                     *pLen=ONE_BYTE;
 
                     retCheck=clean_r(str_op1);

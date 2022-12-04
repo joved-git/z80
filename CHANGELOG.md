@@ -1,3 +1,6 @@
+# 1.0.2
+Add and decode DEC rr.
+
 # 1.0.1
 Search the file into the codefile directory. Handle Windows or Linux compilation.
 Add and decode RRC (HL), RRC (IX+d) and RRC (IY+d) instruction.

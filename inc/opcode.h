@@ -66,13 +66,13 @@
 #define CODE_HALT           (0b01110110)
 #define CODE_LDRRNN         (0b00000001)
 #define CODE_INCR           (0b00000100)
-#define CODE_INCRR          (0b00000011)
+#define CODE_INCRR          (0b00000011)                            // INC RR
 #define CODE_PUSHQQ         (0b11000101)
 #define CODE_DECR           (0b00000101)
-#define CODE_DECRR          (0b00001011)
 #define CODE_ADDAR          (0b10000000)
 #define CODE_ADCAR          (0b10001000)
 #define CODE_ADDHLRR        (0b00001001)
+#define CODE_DECRR          (0b00001011)
 
 /* CB instructions codes    */
 #define CODE_CB_RLCR        (0b1100101100000000)                    // RLC r
@@ -130,7 +130,6 @@
 #define MASK_INCRR          (0b11001111)
 #define MASK_PUSHQQ         (0b11001111)
 #define MASK_DECR           (0b11000111)
-#define MASK_DECRR          (0b11000111)
 #define MASK_RLCA           (0b11111111)
 #define MASK_EXAFAF         (0b11111111)
 #define MASK_EXX            (0b11111111)
@@ -142,6 +141,7 @@
 #define MASK_ADDHLRR        (0b11001111)
 #define MASK_CALLNN         (0b11111111)
 #define MASK_CALLCCNN       (0b11000111)
+#define MASK_DECRR          (0b11001111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)
