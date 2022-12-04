@@ -52,6 +52,8 @@
 #define CODE_LDNNHL         (0b00100010)                // 0x22     // LD (nn),HL
 #define CODE_LDHLNN         (0b00101010)                // 0x2A     // LD HL,(nn)
 #define CODE_LDNNA          (0b00110010)                // 0x32     // LD (nn),A
+#define CODE_INCHL          (0b00110100)                // 0x34     // INC (HL)
+#define CODE_DECHL          (0b00110101)                // 0x35     // DEC (HL)
 #define CODE_LDHLN          (0b00110110)                // 0x36     // LD (HL),n
 #define CODE_LDANN          (0b00111010)                // 0x3A     // LD A,(nn)
 #define CODE_ADDAHL         (0b10000110)                // 0x86     // ADD A,(HL)
@@ -81,6 +83,10 @@
 #define CODE_CB_RRCHL       (0b1100101100001110)        // 0xCB0E   // RRC (HL) 
 #define CODE_CB_BITBR       (0b1100101101000000)                    // BIT b,r
 #define CODE_CB_BITBHL      (0b1100101101000110)                    // BIT b,(HL)
+#define CODE_CB_RESBR       (0b1100101110000000)                    // RES b,r
+#define CODE_CB_SETBR       (0b1100101111000000)                    // SET b,r
+#define CODE_CB_RESBHL      (0b1100101110000110)                    // RES b,(HL)
+#define CODE_CB_SETBHL      (0b1100101111000110)                    // SET b,(HL)
 
 /* ED instruction codes     */
 #define CODE_ED_LDNNRR      (0b1110110101000011)        //          // LD (nn),rr
@@ -142,6 +148,8 @@
 #define MASK_CALLNN         (0b11111111)
 #define MASK_CALLCCNN       (0b11000111)
 #define MASK_DECRR          (0b11001111)
+#define MASK_DECHL          (0b11111111)
+#define MASK_INCHL          (0b11111111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)
@@ -164,6 +172,10 @@
 #define MASK_ADDIYQQ        (0b1111111111001111)
 #define MASK_BITBR          (0b1111111111000000)
 #define MASK_BITBHL         (0b1111111111000111)
+#define MASK_RESBR          (0b1111111111000000)
+#define MASK_SETBR          (0b1111111111000000)
+#define MASK_RESBHL         (0b1111111111000111)
+#define MASK_SETBHL         (0b1111111111000111)
 
 /* 32-bit mask  */
 #define MASK_RLCIXD         (0b11111111111111110000000011111111)
