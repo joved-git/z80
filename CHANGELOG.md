@@ -1,3 +1,6 @@
+# 1.0.6
+Add and decode CPL and NEG.
+
 # 1.0.5
 Add and decode RL (HL), RL (IX+d) and RL (IY+d).
 Correct the affected flags for RLC r and RL r.

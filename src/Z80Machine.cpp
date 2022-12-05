@@ -1634,9 +1634,23 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a RL (HL)  */
-    if (((codeInHexa & FIRST_TWO_LOWEST_BYTES) & MASK_RLHL)==CODE_CB_RLHL && len == CB_CODE_LENGTH(CODE_CB_RLHL))
+    if ((codeInHexa & MASK_RLHL)==CODE_CB_RLHL && len == CB_CODE_LENGTH(CODE_CB_RLHL))
     {
         instruction=CODE_CB_RLHL;
+
+    }
+
+    /* This is a CPL  */
+    if ((codeInHexa & MASK_CPL)==CODE_CPL && len == NATURAL_CODE_LENGTH(CODE_CPL))
+    {
+        instruction=CODE_CPL;
+
+    }
+
+    /* This is a NEG  */
+    if ((codeInHexa & MASK_NEG)==CODE_ED_NEG && len == ED_CODE_LENGTH(CODE_ED_NEG))
+    {
+        instruction=CODE_ED_NEG;
 
     }
 
@@ -3507,12 +3521,8 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             {
                 reg8_1=get8bitsRegisterAddress(op1);
                 bit=reg8_1->getBit(BIT_7);
-                //printf("bit7=%1d\n", bit);
-                //printf("carry=%1d\n", mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY));  
-                //printf("rl=%02X\n", (reg8_1->getValue()<<1) & FIRST_LOWEST_BYTE);
                 
                 reg8_1->setValue(((reg8_1->getValue()<<1) & FIRST_LOWEST_BYTE) | mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY));
-                //printf("a=%02X\n", reg8_1->getValue());
                 mRegisterPack.regF.setCarryFlag((bool) bit);
 
                 /* Modify flags here    */
@@ -3521,6 +3531,82 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 H_RESET;
                 PV_IS(EVEN(newVal));
                 N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+        
+        case CODE_CPL:                                              /* This is a CPL  */
+            sprintf(mInstruction, "CPL");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg8_1->setValue(~reg8_1->getValue());
+
+                /* Modify flags here    */
+                H_SET;
+                N_SET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ED_NEG:                                              /* This is a NEG  */
+            sprintf(mInstruction, "NEG");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=reg8_1->getValue();
+                reg8_1->setValue((~reg8_1->getValue())+1);
+
+                /* Modify flags here    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_SET;
+
+                // To do xxxjoexxx. Study what is a borrow !!!
+                //H_IS() if borrow from bit 4.
+
+                /* PV setting   */
+                if (val==0x80)
+                {
+                    PV_SET;
+                }
+                else
+                {
+                    PV_RESET;
+                }
+
+                /* C setting   */
+                if (val!=0x00)
+                {
+                    C_SET;
+                }
+                else
+                {
+                    C_RESET;
+                }
+
+
+
 
                 if (pMode==INTP_EXECUTE)
                 {
@@ -3697,6 +3783,18 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
             {
                 retCode=CODE_HALT;
                 *pLen=ONE_BYTE;
+            }
+
+            if (!strcmp(str_inst, "CPL"))                          /* A CPL is present     */
+            {
+                retCode=CODE_CPL;
+                *pLen=ONE_BYTE;
+            }
+
+            if (!strcmp(str_inst, "NEG"))                          /* A NEG is present     */
+            {
+                retCode=CODE_ED_NEG;
+                *pLen=TWO_BYTES;
             }
 
             if (!strcmp(str_inst, "RLCA"))                          /* A RLCA is present     */

@@ -52,6 +52,7 @@
 #define CODE_LDADE          (0b00011010)                // 0x1A     // LD A,(DE)
 #define CODE_LDNNHL         (0b00100010)                // 0x22     // LD (nn),HL
 #define CODE_LDHLNN         (0b00101010)                // 0x2A     // LD HL,(nn)
+#define CODE_CPL            (0b00101111)                // 0x2F     // CPL
 #define CODE_LDNNA          (0b00110010)                // 0x32     // LD (nn),A
 #define CODE_INCHL          (0b00110100)                // 0x34     // INC (HL)
 #define CODE_DECHL          (0b00110101)                // 0x35     // DEC (HL)
@@ -94,6 +95,7 @@
 /* ED instruction codes     */
 #define CODE_ED_LDNNRR      (0b1110110101000011)        //          // LD (nn),rr
 #define CODE_ED_LDDDNN      (0b1110110101001011)        //          // LD rr,(nn)
+#define CODE_ED_NEG         (0b1110110101000100)        // 0xED44   // NEG
 
 /* DD instruction codes     */
 #define CODE_DD_LDIXNN      (0b1101110100100001)        // 0xDD21   // LD IX,nn      
@@ -156,6 +158,7 @@
 #define MASK_DECHL          (0b11111111)
 #define MASK_INCHL          (0b11111111)
 #define MASK_RLA            (0b11111111)
+#define MASK_CPL            (0b11111111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)
@@ -184,6 +187,7 @@
 #define MASK_SETBHL         (0b1111111111000111)
 #define MASK_RLR            (0b1111111111111000)
 #define MASK_RLHL           (0b1111111111111111)
+#define MASK_NEG            (0b1111111111111111)
 
 /* 32-bit mask  */
 #define MASK_RLCIXD         (0b11111111111111110000000011111111)
