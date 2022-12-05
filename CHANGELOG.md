@@ -1,3 +1,7 @@
+# 1.0.5
+Add and decode RL (HL), RL (IX+d) and RL (IY+d).
+Correct the affected flags for RLC r and RL r.
+
 # 1.0.4
 Add and decode RLA and RL r.
 

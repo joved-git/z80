@@ -1102,7 +1102,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     char sop1[MAX_OP_LENGTH], sop2[MAX_OP_LENGTH];
 
 #ifdef DEBUG_DISPLAY_INSTR_DATA 
-    printf("codee=<%08X> / len=%d\n", codeInHexa, len);
+    printf("code=<%08X> / len=%d\n", codeInHexa, len);
 #endif
     
     /* bottom 0 */
@@ -1538,6 +1538,20 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=EXTRACT(codeInHexa,8, 8);
     }
 
+        /* This is a RL (IX+d) */
+    if (((codeInHexa & MASK_RLIXD)==CODE_DDCB_RLIXD && len == DDCB_CODE_LENGTH(CODE_DDCB_RLIXD)))
+    {
+        instruction=CODE_DDCB_RLIXD;
+        op1=EXTRACT(codeInHexa,8, 8);
+    }
+
+    /* This is a RL (IY+d) */
+    if (((codeInHexa & MASK_RLIYD)==CODE_FDCB_RLIYD && len == FDCB_CODE_LENGTH(CODE_FDCB_RLIYD)))
+    {
+        instruction=CODE_FDCB_RLIYD;
+        op1=EXTRACT(codeInHexa,8, 8);
+    }
+
     /* This is a RRC (IX+d) */
     if (((codeInHexa & MASK_RRCIXD)==CODE_DDCB_RRCIXD && len == DDCB_CODE_LENGTH(CODE_DDCB_RRCIXD)))
     {
@@ -1617,6 +1631,13 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         instruction=CODE_CB_RLR;
                
         op1=EXTRACT(codeInHexa, 0, 3);          /* This is b    */
+    }
+
+    /* This is a RL (HL)  */
+    if (((codeInHexa & FIRST_TWO_LOWEST_BYTES) & MASK_RLHL)==CODE_CB_RLHL && len == CB_CODE_LENGTH(CODE_CB_RLHL))
+    {
+        instruction=CODE_CB_RLHL;
+
     }
 
     // bottom 1
@@ -2437,9 +2458,12 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 reg8_1->setValue(newVal);
 
                 /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
                 H_RESET;
+                PV_IS(EVEN(newVal));
                 N_RESET;
-                //C_IS(BIT(reg8_1->getValue(), 0));
+                C_IS(BIT(reg8_1->getValue(), 0));
 
                 if (pMode==INTP_EXECUTE)
                 {
@@ -2480,6 +2504,125 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             if (pMode==INTP_DISPLAY)
             {
                 printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_CB_RLHL:                                         /* This is a RL (HL)  */
+            sprintf(mInstruction, "RL (HL)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Retrieve the byte and rotate it  */
+                val=mMemory->get8bitsValue(mRegisterPack.regHL.getValue());
+                bit=EXTRACT(val, 7, 1);
+                
+                newVal=((val<<1) & FIRST_LOWEST_BYTE) | mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY);
+
+                mMemory->set8bitsValue(mRegisterPack.regHL.getValue(), newVal);            
+                mRegisterPack.regF.setCarryFlag((bool) bit);
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DDCB_RLIXD:                                           /* This is a RL (IX+d)  */        
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIX.getValue()-op1;
+                sprintf(mInstruction, "RL (IX-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op1;
+                sprintf(mInstruction, "RL (IX+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                       /* Execute RL (IX+d)    */
+            {
+                /* Retrieve the byte and rotate it  */
+                val=mMemory->get8bitsValue(address);
+                bit=EXTRACT(val, 7, 1);
+                
+                newVal=((val<<1) & FIRST_LOWEST_BYTE) | mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY);
+                mMemory->set8bitsValue(address, newVal);
+       
+                mRegisterPack.regF.setCarryFlag((bool) bit);
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FDCB_RLIYD:                                           /* This is a RL (IY+d)  */        
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIY.getValue()-op1;
+                sprintf(mInstruction, "RL (IY-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op1;
+                sprintf(mInstruction, "RL (IY+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                       /* Execute RL (IY+d)    */
+            {
+                /* Retrieve the byte and rotate it  */
+                val=mMemory->get8bitsValue(address);
+                bit=EXTRACT(val, 7, 1);
+                
+                newVal=((val<<1) & FIRST_LOWEST_BYTE) | mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY);
+                mMemory->set8bitsValue(address, newVal);
+       
+                mRegisterPack.regF.setCarryFlag((bool) bit);
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -3373,7 +3516,10 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 mRegisterPack.regF.setCarryFlag((bool) bit);
 
                 /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
                 H_RESET;
+                PV_IS(EVEN(newVal));
                 N_RESET;
 
                 if (pMode==INTP_EXECUTE)
@@ -3682,28 +3828,24 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     PUSHBIT(retCode, registerToBit(str_op1), 0);    /* Add the register as bits             */
                 }
 
-                // RL (HL) is comming soon !
-#ifdef RLHL
-                if (!strcmp(str_op1, "(HL)"))                       /* Check if it is a RLC (HL) instruction*/
+                if (!strcmp(str_op1, "(HL)"))                       /* Check if it is a RL (HL) instruction*/
                 {
-                    retCode=CODE_CB_RLCHL;                           /* Prepare the RLC r                    */
+                    retCode=CODE_CB_RLHL;                           /* Prepare the RL (HL)                    */
                     *pLen=TWO_BYTES;
                 }
-#endif
 
-                // RL (IX+d) and RL (IX+d) are comming soon !
-#ifdef RLIXIXD
-                /* Check if it is a RLC (IX+d) or RLC (IY+d) instruction  */
+
+                /* Check if it is a RL (IX+d) or RL (IY+d) instruction  */
                 if (((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")) && strchr(str_op1, '(') && strchr(str_op1, ')') && strchr(str_op1, '+'))
                 {
                     if (strstr(str_op1, "IX"))
                     {
-                        retCode=CODE_DDCB_RLCIXD;
+                        retCode=CODE_DDCB_RLIXD;
                     }
 
                     if (strstr(str_op1, "IY"))
                     {
-                        retCode=CODE_FDCB_RLCIYD;
+                        retCode=CODE_FDCB_RLIYD;
                     }
 
                     /* Clean the (IX+d) or (IY+d) for Op1 */
@@ -3712,7 +3854,6 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
                     *pLen=FOUR_BYTES;
                 }
-#endif
             }
 
             if (!strcmp(str_inst, "INC"))                           /* A INC instruction is present         */

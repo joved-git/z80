@@ -82,6 +82,7 @@
 #define CODE_CB_RRCR        (0b1100101100001000)                    // RRC r
 #define CODE_CB_RLCHL       (0b1100101100000110)        // 0xCB06   // RLC (HL) 
 #define CODE_CB_RRCHL       (0b1100101100001110)        // 0xCB0E   // RRC (HL) 
+#define CODE_CB_RLHL        (0b1100101100010110)        // 0xCB16   // RL (HL)
 #define CODE_CB_BITBR       (0b1100101101000000)                    // BIT b,r
 #define CODE_CB_BITBHL      (0b1100101101000110)                    // BIT b,(HL)
 #define CODE_CB_RESBR       (0b1100101110000000)                    // RES b,r
@@ -113,10 +114,12 @@
 /* DDCB instruction codes   */
 #define CODE_DDCB_RLCIXD    (0b11011101110010110000000000000110)     // RLC (IX+d)
 #define CODE_DDCB_RRCIXD    (0b11011101110010110000000000001110)     // RRC (IX+d)
+#define CODE_DDCB_RLIXD     (0b11011101110010110000000000010110)     // RL (IX+d)
 
 /* FDCB instruction codes   */
 #define CODE_FDCB_RLCIYD    (0b11111101110010110000000000000110)     // RLC (IY+d)
 #define CODE_FDCB_RRCIYD    (0b11111101110010110000000000001110)     // RRC (IY+d)
+#define CODE_FDCB_RLIYD     (0b11111101110010110000000000010110)     // RL (IY+d)
 
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
@@ -180,12 +183,15 @@
 #define MASK_RESBHL         (0b1111111111000111)
 #define MASK_SETBHL         (0b1111111111000111)
 #define MASK_RLR            (0b1111111111111000)
+#define MASK_RLHL           (0b1111111111111111)
 
 /* 32-bit mask  */
 #define MASK_RLCIXD         (0b11111111111111110000000011111111)
 #define MASK_RLCIYD         (0b11111111111111110000000011111111)
 #define MASK_RRCIXD         (0b11111111111111110000000011111111)
 #define MASK_RRCIYD         (0b11111111111111110000000011111111)
+#define MASK_RLIXD          (0b11111111111111110000000011111111)
+#define MASK_RLIYD          (0b11111111111111110000000011111111)
 
 /* 8-bit registers binary codes */
 #define REGA                (0b111)
