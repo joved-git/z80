@@ -1094,6 +1094,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     uint16_t address=0x0000;
     uint8_t newVal=0;
     uint8_t val=0;
+    uint8_t bit=0;
     char strInstr[MAX_OP_LENGTH*3];
     uint8_t carry=0;
 
@@ -1103,7 +1104,8 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
 #ifdef DEBUG_DISPLAY_INSTR_DATA 
     printf("codee=<%08X> / len=%d\n", codeInHexa, len);
 #endif
-    //codeInHexa=toValue(pCode, &len, &lenEff);                     /* Transform the instruction into real number  */
+    
+    /* bottom 0 */
     
     sprintf(mInstruction, " not yet decoded ");
 
@@ -1601,6 +1603,20 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         instruction=CODE_CB_SETBHL;
                
         op1=EXTRACT(codeInHexa, 3, 3);          /* This is b    */
+    }
+
+    /* This is a RLA    */
+    if ((codeInHexa & MASK_RLA)==CODE_RLA && len == NATURAL_CODE_LENGTH(CODE_RLA))
+    {
+        instruction=CODE_RLA;
+    }
+
+    /* This is a RL r */
+    if ((codeInHexa & MASK_RLR)==CODE_CB_RLR && len == CB_CODE_LENGTH(CODE_CB_RLR))
+    {
+        instruction=CODE_CB_RLR;
+               
+        op1=EXTRACT(codeInHexa, 0, 3);          /* This is b    */
     }
 
     // bottom 1
@@ -2421,12 +2437,9 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 reg8_1->setValue(newVal);
 
                 /* Modify flags here    */
-                S_IS(SIGN(newVal));
-                Z_IS(ZERO(newVal));
                 H_RESET;
-                PV_IS(EVEN(newVal));
                 N_RESET;
-                C_IS(BIT(reg8_1->getValue(), 0));
+                //C_IS(BIT(reg8_1->getValue(), 0));
 
                 if (pMode==INTP_EXECUTE)
                 {
@@ -3310,13 +3323,76 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
 
             break;
+
+        case CODE_RLA:                                         /* This is a RLA  */
+            sprintf(mInstruction, "RLA");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                bit=reg8_1->getBit(BIT_7);
+                //printf("bit7=%1d\n", bit);
+                //printf("carry=%1d\n", mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY));  
+                //printf("rl=%02X\n", (reg8_1->getValue()<<1) & FIRST_LOWEST_BYTE);
+                
+                reg8_1->setValue(((reg8_1->getValue()<<1) & FIRST_LOWEST_BYTE) | mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY));
+                //printf("a=%02X\n", reg8_1->getValue());
+                mRegisterPack.regF.setCarryFlag((bool) bit);
+
+                /* Modify flags here    */
+                H_RESET;
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_CB_RLR:                                              /* This is a RL r  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "RL %s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(op1);
+                bit=reg8_1->getBit(BIT_7);
+                //printf("bit7=%1d\n", bit);
+                //printf("carry=%1d\n", mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY));  
+                //printf("rl=%02X\n", (reg8_1->getValue()<<1) & FIRST_LOWEST_BYTE);
+                
+                reg8_1->setValue(((reg8_1->getValue()<<1) & FIRST_LOWEST_BYTE) | mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY));
+                //printf("a=%02X\n", reg8_1->getValue());
+                mRegisterPack.regF.setCarryFlag((bool) bit);
+
+                /* Modify flags here    */
+                H_RESET;
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
     }
 
 
     /* bottom 2*/
     /*************************************************************************************************************************/
-
-    
+  
     return 0;
 }
 
@@ -3489,6 +3565,12 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 *pLen=ONE_BYTE;
             }
 
+            if (!strcmp(str_inst, "RLA"))                           /* A RLA is present     */
+            {
+                retCode=CODE_RLA;
+                *pLen=ONE_BYTE;
+            }
+
             if (!strcmp(str_inst, "EXX"))                          /* A EXX is present     */
             {
                 retCode=CODE_EXX;
@@ -3586,6 +3668,51 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     *pLen=FOUR_BYTES;
                 }
                 
+            }
+
+            if (!strcmp(str_inst, "RL"))                            /* A RL instruction is present         */
+            {
+                if (strlen(str_op1)==1)                             /* Check if it is a RLC r instruction   */
+                {
+                    retCode=CODE_CB_RLR;                            /* Prepare the RLC r                    */
+                    *pLen=TWO_BYTES;
+
+                    retCheck=clean_r(str_op1);
+                    
+                    PUSHBIT(retCode, registerToBit(str_op1), 0);    /* Add the register as bits             */
+                }
+
+                // RL (HL) is comming soon !
+#ifdef RLHL
+                if (!strcmp(str_op1, "(HL)"))                       /* Check if it is a RLC (HL) instruction*/
+                {
+                    retCode=CODE_CB_RLCHL;                           /* Prepare the RLC r                    */
+                    *pLen=TWO_BYTES;
+                }
+#endif
+
+                // RL (IX+d) and RL (IX+d) are comming soon !
+#ifdef RLIXIXD
+                /* Check if it is a RLC (IX+d) or RLC (IY+d) instruction  */
+                if (((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")) && strchr(str_op1, '(') && strchr(str_op1, ')') && strchr(str_op1, '+'))
+                {
+                    if (strstr(str_op1, "IX"))
+                    {
+                        retCode=CODE_DDCB_RLCIXD;
+                    }
+
+                    if (strstr(str_op1, "IY"))
+                    {
+                        retCode=CODE_FDCB_RLCIYD;
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op1);
+                    retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the RLC (IX+d) or the RLC (IY+d)  */
+
+                    *pLen=FOUR_BYTES;
+                }
+#endif
             }
 
             if (!strcmp(str_inst, "INC"))                           /* A INC instruction is present         */
@@ -4409,7 +4536,6 @@ bool Z80Machine::analyse()
             case CODE:
                 codeInHexa=toValue(mEntry, &lenValue, &lenEff);                     /* Transform the instruction into real number  */
                 interpretCode(codeInHexa, lenValue, INTP_EXECUTE);
-                
                 break;
 
             case INSTRUCTION:

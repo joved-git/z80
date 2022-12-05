@@ -1,3 +1,6 @@
+# 1.0.4
+Add and decode RLA and RL r.
+
 # 1.0.3
 Add and decode INC (HL) and DEC (HL).
 Add and decode RES b,r and SET b,r.

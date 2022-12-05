@@ -37,7 +37,16 @@
 
 #define INITIAL_STACK_POINTER	(0x0000)		/* Initial value for the Stack Pointer						*/
 
-//#define CODEFILE_LOCATION       "../codefile"
+
+#define BIT_0                   0
+#define BIT_1                   1
+#define BIT_2                   2
+#define BIT_3                   3
+#define BIT_4                   4
+#define BIT_5                   5
+#define BIT_6                   6
+#define BIT_7                   7
+
 
 #define STRING_REG_UNDEFINED    "?"
 #define STRING_REGA             "A"
@@ -80,12 +89,19 @@
 #define ERR_BAD_OPERAND         (-2)
 #define ERR_NO_CONDITION        (-3)
 
-#define FLAG_SIGN               (0b10000000)
-#define FLAG_ZERO               (0b01000000)
-#define FLAG_HALF_CARRY         (0b00010000)
-#define FLAG_PARITY_OVERFLOW    (0b00000100)
-#define FLAG_ADD_SUBTRACT       (0b00000010)
-#define FLAG_CARRY              (0b00000001)
+#define MASK_FLAG_SIGN               (0b10000000)
+#define MASK_FLAG_ZERO               (0b01000000)
+#define MASK_FLAG_HALF_CARRY         (0b00010000)
+#define MASK_FLAG_PARITY_OVERFLOW    (0b00000100)
+#define MASK_FLAG_ADD_SUBTRACT       (0b00000010)
+#define MASK_FLAG_CARRY              (0b00000001)
+
+#define BITPOS_FLAG_SIGN               (7)
+#define BITPOS_FLAG_ZERO               (6)
+#define BITPOS_FLAG_HALF_CARRY         (4)
+#define BITPOS_FLAG_PARITY_OVERFLOW    (2)
+#define BITPOS_FLAG_ADD_SUBTRACT       (1)
+#define BITPOS_FLAG_CARRY              (0)
 
 #define STRING_COND_UNDEFINED   "?"
 #define STRING_CONDNZ           "NZ"

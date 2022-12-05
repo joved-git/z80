@@ -38,6 +38,7 @@ public:
     uint8_t getBit(uint8_t);
     void setBit(uint8_t);
     void resetBit(uint8_t);
+    void setBitValue(uint8_t, uint8_t);
 
 private:
     uint8_t mValue;
