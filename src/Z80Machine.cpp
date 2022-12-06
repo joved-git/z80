@@ -1538,7 +1538,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=EXTRACT(codeInHexa,8, 8);
     }
 
-        /* This is a RL (IX+d) */
+    /* This is a RL (IX+d) */
     if (((codeInHexa & MASK_RLIXD)==CODE_DDCB_RLIXD && len == DDCB_CODE_LENGTH(CODE_DDCB_RLIXD)))
     {
         instruction=CODE_DDCB_RLIXD;
@@ -1549,6 +1549,20 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if (((codeInHexa & MASK_RLIYD)==CODE_FDCB_RLIYD && len == FDCB_CODE_LENGTH(CODE_FDCB_RLIYD)))
     {
         instruction=CODE_FDCB_RLIYD;
+        op1=EXTRACT(codeInHexa,8, 8);
+    }
+
+    /* This is a RR (IX+d) */
+    if (((codeInHexa & MASK_RRIXD)==CODE_DDCB_RRIXD && len == DDCB_CODE_LENGTH(CODE_DDCB_RRIXD)))
+    {
+        instruction=CODE_DDCB_RRIXD;
+        op1=EXTRACT(codeInHexa,8, 8);
+    }
+
+    /* This is a RR (IY+d) */
+    if (((codeInHexa & MASK_RRIYD)==CODE_FDCB_RRIYD && len == FDCB_CODE_LENGTH(CODE_FDCB_RRIYD)))
+    {
+        instruction=CODE_FDCB_RRIYD;
         op1=EXTRACT(codeInHexa,8, 8);
     }
 
@@ -1625,6 +1639,12 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         instruction=CODE_RLA;
     }
 
+    /* This is a RRA    */
+    if ((codeInHexa & MASK_RRA)==CODE_RRA && len == NATURAL_CODE_LENGTH(CODE_RRA))
+    {
+        instruction=CODE_RRA;
+    }
+
     /* This is a RL r */
     if ((codeInHexa & MASK_RLR)==CODE_CB_RLR && len == CB_CODE_LENGTH(CODE_CB_RLR))
     {
@@ -1633,10 +1653,25 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=EXTRACT(codeInHexa, 0, 3);          /* This is b    */
     }
 
+    /* This is a RR r */
+    if ((codeInHexa & MASK_RRR)==CODE_CB_RRR && len == CB_CODE_LENGTH(CODE_CB_RRR))
+    {
+        instruction=CODE_CB_RRR;
+               
+        op1=EXTRACT(codeInHexa, 0, 3);          /* This is b    */
+    }
+
     /* This is a RL (HL)  */
     if ((codeInHexa & MASK_RLHL)==CODE_CB_RLHL && len == CB_CODE_LENGTH(CODE_CB_RLHL))
     {
         instruction=CODE_CB_RLHL;
+
+    }
+
+    /* This is a RR (HL)  */
+    if ((codeInHexa & MASK_RRHL)==CODE_CB_RRHL && len == CB_CODE_LENGTH(CODE_CB_RRHL))
+    {
+        instruction=CODE_CB_RRHL;
 
     }
 
@@ -2070,12 +2105,12 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             if (SIGN(op1))                                          /* Check if op2 is negative */
             {
                 op1=~op1+1;
-                address=mRegisterPack.regIX.getValue()-op1;
+                address=mRegisterPack.regIY.getValue()-op1;
                 sprintf(mInstruction, "LD (IY-#%02X),%s", op1, sop2);
             }
             else
             {
-                address=mRegisterPack.regIX.getValue()+op1;
+                address=mRegisterPack.regIY.getValue()+op1;
                 sprintf(mInstruction, "LD (IY+#%02X),%s", op1, sop2);
             }
 
@@ -3543,6 +3578,192 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+        case CODE_RRA:                                         /* This is a RRA  */
+            sprintf(mInstruction, "RRA");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                bit=reg8_1->getBit(BIT_0);
+                // printf("bit7=%1d\n", bit);
+                // printf("carry=%1d\n", mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY));  
+                // printf("rl=%02X\n", (reg8_1->getValue()<<1) & FIRST_LOWEST_BYTE);
+                
+                reg8_1->setValue(((reg8_1->getValue()>>1) & FIRST_LOWEST_BYTE) | (mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY)<<7));
+                // printf("a=%02X\n", reg8_1->getValue());
+                mRegisterPack.regF.setCarryFlag((bool) bit);
+                // printf("carry=%1d\n", mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY));  
+
+                /* Modify flags here    */
+                H_RESET;
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_CB_RRR:                                         /* This is a RR r  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "RR %s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                bit=reg8_1->getBit(BIT_0);
+                
+                reg8_1->setValue(((reg8_1->getValue()>>1) & FIRST_LOWEST_BYTE) | (mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY)<<7));
+                mRegisterPack.regF.setCarryFlag((bool) bit);
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_CB_RRHL:                                         /* This is a RR (HL)  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "RR (HL)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Retrieve the byte and rotate it  */
+                val=mMemory->get8bitsValue(mRegisterPack.regHL.getValue());
+                bit=EXTRACT(val, 0, 1);
+                
+                newVal=((val>>1) & FIRST_LOWEST_BYTE) | (mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY)<<7);
+
+                mMemory->set8bitsValue(mRegisterPack.regHL.getValue(), newVal);            
+                mRegisterPack.regF.setCarryFlag((bool) bit);
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DDCB_RRIXD:                                         /* This is a RR (IX+d)  */
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIX.getValue()-op1;
+                sprintf(mInstruction, "RR (IX-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op1;
+                sprintf(mInstruction, "RR (IX+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Retrieve the byte and rotate it  */
+                val=mMemory->get8bitsValue(address);
+                bit=EXTRACT(val, 0, 1);
+                
+                newVal=((val>>1) & FIRST_LOWEST_BYTE) | (mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY)<<7);
+
+                mMemory->set8bitsValue(address, newVal);            
+                mRegisterPack.regF.setCarryFlag((bool) bit);
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FDCB_RRIYD:                                           /* This is a RR (IY+d)  */
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIY.getValue()-op1;
+                sprintf(mInstruction, "RR (IY-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op1;
+                sprintf(mInstruction, "RR (IY+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Retrieve the byte and rotate it  */
+                val=mMemory->get8bitsValue(address);
+                bit=EXTRACT(val, 0, 1);
+                
+                newVal=((val>>1) & FIRST_LOWEST_BYTE) | (mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY)<<7);
+
+                mMemory->set8bitsValue(address, newVal);            
+                mRegisterPack.regF.setCarryFlag((bool) bit);
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
         
         case CODE_CPL:                                              /* This is a CPL  */
             sprintf(mInstruction, "CPL");
@@ -3582,8 +3803,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 Z_IS(ZERO(reg8_1->getValue()));
                 N_SET;
 
-                // To do xxxjoexxx. Study what is a borrow !!!
-                //H_IS() if borrow from bit 4.
+                H_IS(checkHalfBorrowOnSub8(0, val));
 
                 /* PV setting   */
                 if (val==0x80)
@@ -3656,9 +3876,9 @@ bool Z80Machine::checkCarryOnAdd8(uint8_t pB1, uint8_t pB2)
 }
 
 /* Check if it will be an half carry on an 16-bit addition.    */
-bool Z80Machine::checkHalfCarryOnAdd16(uint16_t pB1, uint16_t pB2)
+bool Z80Machine::checkHalfCarryOnAdd16(uint16_t pW1, uint16_t pW2)
 {
-    if ((pB1 & 0x0FFF) + (pB2 & 0x0FFF)>0x0FFF)
+    if ((pW1 & 0x0FFF) + (pW2 & 0x0FFF)>0x0FFF)
     {
         return true;
     }
@@ -3670,9 +3890,9 @@ bool Z80Machine::checkHalfCarryOnAdd16(uint16_t pB1, uint16_t pB2)
 
 
 /* Check if it will be a carry on an 16-bit addition.          */
-bool Z80Machine::checkCarryOnAdd16(uint16_t pB1, uint16_t pB2)
+bool Z80Machine::checkCarryOnAdd16(uint16_t pW1, uint16_t pW2)
 {
-    if (pB1 + pB2 > 0xFFFF)
+    if (pW1 + pW2 > 0xFFFF)
     {
         return true;
     }
@@ -3681,6 +3901,7 @@ bool Z80Machine::checkCarryOnAdd16(uint16_t pB1, uint16_t pB2)
         return false;
     }
 }
+
 
 /* Check if it will be an overflow on an addition.      */
 bool Z80Machine::checkOverflowOnAdd(uint8_t pB1, uint8_t pB2)
@@ -3694,6 +3915,55 @@ bool Z80Machine::checkOverflowOnAdd(uint8_t pB1, uint8_t pB2)
         return false;
     }
 }
+
+/* Check if it will be an half borrow on an 8-bit substraction  */
+bool Z80Machine::checkHalfBorrowOnSub8(uint8_t pB1, uint8_t pB2)
+{
+    if ((pB1 & 0x0F) < (pB2 & 0x0F))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+/* Check if it will be a borrow on an 8-bit substraction */
+bool Z80Machine::checkBorrowOnSub8(uint8_t pB1, uint8_t pB2)
+{
+    if (pB1 < pB2)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+/* Check if it will be an half borrow on an 16-bit substraction */
+bool Z80Machine::checkHalfBorrowOnSub16(uint16_t pW1, uint16_t pW2)
+{
+    return false;
+}
+
+
+/* Check if it will be a borrow on an 16-bit substraction   */
+bool Z80Machine::checkBorrowOnSub16(uint16_t pW1, uint16_t pW2)
+{
+    if (pW1 < pW2)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 
 /* Used to cut the instruction  */
 int8_t Z80Machine::cutInstruction(char *pInstruction, char *pInst, char *pOp1, char *pOp2)
@@ -3812,6 +4082,12 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
             if (!strcmp(str_inst, "RLA"))                           /* A RLA is present     */
             {
                 retCode=CODE_RLA;
+                *pLen=ONE_BYTE;
+            }
+
+            if (!strcmp(str_inst, "RRA"))                           /* A RRA is present     */
+            {
+                retCode=CODE_RRA;
                 *pLen=ONE_BYTE;
             }
 
@@ -3944,6 +4220,46 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     if (strstr(str_op1, "IY"))
                     {
                         retCode=CODE_FDCB_RLIYD;
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op1);
+                    retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the RLC (IX+d) or the RLC (IY+d)  */
+
+                    *pLen=FOUR_BYTES;
+                }
+            }
+
+            if (!strcmp(str_inst, "RR"))                            /* A RR instruction is present         */
+            {
+                if (strlen(str_op1)==1)                             /* Check if it is a RLC r instruction   */
+                {
+                    retCode=CODE_CB_RRR;                            /* Prepare the RLR r                    */
+                    *pLen=TWO_BYTES;
+
+                    retCheck=clean_r(str_op1);
+                    
+                    PUSHBIT(retCode, registerToBit(str_op1), 0);    /* Add the register as bits             */
+                }
+
+                if (!strcmp(str_op1, "(HL)"))                       /* Check if it is a RR (HL) instruction*/
+                {
+                    retCode=CODE_CB_RRHL;                           /* Prepare the RR (HL)                    */
+                    *pLen=TWO_BYTES;
+                }
+
+
+                /* Check if it is a RR (IX+d) or RR (IY+d) instruction  */
+                if (((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")) && strchr(str_op1, '(') && strchr(str_op1, ')') && strchr(str_op1, '+'))
+                {
+                    if (strstr(str_op1, "IX"))
+                    {
+                        retCode=CODE_DDCB_RRIXD;
+                    }
+
+                    if (strstr(str_op1, "IY"))
+                    {
+                        retCode=CODE_FDCB_RRIYD;
                     }
 
                     /* Clean the (IX+d) or (IY+d) for Op1 */

@@ -223,7 +223,6 @@ private:
     /// @return true if it will be a half carry.
     bool checkHalfCarryOnAdd8(uint8_t, uint8_t);
 
-
     /// @brief  Check if it will be a carry on an 8-bit addition.
     /// @param  The 2 bytes to add.
     /// @return true if it will be a carry.
@@ -234,7 +233,6 @@ private:
     /// @return true if it will be a half carry.
     bool checkHalfCarryOnAdd16(uint16_t, uint16_t);
 
-
     /// @brief  Check if it will be a carry on an 16-bit addition.
     /// @param  The 2 bytes to add.
     /// @return true if it will be a carry.
@@ -244,6 +242,26 @@ private:
     /// @param  The 2 bytes to add.
     /// @return true if it will be an overflow.
     bool checkOverflowOnAdd(uint8_t, uint8_t);
+
+    /// @brief  Check if it will be an half borrow on an 8-bit substraction.
+    /// @param  The 2 bytes to substract (#1 - #2).
+    /// @return true if it will be a half borrow.
+    bool checkHalfBorrowOnSub8(uint8_t, uint8_t);
+
+    /// @brief  Check if it will be a borrow on an 8-bit substraction.
+    /// @param  The 2 bytes to substract (#1 - #2).
+    /// @return true if it will be a borrow.
+    bool checkBorrowOnSub8(uint8_t, uint8_t);
+
+    /// @brief  Check if it will be an half borrow on an 16-bit substraction.
+    /// @param  The 2 bytes to substract (#1 - #2).
+    /// @return true if it will be a half borrow.
+    bool checkHalfBorrowOnSub16(uint16_t, uint16_t);
+
+    /// @brief  Check if it will be a borrow on an 16-bit substraction.
+    /// @param  The 2 bytes to substarct (#1 - #2).
+    /// @return true if it will be a borrow.
+    bool checkBorrowOnSub16(uint16_t, uint16_t);
 
     /// @brief  Load a file with codes or instructions.
     /// @param  The file to load.

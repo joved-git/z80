@@ -1,3 +1,8 @@
+# 1.0.7
+Introduce borrow managing: checkHalfBorrowOnSub8(), checkBorrowOnSub16() and checkHalfBorrowOnSub16() functions.
+Add Half Borrow detection into NEG instruction. 
+Add and decode all RR instructions (RRA, RR r, RR (HL), RR (IX+d) and RR (IY+d)).
+
 # 1.0.6
 Add and decode CPL and NEG.
 
