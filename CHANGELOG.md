@@ -1,3 +1,6 @@
+# 1.0.10
+Add new Label class.
+
 # 1.0.9
 Add and decode JP nn (prepare handling of labels into ASM programs).
 Correct execution of CALL and JP: the PC was not correctly calculated.
