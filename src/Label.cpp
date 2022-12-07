@@ -6,6 +6,15 @@ Label::Label(std::string pName, uint8_t pAddress)
     mAddress=pAddress;
 }
 
-Label::~ Label()
+Label::~Label()
 {
+}
+
+/// @brief 
+/// @param pName 
+/// @param pAddress 
+void Label::setValues(std::string pName, uint8_t pAddress)
+{
+    mName=pName;
+    mAddress=pAddress;    
 }
