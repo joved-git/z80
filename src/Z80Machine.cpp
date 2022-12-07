@@ -1067,7 +1067,7 @@ void Z80Machine::loadCode(const char *pFilename)
                     // std::string stringLabel(label);
                     // Label lbl(std::string(label), address);
                     labelDataset.insert(labelDataset.begin(), Label(std::string(label), address));
-<<<<<<< HEAD
+
                     printf("%8s @ #%04X\n", label, address);
                     strcpy(label, &aLine[posChar-aLine+1]);
                     strcpy(aLine, label);
