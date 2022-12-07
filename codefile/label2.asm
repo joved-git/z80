@@ -3,8 +3,8 @@ org #1234
 loop:	ld a,#1
 		ld b,#CD
 		add a,b
-		jump loop
+		jp loop
 
 loop2:	ld a,b
-		jump loop2
+		jp loop2
 end
