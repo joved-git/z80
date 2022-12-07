@@ -1,6 +1,6 @@
 #include "../inc/Z80Machine.h"
 #include "../inc/instruction_length.h"
-#include "../inc/Label.h"
+#include "../inc/LabelDataset.h"
 
 #include <list>
 
@@ -1036,10 +1036,13 @@ void Z80Machine::loadCode(const char *pFilename)
     char label[MAX_INSTR_LENGTH];
     uint8_t len=-1;
     uint32_t machineCode=0;
-    int8_t i=0;
     uint16_t address=0x0000;
+    uint16_t labelAddress=0x0000;
     char *posChar=0;
-    std::list<Label> labelDataset;
+    LabelDataset labelDataset;
+    uint8_t pos1=0, pos2=0;
+    int8_t i=0;
+    char sepChar=' ';
 
     if (!(file=fopen(pFilename, "rw")))
     {
@@ -1060,19 +1063,59 @@ void Z80Machine::loadCode(const char *pFilename)
                     address=mRegisterPack.regPC.getValue();
                 }
 
-                if (posChar=strchr(aLine, ':'))
+                if (posChar=strchr(aLine, ':'))                 /* Find label in the line   */
                 {
                     strcpy(label, aLine);       
                     label[posChar-aLine]='\0';
-                    // std::string stringLabel(label);
-                    // Label lbl(std::string(label), address);
-                    labelDataset.insert(labelDataset.begin(), Label(std::string(label), address));
 
-                    printf("%8s @ #%04X\n", label, address);
+                    /* Add the label and its address into the dataset       */
+                    labelDataset.add(Label(std::string(label), address));
+                    // printf("Add %s / #%04X\n", label, address);
+
+                    /* Keep the instruction that is on the line             */
                     strcpy(label, &aLine[posChar-aLine+1]);
                     strcpy(aLine, label);
                     clean_line(aLine);
-                    printf("nl=<%s>\n", label);
+                }
+
+                /* Is it a JP or a CALL     */
+                if (strstr(aLine, "JP") || strstr(aLine, "CALL")) 
+                {
+                    if (!strchr(aLine, '#') && !strchr(aLine, ')' && !strchr(aLine, '(')))           /* This is a label          */
+                    {
+                        std::string strLine(aLine);
+
+                        /* Find the last ' ' or ','    */
+                        pos1=strLine.rfind(' ');
+                        pos2=strLine.rfind(',');
+
+                        if (pos1+pos2)                      /* ' ' or ',' was found     */
+                        {
+                            /* Find the last ' ' or ',' */
+                            if (pos1>pos2)
+                            {
+                                sepChar=' ';
+                            }
+                            else 
+                            {
+                                pos1=pos2;
+                                sepChar=',';
+                            }
+
+                            strcpy(label, &aLine[pos1+1]);
+                            strLine.resize(pos1);
+                            //printf("Search for %s\n", label);
+                            labelAddress=labelDataset.findAddress(label);
+                            sprintf(aLine, "%s%c#%04X", strLine.c_str(), sepChar, labelAddress);
+                            //printf("al=<%s>\n", aLine);
+                        }
+
+                    }
+                }
+
+                if (strstr(aLine, "JR") || strstr(aLine, "DJNZ")) 
+                {
+                    /* Must ne done */
                 }
 
                 machineCode=findMachineCode(aLine, &len);

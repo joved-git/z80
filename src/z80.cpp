@@ -49,17 +49,10 @@ int main(int argc, char *argv[])
 
 		command[i]='\0';
 		i=0;
-		//printf("command=<%s>\n", command);
 		
 		/* Handle the command	*/ 
 		machine.setEntry(command);
 		exit=machine.analyse();
-		//printf("*** 2");
-		//newCommand.getResult();
-		//
-		//cmd=newCommand.getInstruction();
-		//attr1=newCommand.getFirstAttribute();
-		//attr2=newCommand.getSecondAttribute();
 
 		if (!exit) 
 		{
@@ -68,7 +61,6 @@ int main(int argc, char *argv[])
 				machine.displayExecRegisters();
 				machine.displayMemory("(PC)");
 				machineCode=machine.getNextInstruction(instruction, &len);
-				//printf("mc=%08X  <%s>  len=%d\n", machineCode, instruction, len);
 
 				std::cout << std::endl;
 

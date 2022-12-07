@@ -9,13 +9,18 @@
 class Label
 {
 public:
-    Label(std::string, uint8_t);
+
+    Label(std::string, uint16_t);
+    Label();
     ~Label();
-    void setValues(std::string, uint8_t);
+    void setValues(std::string, uint16_t);
+    uint16_t getAddress();
+    std::string getName();
+
 
 private:
     std::string mName;
-    uint8_t mAddress;
+    uint16_t mAddress;
 };
 
 #endif

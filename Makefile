@@ -8,6 +8,7 @@ SRC_FILES=	$(SRC_DIR)\z80.cpp \
 		$(SRC_DIR)\Register_16bits.cpp \
 		$(SRC_DIR)\Memory.cpp \
 		$(SRC_DIR)\Label.cpp \
+		$(SRC_DIR)\LabelDataset.cpp \
 		$(SRC_DIR)\Z80Machine.cpp
 
 z80:  
