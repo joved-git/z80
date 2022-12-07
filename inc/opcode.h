@@ -1,15 +1,15 @@
 #ifndef OPCODE_H
 #define OPCODE_H
 
-#define ONE_BYTE                (2)
-#define TWO_BYTES               (4)
-#define THREE_BYTES             (6)
-#define FOUR_BYTES              (8)
-
-#define SIZE_1_BYTE             (8)
-#define SIZE_2_BYTES            (16)
-#define SIZE_3_BYTES            (24)
-#define SIZE_4_BYTES            (32)
+#define ONE_BYTE                    (2)
+#define TWO_BYTES                   (4)
+#define THREE_BYTES                 (6)
+#define FOUR_BYTES                  (8)
+    
+#define SIZE_1_BYTE                 (8)
+#define SIZE_2_BYTES                (16)
+#define SIZE_3_BYTES                (24)
+#define SIZE_4_BYTES                (32)
 
 #define FIRST_LOWEST_BYTE           (0x000000FF)
 #define SECOND_LOWEST_BYTE          (0x0000FF00)
@@ -18,6 +18,7 @@
 #define FIRST_TWO_LOWEST_BYTES      (0x0000FFFF)
 #define FIRST_THREE_LOWEST_BYTES    (0x00FFFFFF)
 
+/* Bit operations    */
 #define EXTRACT(a, d, l)        (a>>d & ~(((uint8_t) 0b111111111)<<l)) 
 #define PUSHBIT(a, b, l)        (b==0?a=a&~(1<<l):a=a|(b<<l))
 #define SIGN(a)                 (a>>7)
@@ -25,6 +26,7 @@
 #define EVEN(a)                 (BIT(a, 0)==0?1:0)     
 #define ODD(a)                  (BIT(a, 0)==1?1:0)
 #define BIT(a, n)               EXTRACT (a, n, 1)
+#define REVERT(a)               a=((a&FIRST_LOWEST_BYTE)<<8) | ((a&SECOND_LOWEST_BYTE)>>8);
 
 #define NATURAL_CODE_LENGTH(c)  natural_code_length[c]
 #define CB_CODE_LENGTH(c)       (cb_code_length[c & FIRST_LOWEST_BYTE]+ONE_BYTE)
@@ -62,6 +64,7 @@
 #define CODE_ADDAHL         (0b10000110)                // 0x86     // ADD A,(HL)
 #define CODE_ADCAHL         (0b10001110)                // 0x8E     // ADC A,(HL)
 #define CODE_CALLCCNN       (0b11000100)                            // CALL cc,nn
+#define CODE_JPNN           (0b11000011)                // 0xC3     / JP nn
 #define CODE_CALLNN         (0b11001101)                // 0xCD     // CALL nn
 #define CODE_EXX            (0b11011001)                // 0xD9     // EXX
 #define CODE_LDRR           (0b01000000)                
@@ -171,6 +174,7 @@
 #define MASK_RLA            (0b11111111)
 #define MASK_CPL            (0b11111111)
 #define MASK_RRA            (0b11111111)
+#define MASK_JPNN           (0b11111111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)

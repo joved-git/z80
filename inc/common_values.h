@@ -113,6 +113,10 @@
 #define STRING_CONDP            "P"
 #define STRING_CONDM            "M"
 
+/* Return code for interpretCode() function */
+#define NOTHING_SPECIAL         0
+#define NO_PC_CHANGE            1
+
 enum typeOfEntry
     {
         NOTHING=0,

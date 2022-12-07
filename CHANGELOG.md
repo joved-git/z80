@@ -1,3 +1,7 @@
+# 1.0.9
+Add and decode JP nn (prepare handling of labels into ASM programs).
+Correct execution of CALL and JP: the PC was not correctly calculated.
+
 # 1.0.8
 Add and decode BIT b,(IX+d), BIT b,(IY+d), SET b,(IX+d), SET b,(IY+d), RES b,(IX+d), RES b,(IY+d).
 
