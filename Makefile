@@ -1,4 +1,5 @@
 CC=C:\msys64\mingw64\bin\g++
+CCFLAGS=-static-libgcc -static-libstdc++
 CFLAGS=-I.
 BUILD_DIR=.\build
 SRC_DIR=.\src
@@ -12,5 +13,5 @@ SRC_FILES=	$(SRC_DIR)\z80.cpp \
 z80:  
 	rd /s/q $(BUILD_DIR)
 	md $(BUILD_DIR)
-	$(CC) $(SRC_FILES) -o $(BUILD_DIR)\z80.exe
+	$(CC) $(CCFLAGS) $(SRC_FILES) -o $(BUILD_DIR)\z80.exe
 	

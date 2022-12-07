@@ -1055,8 +1055,6 @@ void Z80Machine::loadCode(const char *pFilename)
 
             if (strlen(aLine)!=0)
             {
-                machineCode=findMachineCode(aLine, &len);
-
                 if (strstr(aLine, "ORG"))
                 {
                     address=mRegisterPack.regPC.getValue();
@@ -1068,9 +1066,15 @@ void Z80Machine::loadCode(const char *pFilename)
                     label[posChar-aLine]='\0';
                     // std::string stringLabel(label);
                     // Label lbl(std::string(label), address);
-                    // labelDataset.insert(labelDataset.begin(), Label(std::string(label), address));
-                    printf("<%s> @ #%04X\n", label, address);
+                    labelDataset.insert(labelDataset.begin(), Label(std::string(label), address));
+                    printf("%8s @ #%04X\n", label, address);
+                    strcpy(label, &aLine[posChar-aLine+1]);
+                    strcpy(aLine, label);
+                    clean_line(aLine);
+                    printf("nl=<%s>\n", label);
                 }
+
+                machineCode=findMachineCode(aLine, &len);
 
                 if (machineCode!=0xFFFFFFFF)
                 {

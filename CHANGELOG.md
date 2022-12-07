@@ -1,4 +1,7 @@
-# 1.0.10
+# 1.0.12
+Handle label and instruction on the same line with command load 'l'.
+
+# 1.0.11
 Add new Label class.
 
 # 1.0.9
