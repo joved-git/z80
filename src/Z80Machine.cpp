@@ -1507,7 +1507,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                
         op1=EXTRACT(codeInHexa, 3, 3);          /* This is b    */
     }
-
+    
     /* This is a CALL nn */
     if ((codeInHexa>>SIZE_2_BYTES & MASK_CALLNN)==CODE_CALLNN && len == NATURAL_CODE_LENGTH(CODE_CALLNN))
     {
@@ -1688,6 +1688,55 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         instruction=CODE_ED_NEG;
 
     }
+
+    /* This is a BIT (IX+d) */
+    if (((codeInHexa & MASK_BITBIXD)==CODE_DDCB_BITBIXD && len == DDCB_CODE_LENGTH(CODE_DDCB_BITBIXD)))
+    {
+        instruction=CODE_DDCB_BITBIXD;
+        op1=EXTRACT(codeInHexa,3, 3);           // This is b
+        op2=EXTRACT(codeInHexa,8, 8);           // This is d
+    }
+
+    /* This is a BIT (IY+d) */
+    if (((codeInHexa & MASK_BITBIYD)==CODE_FDCB_BITBIYD && len == FDCB_CODE_LENGTH(CODE_FDCB_BITBIYD)))
+    {
+        instruction=CODE_FDCB_BITBIYD;
+        op1=EXTRACT(codeInHexa,3, 3);           // This is b
+        op2=EXTRACT(codeInHexa,8, 8);           // This is d
+    }
+
+    /* This is a SET (IX+d) */
+    if (((codeInHexa & MASK_SETBIXD)==CODE_DDCB_SETBIXD && len == DDCB_CODE_LENGTH(CODE_DDCB_SETBIXD)))
+    {
+        instruction=CODE_DDCB_SETBIXD;
+        op1=EXTRACT(codeInHexa,3, 3);           // This is b
+        op2=EXTRACT(codeInHexa,8, 8);           // This is d
+    }
+
+    /* This is a SET (IY+d) */
+    if (((codeInHexa & MASK_SETBIYD)==CODE_FDCB_SETBIYD && len == FDCB_CODE_LENGTH(CODE_FDCB_SETBIYD)))
+    {
+        instruction=CODE_FDCB_SETBIYD;
+        op1=EXTRACT(codeInHexa,3, 3);           // This is b
+        op2=EXTRACT(codeInHexa,8, 8);           // This is d
+    }
+
+    /* This is a RES (IX+d) */
+    if (((codeInHexa & MASK_RESBIXD)==CODE_DDCB_RESBIXD && len == DDCB_CODE_LENGTH(CODE_DDCB_RESBIXD)))
+    {
+        instruction=CODE_DDCB_RESBIXD;
+        op1=EXTRACT(codeInHexa,3, 3);           // This is b
+        op2=EXTRACT(codeInHexa,8, 8);           // This is d
+    }
+
+    /* This is a RES (IY+d) */
+    if (((codeInHexa & MASK_RESBIYD)==CODE_FDCB_RESBIYD && len == FDCB_CODE_LENGTH(CODE_FDCB_SETBIYD)))
+    {
+        instruction=CODE_FDCB_RESBIYD;
+        op1=EXTRACT(codeInHexa,3, 3);           // This is b
+        op2=EXTRACT(codeInHexa,8, 8);           // This is d
+    }
+    
 
     // bottom 1
     /*************************************************************************************************************************/
@@ -3195,6 +3244,210 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
+        case CODE_DDCB_BITBIXD:                                         /* This is a BIT b,(IX+d)   */
+            if (SIGN(op2))                                              /* Check if op2 is negative */
+            {
+                op2=~op2+1;
+                address=mRegisterPack.regIX.getValue()-op2;
+                sprintf(mInstruction, "BIT %d,(IX-#%02X)", op1, op2);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op2;
+                sprintf(mInstruction, "BIT %d,(IX+#%02X)", op1, op2);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                newVal=mMemory->get8bitsValue(address);
+
+                /* Modify flags here    */
+                Z_IS(BIT(newVal, op1)==1?0:1);
+                H_SET;
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FDCB_BITBIYD:                                         /* This is a BIT b,(IY+d)   */
+            if (SIGN(op2))                                              /* Check if op2 is negative */
+            {
+                op2=~op2+1;
+                address=mRegisterPack.regIY.getValue()-op2;
+                sprintf(mInstruction, "BIT %d,(IY-#%02X)", op1, op2);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op2;
+                sprintf(mInstruction, "BIT %d,(IY+#%02X)", op1, op2);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                newVal=mMemory->get8bitsValue(address);
+
+                /* Modify flags here    */
+                Z_IS(BIT(newVal, op1)==1?0:1);
+                H_SET;
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DDCB_SETBIXD:                                            /* This is a SET b,(IX+d)   */
+            if (SIGN(op2))                                                  /* Check if op2 is negative */
+            {
+                op2=~op2+1;
+                address=mRegisterPack.regIX.getValue()-op2;
+                sprintf(mInstruction, "SET %d,(IX-#%02X)", op1, op2);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op2;
+                sprintf(mInstruction, "SET %d,(IX+#%02X)", op1, op2);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                val=mMemory->get8bitsValue(address);
+                PUSHBIT(val, 1, op1);
+                mMemory->set8bitsValue(address, val);
+
+                /* Modify flags here    */
+                /* None here            */
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FDCB_SETBIYD:                                         /* This is a SET b,(IY+d)   */
+            if (SIGN(op2))                                              /* Check if op2 is negative */
+            {
+                op2=~op2+1;
+                address=mRegisterPack.regIY.getValue()-op2;
+                sprintf(mInstruction, "SET %d,(IY-#%02X)", op1, op2);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op2;
+                sprintf(mInstruction, "SET %d,(IY+#%02X)", op1, op2);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                val=mMemory->get8bitsValue(address);
+                PUSHBIT(val, 1, op1);
+                mMemory->set8bitsValue(address, val);
+
+                /* Modify flags here    */
+                /* None here            */
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DDCB_RESBIXD:                                             /* This is a RES b,(IX+d)   */
+            if (SIGN(op2))                                                  /* Check if op2 is negative */
+            {
+                op2=~op2+1;
+                address=mRegisterPack.regIX.getValue()-op2;
+                sprintf(mInstruction, "RES %d,(IX-#%02X)", op1, op2);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op2;
+                sprintf(mInstruction, "RES %d,(IX+#%02X)", op1, op2);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                val=mMemory->get8bitsValue(address);
+                PUSHBIT(val, 0, op1);
+                mMemory->set8bitsValue(address, val);
+
+                /* Modify flags here    */
+                /* None here            */
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FDCB_RESBIYD:                                         /* This is a RES b,(IY+d)   */
+            if (SIGN(op2))                                              /* Check if op2 is negative */
+            {
+                op2=~op2+1;
+                address=mRegisterPack.regIY.getValue()-op2;
+                sprintf(mInstruction, "RES %d,(IY-#%02X)", op1, op2);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op2;
+                sprintf(mInstruction, "RES %d,(IY+#%02X)", op1, op2);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                val=mMemory->get8bitsValue(address);
+                PUSHBIT(val, 0, op1);
+                mMemory->set8bitsValue(address, val);
+
+                /* Modify flags here    */
+                /* None here            */
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
         case CODE_CB_RESBHL:                                         /* This is a RES b,(HL)  */
             sprintf(mInstruction, "RES %d,(HL)", op1);
 
@@ -3765,6 +4018,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             break;
 
         
+
         case CODE_CPL:                                              /* This is a CPL  */
             sprintf(mInstruction, "CPL");
 
@@ -3824,9 +4078,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 {
                     C_RESET;
                 }
-
-
-
 
                 if (pMode==INTP_EXECUTE)
                 {
@@ -4719,7 +4970,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
             if (!strcmp(str_inst, "BIT"))                               /* A BIT instruction is present  */
             {
-                /* Check if it is a BIT n,r instruction    */
+                /* Check if it is a BIT b,r instruction    */
                 if (strlen(str_op1)==1 && strlen(str_op2)==1)       
                 {
                     retCode=CODE_CB_BITBR;                              /* Prepare the BIT n,r  */
@@ -4730,7 +4981,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     *pLen=TWO_BYTES;
                 }
 
-                /* Check if it is a BIT n(HL) instruction    */
+                /* Check if it is a BIT b,(HL) instruction    */
                 if (strlen(str_op1)==1 && !strcmp(str_op2, "(HL)"))       
                 {
                     retCode=CODE_CB_BITBHL;                               /* Prepare the BIT n,(HL) */
@@ -4738,6 +4989,28 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     PUSHBIT(retCode, numberToBit(str_op1), 3);            /* Add the bit number as bits   */
                     //
                     *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a BIT b,(IX+d) or BIT b,(IY+d) instruction  */
+                if ((strlen(str_op1)==1) && (((strlen(str_op2)==7) || (strlen(str_op2)==8)) && (strstr(str_op2, "IX") || strstr(str_op2, "IY")) && strchr(str_op2, '(') && strchr(str_op2, ')') && strchr(str_op2, '+')))
+                {
+                    if (strstr(str_op2, "IX"))
+                    {
+                        retCode=CODE_DDCB_BITBIXD;
+                    }
+
+                    if (strstr(str_op2, "IY"))
+                    {
+                        retCode=CODE_FDCB_BITBIYD;
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op2);
+                    
+                    retCode=retCode+(toValue(str_op2+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the BIT b,(IX+d) or the RLC (IY+d)  */
+                    PUSHBIT(retCode, toValue(str_op1, pLen, &lenEff), 3);
+
+                    *pLen=FOUR_BYTES;
                 }
             }
 
@@ -4753,13 +5026,35 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     *pLen=TWO_BYTES;
                 }
 
-                /* Check if it is a RES n(HL) instruction    */
+                /* Check if it is a RES n,(HL) instruction    */
                 if (strlen(str_op1)==1 && !strcmp(str_op2, "(HL)"))       
                 {
                     retCode=CODE_CB_RESBHL;                               /* Prepare the RES n,(HL) */
                     PUSHBIT(retCode, numberToBit(str_op1), 3);            /* Add the bit number as bits   */
                     
                     *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a RES b,(IX+d) or RES b,(IY+d) instruction  */
+                if ((strlen(str_op1)==1) && (((strlen(str_op2)==7) || (strlen(str_op2)==8)) && (strstr(str_op2, "IX") || strstr(str_op2, "IY")) && strchr(str_op2, '(') && strchr(str_op2, ')') && strchr(str_op2, '+')))
+                {
+                    if (strstr(str_op2, "IX"))
+                    {
+                        retCode=CODE_DDCB_RESBIXD;
+                    }
+
+                    if (strstr(str_op2, "IY"))
+                    {
+                        retCode=CODE_FDCB_RESBIYD;
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op2);
+                    
+                    retCode=retCode+(toValue(str_op2+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the RES b,(IX+d) or the RLC (IY+d)  */
+                    PUSHBIT(retCode, toValue(str_op1, pLen, &lenEff), 3);
+
+                    *pLen=FOUR_BYTES;
                 }
             }
 
@@ -4775,13 +5070,35 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     *pLen=TWO_BYTES;
                 }
 
-                /* Check if it is a SET n(HL) instruction    */
+                /* Check if it is a SET n,(HL) instruction    */
                 if (strlen(str_op1)==1 && !strcmp(str_op2, "(HL)"))       
                 {
                     retCode=CODE_CB_SETBHL;                               /* Prepare the SET n,(HL) */
                     PUSHBIT(retCode, numberToBit(str_op1), 3);            /* Add the bit number as bits   */
                     
                     *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a SET b,(IX+d) or SET b,(IY+d) instruction  */
+                if ((strlen(str_op1)==1) && (((strlen(str_op2)==7) || (strlen(str_op2)==8)) && (strstr(str_op2, "IX") || strstr(str_op2, "IY")) && strchr(str_op2, '(') && strchr(str_op2, ')') && strchr(str_op2, '+')))
+                {
+                    if (strstr(str_op2, "IX"))
+                    {
+                        retCode=CODE_DDCB_SETBIXD;
+                    }
+
+                    if (strstr(str_op2, "IY"))
+                    {
+                        retCode=CODE_FDCB_SETBIYD;
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op2);
+                    
+                    retCode=retCode+(toValue(str_op2+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the SET b,(IX+d) or the RLC (IY+d)  */
+                    PUSHBIT(retCode, toValue(str_op1, pLen, &lenEff), 3);
+
+                    *pLen=FOUR_BYTES;
                 }
             }
 

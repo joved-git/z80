@@ -1,3 +1,6 @@
+# 1.0.8
+Add and decode BIT b,(IX+d), BIT b,(IY+d), SET b,(IX+d), SET b,(IY+d), RES b,(IX+d), RES b,(IY+d).
+
 # 1.0.7
 Introduce borrow managing: checkHalfBorrowOnSub8(), checkBorrowOnSub16() and checkHalfBorrowOnSub16() functions.
 Add Half Borrow detection into NEG instruction. 
