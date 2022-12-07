@@ -1,5 +1,8 @@
 #include "../inc/Z80Machine.h"
 #include "../inc/instruction_length.h"
+#include "../inc/Label.h"
+
+#include <list>
 
 /* The constructor  */
 Z80Machine::Z80Machine()
@@ -1030,10 +1033,13 @@ void Z80Machine::loadCode(const char *pFilename)
     FILE *file=NULL;
     bool notTheEnd=true;
     char aLine[MAX_INSTR_LENGTH];
+    char label[MAX_INSTR_LENGTH];
     uint8_t len=-1;
     uint32_t machineCode=0;
     int8_t i=0;
     uint16_t address=0x0000;
+    char *posChar=0;
+    std::list<Label> labelDataset;
 
     if (!(file=fopen(pFilename, "rw")))
     {
@@ -1054,6 +1060,16 @@ void Z80Machine::loadCode(const char *pFilename)
                 if (strstr(aLine, "ORG"))
                 {
                     address=mRegisterPack.regPC.getValue();
+                }
+
+                if (posChar=strchr(aLine, ':'))
+                {
+                    strcpy(label, aLine);       
+                    label[posChar-aLine]='\0';
+                    // std::string stringLabel(label);
+                    // Label lbl(std::string(label), address);
+                    // labelDataset.insert(labelDataset.begin(), Label(std::string(label), address));
+                    printf("<%s> @ #%04X\n", label, address);
                 }
 
                 if (machineCode!=0xFFFFFFFF)
@@ -3504,7 +3520,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             break;
 
        case CODE_CALLNN:                                       /* This is a CALL nn                    */
-            // op16=((op16&FIRST_LOWEST_BYTE)<<8) | ((op16&SECOND_LOWEST_BYTE)>>8);
             REVERT(op16);
             sprintf(mInstruction, "CALL #%04X", op16);
 
