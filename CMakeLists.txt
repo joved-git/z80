@@ -26,6 +26,7 @@ set(SRC_FILES src/z80.cpp
     src/Register_8bits.cpp
     src/Register_16bits.cpp
     src/Memory.cpp
+    src/Label.cpp
     src/Z80Machine.cpp)       
 
 #add_definitions(-DQT_DEPRECATED_WARNINGS)
