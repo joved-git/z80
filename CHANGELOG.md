@@ -1,3 +1,6 @@
+# 1.1.1
+Add some forgotten files to the repo.
+
 # 1.1.0
 Label detection is finished for JP, JP cc, CALL and CALL cc.
 
