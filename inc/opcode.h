@@ -51,6 +51,7 @@
 #define CODE_RRCA           (0b00001111)                // 0x0F     // RRCA
 #define CODE_LDDEA          (0b00010010)                // 0x12     // LD (DE),A
 #define CODE_RLA            (0b00010111)                // 0x17     // RLA
+#define CODE_JRE            (0b00011000)                // 0x18     // JRE
 #define CODE_LDADE          (0b00011010)                // 0x1A     // LD A,(DE)
 #define CODE_RRA            (0b00011111)                // 0x1F     // RRA
 #define CODE_LDNNHL         (0b00100010)                // 0x22     // LD (nn),HL
@@ -175,6 +176,7 @@
 #define MASK_CPL            (0b11111111)
 #define MASK_RRA            (0b11111111)
 #define MASK_JPNN           (0b11111111)
+#define MASK_JRE            (0b11111111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)

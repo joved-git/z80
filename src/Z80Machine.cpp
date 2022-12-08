@@ -516,7 +516,7 @@ void Z80Machine::setEntry(char *pEntry)
 }
 
 
-/* Transform the instruction into real number  */
+/* Convert the hexa string into real value  */
 uint32_t Z80Machine::toValue(char *pCode, uint8_t *pLen, uint8_t *pLenEffective)
 {
     uint32_t hexaValue=0;
@@ -543,17 +543,40 @@ uint32_t Z80Machine::toValue(char *pCode, uint8_t *pLen, uint8_t *pLenEffective)
         i++;
     }
 
-    /*
-    for (int i=0; i<*pLen; i++)
-    {
-        hexaValue=hexaValue*0x10+(pCode[i]>'9'?pCode[i]-55:pCode[i]-'0');
-        //printf("c=%c\n", pCode[i]);
-        //printf("th=<%08X>\n", hexaValue);
-    }
-    */
-
     return hexaValue;
 }      
+
+
+
+/* Convert the decimal string into real value  */
+uint32_t Z80Machine::toDecValue(char *pCode, uint8_t *pLen, uint8_t *pLenEffective)
+{
+    uint32_t decValue=0;
+    uint8_t i=0;
+
+    *pLen=strlen(pCode);
+    *pLenEffective=*pLen;
+
+    printf("c0=%1X val=%1X\n", pCode[0], pCode[0]-'0');
+    //printf("c1=%1X val=%1X\n", pCode[1], (pCode[1]>'9'?pCode[1]-55:pCode[1]-'0'));
+
+    while (i<*pLen)
+    {
+        if (pCode[i]<'0' || (pCode[i]>'9'))
+        {
+            *pLenEffective=i;
+            i=*pLen;
+        }
+        else
+        {
+            decValue=decValue*10+pCode[i]-'0';
+        }
+
+        i++;
+    }
+
+    return decValue;
+}     
 
 
 /* Transform the instruction into hex number  */
@@ -898,6 +921,13 @@ int8_t Z80Machine::clean_r(char *)
 }
 
 
+/* Clean the r operand  (IX+#00)  */
+int8_t Z80Machine::clean_e(char *)
+{
+    return 0;
+}
+
+
 /* Give the execution mode.     */
 bool Z80Machine::getExecutionMode()
 {
@@ -1147,6 +1177,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     //uint8_t len=0;
     uint8_t lenEff=0;
     uint8_t op1=0;
+    int16_t op1s=0;
     uint8_t op2=0;
     uint16_t op16=0;
     //uint16_t instruction=CODE_NO_INSTRUCTION;
@@ -1810,6 +1841,15 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         ret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
 
         op16=EXTRACT(codeInHexa, 0, 16);
+    }
+
+    /* This is a JR e */
+    if ((codeInHexa>>SIZE_1_BYTE & MASK_JRE)==CODE_JRE && len == NATURAL_CODE_LENGTH(CODE_JRE))
+    {
+        instruction=CODE_JRE;
+        ret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+
+        op1=EXTRACT(codeInHexa, 0, 8);
     }
 
     // bottom 1
@@ -3613,6 +3653,40 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
+        case CODE_JRE:                                                      /* This is a JR e                       */
+            if (op1<=127 || op1>=254)                                       /* Is e positive or negative ?    */
+            {
+                op1=op1+2;
+                op1s=op1;
+                sprintf(mInstruction, "JR $+%0d", op1);            
+            }
+            else
+            {
+                op1=((~op1&FIRST_LOWEST_BYTE)+1)-2;
+                op1s=-op1;
+                sprintf(mInstruction, "JR $-%0d", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                mRegisterPack.regPC.setValue(mRegisterPack.regPC.getValue()+op1s);                         /* The SP is changing       */
+                // reg16_1=get16bitsRegisterAddress(REGPC);
+                // mMemory->setAddress(mRegisterPack.regSP.getValue(), reg16_1->getValue());   /* Save the PC              */
+                // reg16_1->setValue(op16);                                                     /* The PC is changing       */
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+
        case CODE_CALLCCNN:                                       /* This is a CALL cc,nn                    */
            ret=bitToCondition(op1, sop1);
            REVERT(op16);
@@ -4583,9 +4657,9 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
             if (!strcmp(str_inst, "RR"))                            /* A RR instruction is present         */
             {
-                if (strlen(str_op1)==1)                             /* Check if it is a RLC r instruction   */
+                if (strlen(str_op1)==1)                             /* Check if it is a RR r instruction   */
                 {
-                    retCode=CODE_CB_RRR;                            /* Prepare the RLR r                    */
+                    retCode=CODE_CB_RRR;                            /* Prepare the RR r                    */
                     *pLen=TWO_BYTES;
 
                     retCheck=clean_r(str_op1);
@@ -4727,6 +4801,30 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);     /* Add the nn into the code */      
 
                     *pLen=THREE_BYTES;
+                }
+            }
+
+            if (!strcmp(str_inst, "JR"))                                /* A JR instruction is present          */
+            {
+                /* Check if it is a JR e instruction   */
+                if ((strlen(str_op1)>=3 && strlen(str_op1)<=5) && !strchr(str_op1, '#') && strchr(str_op1, '$') && (strchr(str_op1, '+') || strchr(str_op1, '-') ))
+                {
+                    retCode=CODE_JRE;                                   /* Prepare the JR e                     */
+                    
+                    retCheck=clean_e(str_op1);                          /* Clean the e operand                  */
+
+                    if (str_op1[1]=='+')
+                    {
+                        word=toDecValue(str_op1+2, pLen, &lenEff);
+                    }
+                    else
+                    {
+                        word=((~toDecValue(str_op1+2, pLen, &lenEff))+1) & FIRST_LOWEST_BYTE;
+                    }
+
+                    retCode=(retCode<<SIZE_1_BYTE) + ((word -2) & FIRST_LOWEST_BYTE); /* Calc the (e-2) operand */      
+
+                    *pLen=TWO_BYTES;
                 }
             }
             break;    

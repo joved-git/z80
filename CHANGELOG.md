@@ -1,3 +1,6 @@
+# 1.1.2
+Add and decode JR e.
+
 # 1.1.1
 Add some forgotten files to the repo.
 

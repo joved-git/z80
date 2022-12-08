@@ -154,12 +154,19 @@ private:
     /// @return Always 0 for now even if there is a uint8_t.
     uint32_t findMachineCode(char *, uint8_t *);
 
-    /// @brief  Convert the string into real value.
+    /// @brief  Convert the hexa string into real value.
     /// @param  The string to convert.
     /// @param  In return, the length of the convertion (in digit, 2 digits = 1 byte).
     /// @param  In return, the effective length.
     /// @return The converted value.
     uint32_t toValue(char *, uint8_t *, uint8_t *);
+
+    /// @brief  Convert the dec string into real value.
+    /// @param  The string to convert.
+    /// @param  In return, the length of the convertion (in digit, 2 digits = 1 byte).
+    /// @param  In return, the effective length.
+    /// @return The converted value.
+    uint32_t toDecValue(char *, uint8_t *, uint8_t *);
 
     /// @brief  Convert the string into dec value.
     /// @param  The string to convert.
@@ -212,6 +219,11 @@ private:
     /// @param  The operand as a string.
     /// @return OK or error code (bas operand).
     int8_t clean_r(char *);
+
+    /// @brief  Clean a e operand.
+    /// @param  The operand as a string.
+    /// @return OK or error code (bas operand).
+    int8_t clean_e(char *);
 
     /// @brief  Clean a (Ix+n) operand.
     /// @param  The operand as a string.
