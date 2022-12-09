@@ -1,4 +1,4 @@
-org #1234
+org #0480
 
 loop:	ld a,#1
 		ld b,#CD

@@ -1,3 +1,6 @@
+# 1.1.3
+Correct bug: jp #0 was not understood.
+
 # 1.1.2
 Add and decode JR e.
 

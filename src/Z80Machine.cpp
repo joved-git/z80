@@ -557,7 +557,7 @@ uint32_t Z80Machine::toDecValue(char *pCode, uint8_t *pLen, uint8_t *pLenEffecti
     *pLen=strlen(pCode);
     *pLenEffective=*pLen;
 
-    printf("c0=%1X val=%1X\n", pCode[0], pCode[0]-'0');
+    //printf("c0=%1X val=%1X\n", pCode[0], pCode[0]-'0');
     //printf("c1=%1X val=%1X\n", pCode[1], (pCode[1]>'9'?pCode[1]-55:pCode[1]-'0'));
 
     while (i<*pLen)
@@ -1065,12 +1065,16 @@ void Z80Machine::loadCode(const char *pFilename)
     char aLine[MAX_INSTR_LENGTH];
     char label[MAX_INSTR_LENGTH];
     uint8_t len=-1;
+    uint8_t lenAddr=-1;
+    uint8_t lenEff=0;
+    int8_t retCheck=0;
     uint32_t machineCode=0;
     uint16_t address=0x0000;
     uint16_t labelAddress=0x0000;
+    int16_t delta=0;
     char *posChar=0;
     LabelDataset labelDataset;
-    uint8_t pos1=0, pos2=0;
+    int8_t pos1=0, pos2=0;
     int8_t i=0;
     char sepChar=' ';
 
@@ -1090,7 +1094,17 @@ void Z80Machine::loadCode(const char *pFilename)
             {
                 if (strstr(aLine, "ORG"))
                 {
-                    address=mRegisterPack.regPC.getValue();
+                    printf("ORG...");
+                    if (posChar=strchr(aLine, '#'))
+                    {                  
+                        /* Get address and set address and PC here  */
+                        /* Remove "ORG" in case 2     xxxjoexxx     */
+                        retCheck=clean_nn(posChar);                         /* Clean the (nn) operand   */
+                        address=toValue(posChar+1, &lenAddr, &lenEff);
+
+                        mRegisterPack.regPC.setValue(address);
+                        //address=mRegisterPack.regPC.getValue();
+                    }
                 }
 
                 if (posChar=strchr(aLine, ':'))                 /* Find label in the line   */
@@ -1100,7 +1114,7 @@ void Z80Machine::loadCode(const char *pFilename)
 
                     /* Add the label and its address into the dataset       */
                     labelDataset.add(Label(std::string(label), address));
-                    // printf("Add %s / #%04X\n", label, address);
+                    printf("Add %s / #%04X\n", label, address);
 
                     /* Keep the instruction that is on the line             */
                     strcpy(label, &aLine[posChar-aLine+1]);
@@ -1125,19 +1139,20 @@ void Z80Machine::loadCode(const char *pFilename)
                             if (pos1>pos2)
                             {
                                 sepChar=' ';
+                                printf("p1(+)=%d / p2=%d\n", pos1, pos2);
                             }
                             else 
                             {
+                                printf("p1(+)=%d / p2=%d\n", pos1, pos2);
                                 pos1=pos2;
                                 sepChar=',';
                             }
 
                             strcpy(label, &aLine[pos1+1]);
                             strLine.resize(pos1);
-                            //printf("Search for %s\n", label);
                             labelAddress=labelDataset.findAddress(label);
+
                             sprintf(aLine, "%s%c#%04X", strLine.c_str(), sepChar, labelAddress);
-                            //printf("al=<%s>\n", aLine);
                         }
 
                     }
@@ -1146,8 +1161,46 @@ void Z80Machine::loadCode(const char *pFilename)
                 if (strstr(aLine, "JR") || strstr(aLine, "DJNZ")) 
                 {
                     /* Must ne done */
-                }
+                    if (!strchr(aLine, '$') && !strchr(aLine, '+' && !strchr(aLine, '-')))           /* This is a label          */
+                    {
+                        std::string strLine(aLine);
 
+                        /* Find the last ' ' or ','    */
+                        pos1=strLine.rfind(' ');
+                        pos2=strLine.rfind(',');
+
+                        if (pos1+pos2)                      /* ' ' or ',' was found     */
+                        {
+                            /* Find the last ' ' or ',' */
+                            if (pos1>pos2)
+                            {
+                                printf("p1(+)=%d / p2=%d\n", pos1, pos2);
+                                sepChar=' ';
+                            }
+                            else 
+                            {
+                                printf("p1(-)=%d / p2=%d\n", pos1, pos2);
+                                pos1=pos2;
+                                sepChar=',';
+                            }
+                            
+                            printf("line1=%s\n", aLine);
+                            strcpy(label, &aLine[pos1+1]);
+                            printf("label=%s\n", label);
+                            strLine.resize(pos1);
+                            printf("line2=%s\n", strLine.c_str());
+                            printf("Search for %s\n", label);
+                            labelAddress=labelDataset.findAddress(label);
+                            delta=labelAddress-address;
+                            printf("address=%04X / label=%04X / delta=%d\n", address, labelAddress, delta);
+                            sprintf(aLine, "%s%c$%c%04X", strLine.c_str(), sepChar, '+', labelAddress);
+                            //printf("al=<%s>\n", aLine);
+/**/
+                            
+                        }
+                    }
+                }
+                //xxxprintf("line=%s\n", aLine);
                 machineCode=findMachineCode(aLine, &len);
 
                 if (machineCode!=0xFFFFFFFF)
@@ -4527,6 +4580,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
             if (!strcmp(str_inst, "ORG"))                           /* A ORG directive is present         */
             {
                 /* Check if it is a ORG nn instruction   */
+#ifdef TOTO
                 if ((strlen(str_op1)>=4 && strlen(str_op1)<=7) && strchr(str_op1, '#'))
                 {
                     retCheck=clean_nn(str_op1);                         /* Clean the (nn) operand   */
@@ -4534,6 +4588,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
                     mRegisterPack.regPC.setValue(word);
                 }
+#endif
             }
 
             if (!strcmp(str_inst, "RLC"))                           /* A RLC instruction is present         */
@@ -4791,7 +4846,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
             if (!strcmp(str_inst, "JP"))                              /* A JP instruction is present         */
             {
                 /* Check if it is a JP nn instruction   */
-                if ((strlen(str_op1)>=4 && strlen(str_op1)<=7) && strchr(str_op1, '#'))
+                if ((strlen(str_op1)>=2 && strlen(str_op1)<=7) && strchr(str_op1, '#'))
                 {
                     retCode=CODE_JPNN;                                  /* Prepare the JP nn                 */
                     
