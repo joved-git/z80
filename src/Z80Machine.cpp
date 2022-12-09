@@ -1117,7 +1117,7 @@ void Z80Machine::loadCode(char *pFilename)
 
                     /* Add the label and its address into the dataset       */
                     labelDataset.add(Label(std::string(label), address));
-                    printf("Add %s / #%04X\n", label, address);
+                    // printf("Add %s / #%04X\n", label, address);
 
                     /* Keep the instruction that is on the line             */
                     strcpy(label, &aLine[posChar-aLine+1]);
@@ -1127,15 +1127,13 @@ void Z80Machine::loadCode(char *pFilename)
 
                 machineCode=findMachineCode(aLine, &len);
 
+                /* Go to the next instruction   */
                 if (len!=NOT_DECODED)
                 {
-                    printf("<%s> len=%d / ad=%04X\n", aLine, len/2, address);
                     address+=(len/2);
                 }
             }
         }
-
-        printf("...........LABEL DETECTION IS FINISHED............\n");
 
         /* Charge codes into memory */
         address=mRegisterPack.regPC.getValue();
@@ -1147,28 +1145,10 @@ void Z80Machine::loadCode(char *pFilename)
 
             if (strlen(aLine)!=0)
             {
-                //if (strstr(aLine, "ORG"))
-                //{
-                //    printf("ORG...");
-                //    if (posChar=strchr(aLine, '#'))
-                //   {                  
-                //        /* Get address and set address and PC here  */
-                //        retCheck=clean_nn(posChar);                         /* Clean the (nn) operand   */
-                //        address=toValue(posChar+1, &lenAddr, &lenEff);
-                //
-                //        mRegisterPack.regPC.setValue(address);
-                //        //address=mRegisterPack.regPC.getValue();
-                //    }
-                //}
-
                 if (posChar=strchr(aLine, ':'))                 /* Find label in the line   */
                 {
                     strcpy(label, aLine);       
                     label[posChar-aLine]='\0';
-
-                    /* Add the label and its address into the dataset       */
-                    // labelDataset.add(Label(std::string(label), address));
-                    // printf("Add %s / #%04X\n", label, address);
 
                     /* Keep the instruction that is on the line             */
                     strcpy(label, &aLine[posChar-aLine+1]);
@@ -1193,11 +1173,9 @@ void Z80Machine::loadCode(char *pFilename)
                             if (pos1>pos2)
                             {
                                 sepChar=' ';
-                                printf("p1(+)=%d / p2=%d\n", pos1, pos2);
                             }
                             else 
                             {
-                                printf("p1(+)=%d / p2=%d\n", pos1, pos2);
                                 pos1=pos2;
                                 sepChar=',';
                             }
@@ -1227,48 +1205,44 @@ void Z80Machine::loadCode(char *pFilename)
                             /* Find the last ' ' or ',' */
                             if (pos1>pos2)
                             {
-                                printf("p1(+)=%d / p2=%d\n", pos1, pos2);
                                 sepChar=' ';
                             }
                             else 
                             {
-                                printf("p1(-)=%d / p2=%d\n", pos1, pos2);
                                 pos1=pos2;
                                 sepChar=',';
                             }
-                            
-                            printf("line1=%s\n", aLine);
+
                             strcpy(label, &aLine[pos1+1]);
-                            printf("label=%s\n", label);
                             strLine.resize(pos1);
-                            printf("line2=%s\n", strLine.c_str());
-                            printf("Search for %s\n", label);
                             labelAddress=labelDataset.findAddress(label);
                             delta=labelAddress-address;
-                            printf("address=%04X / label=%04X / delta=%d\n", address, labelAddress, delta);
-                            sprintf(aLine, "%s%c$%c%04X", strLine.c_str(), sepChar, '+', labelAddress);
-                            //printf("al=<%s>\n", aLine);
-/**/
+                            //printf("address=%04X / label=%04X / delta=%d\n", address, labelAddress, delta);
                             
+                            if (delta>=0)
+                            {
+                                sprintf(aLine, "%s%c$%c%d", strLine.c_str(), sepChar, '+', delta);
+                            }
+                            else
+                            {
+                                sprintf(aLine, "%s%c$%c%d", strLine.c_str(), sepChar, '-', -delta);
+                            }
                         }
                     }
                 }
-                //xxxprintf("line=%s\n", aLine);
+
                 machineCode=findMachineCode(aLine, &len);
 
                 if (machineCode!=0xFFFFFFFF)
                 {
                     for (i=(len/2)-1; i>=0; i--)
                     {
-                        //printf("put %02X into #%04X\n", machineCode & FIRST_LOWEST_BYTE, address+i);
                         mMemory->set8bitsValue(address+i, machineCode & FIRST_LOWEST_BYTE);
                         machineCode=machineCode >> SIZE_1_BYTE;
                     }
                     
                     address+=(len/2);
                 }
-                //printf("[%08X] = %s\n", machineCode, aLine);
-                //printf("%d (%ld): <%s>\n", i++, strlen(aLine), aLine);
             }
         }
 

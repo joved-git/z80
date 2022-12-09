@@ -1,3 +1,6 @@
+# 1.1.5
+Integrate the complete 'JR e' into asm file and load function.
+
 # 1.1.4
 Add the loop detection process (see issue #14).
 Add ".asm" is not prese,t during a load 'l' command.
