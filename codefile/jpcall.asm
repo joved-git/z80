@@ -1,4 +1,4 @@
-org #1234
+org #0480
 
 loop:	ld a,#1
 		ld b,#CD
@@ -6,5 +6,10 @@ loop:	ld a,#1
 		jp loop
 
 loop2:	ld a,b
-		jp loop2
+		call loop3
+		nop
+		nop
+
+loop3:	ld a,#2
+		halt
 end

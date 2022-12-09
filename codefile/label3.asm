@@ -6,5 +6,10 @@ loop:	ld a,#1
 		jp nz,loop
 
 loop2:	ld a,b
-		call p,loop2
+		call p,loop3
+		nop
+		nop
+
+loop3:	ld a,#2
+		halt
 end

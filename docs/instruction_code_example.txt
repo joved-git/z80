@@ -7,7 +7,7 @@ org #1234
 123B            ld a,b                  78
 123C		    jr loop2                18XX
 123E            ld b,c                  41
-12EF    loop2:  ld hl,#3412             211234
-12F3    loop3:  halt                    76
+123F    loop2:  ld hl,#3412             211234
+1242    loop3:  halt                    76
 
 end

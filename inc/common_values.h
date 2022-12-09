@@ -117,6 +117,9 @@
 #define NOTHING_SPECIAL         0
 #define NO_PC_CHANGE            1
 
+/* Return code for findMachineCode() function */
+#define NOT_DECODED             0xFFFFFFFF
+
 enum typeOfEntry
     {
         NOTHING=0,

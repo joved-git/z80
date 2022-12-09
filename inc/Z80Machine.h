@@ -278,7 +278,7 @@ private:
     /// @brief  Load a file with codes or instructions.
     /// @param  The file to load.
     /// @return Nothing.
-    void loadCode(const char *);
+    void loadCode(char *);
 
     /// @brief  Clean the line from an asm  file.
     /// @param  The line to clean (before/after).

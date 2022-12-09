@@ -1058,7 +1058,7 @@ char *Z80Machine::getInstruction()
 
 
 /* Load a file with codes or instructions   */
-void Z80Machine::loadCode(const char *pFilename)
+void Z80Machine::loadCode(char *pFilename)
 {
     FILE *file=NULL;
     bool notTheEnd=true;
@@ -1078,6 +1078,11 @@ void Z80Machine::loadCode(const char *pFilename)
     int8_t i=0;
     char sepChar=' ';
 
+    if (!strstr(pFilename, ".asm"))                         /* Add .asm if not present  */
+    {
+        strcat(pFilename, ".asm");
+    }
+
     if (!(file=fopen(pFilename, "rw")))
     {
         printf(" Cannot open <%s>, please check it.\n", pFilename);
@@ -1086,6 +1091,7 @@ void Z80Machine::loadCode(const char *pFilename)
     {
         printf(" OK, opening <%s>.\n", pFilename);
 
+        /* Retrieve and decode all the labels into the file    */
         while (fgets(aLine, MAX_INSTR_LENGTH, file) != NULL)
         {
             clean_line(aLine);
@@ -1094,16 +1100,13 @@ void Z80Machine::loadCode(const char *pFilename)
             {
                 if (strstr(aLine, "ORG"))
                 {
-                    printf("ORG...");
                     if (posChar=strchr(aLine, '#'))
                     {                  
                         /* Get address and set address and PC here  */
-                        /* Remove "ORG" in case 2     xxxjoexxx     */
                         retCheck=clean_nn(posChar);                         /* Clean the (nn) operand   */
                         address=toValue(posChar+1, &lenAddr, &lenEff);
 
                         mRegisterPack.regPC.setValue(address);
-                        //address=mRegisterPack.regPC.getValue();
                     }
                 }
 
@@ -1115,6 +1118,57 @@ void Z80Machine::loadCode(const char *pFilename)
                     /* Add the label and its address into the dataset       */
                     labelDataset.add(Label(std::string(label), address));
                     printf("Add %s / #%04X\n", label, address);
+
+                    /* Keep the instruction that is on the line             */
+                    strcpy(label, &aLine[posChar-aLine+1]);
+                    strcpy(aLine, label);
+                    clean_line(aLine);
+                }
+
+                machineCode=findMachineCode(aLine, &len);
+
+                if (len!=NOT_DECODED)
+                {
+                    printf("<%s> len=%d / ad=%04X\n", aLine, len/2, address);
+                    address+=(len/2);
+                }
+            }
+        }
+
+        printf("...........LABEL DETECTION IS FINISHED............\n");
+
+        /* Charge codes into memory */
+        address=mRegisterPack.regPC.getValue();
+        fseek(file, SEEK_SET, 0);
+
+        while (fgets(aLine, MAX_INSTR_LENGTH, file) != NULL)
+        {
+            clean_line(aLine);
+
+            if (strlen(aLine)!=0)
+            {
+                //if (strstr(aLine, "ORG"))
+                //{
+                //    printf("ORG...");
+                //    if (posChar=strchr(aLine, '#'))
+                //   {                  
+                //        /* Get address and set address and PC here  */
+                //        retCheck=clean_nn(posChar);                         /* Clean the (nn) operand   */
+                //        address=toValue(posChar+1, &lenAddr, &lenEff);
+                //
+                //        mRegisterPack.regPC.setValue(address);
+                //        //address=mRegisterPack.regPC.getValue();
+                //    }
+                //}
+
+                if (posChar=strchr(aLine, ':'))                 /* Find label in the line   */
+                {
+                    strcpy(label, aLine);       
+                    label[posChar-aLine]='\0';
+
+                    /* Add the label and its address into the dataset       */
+                    // labelDataset.add(Label(std::string(label), address));
+                    // printf("Add %s / #%04X\n", label, address);
 
                     /* Keep the instruction that is on the line             */
                     strcpy(label, &aLine[posChar-aLine+1]);
@@ -1160,7 +1214,6 @@ void Z80Machine::loadCode(const char *pFilename)
 
                 if (strstr(aLine, "JR") || strstr(aLine, "DJNZ")) 
                 {
-                    /* Must ne done */
                     if (!strchr(aLine, '$') && !strchr(aLine, '+' && !strchr(aLine, '-')))           /* This is a label          */
                     {
                         std::string strLine(aLine);
@@ -4499,7 +4552,7 @@ int8_t Z80Machine::cutInstruction(char *pInstruction, char *pInst, char *pOp1, c
 /* Find machine code    */
 uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 {
-    uint32_t retCode=0xFFFFFFFF;
+    uint32_t retCode=NOT_DECODED;
     char str_inst[MAX_LEN];
     char str_op1[MAX_OP_LENGTH];
     char str_op2[MAX_OP_LENGTH];
@@ -4511,6 +4564,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
     bool isIX=false;
     bool isIY=false;
 
+    *pLen=0;                             /* Init the length counter  */
     nbOfComponents=cutInstruction(pInstruction, str_inst, str_op1, str_op2);
 
 #ifdef DEBUG_DISPLAY_CUTI_DATA
@@ -4827,8 +4881,10 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 }
             }
 
-            if (!strcmp(str_inst, "CALL"))                              /* A CALL instruction is present         */
+            if (!strcmp(str_inst, "CALL"))                              /* A CALL instruction is present                    */
             {
+                *pLen=THREE_BYTES;                                      /* By default, a CALL is 3 bytes in label detection */
+
                 /* Check if it is a CALL nn instruction   */
                 if ((strlen(str_op1)>=4 && strlen(str_op1)<=7) && strchr(str_op1, '#'))
                 {
@@ -4843,8 +4899,10 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 }
             }
 
-            if (!strcmp(str_inst, "JP"))                              /* A JP instruction is present         */
+            if (!strcmp(str_inst, "JP"))                                /* A JP instruction is present                      */
             {
+                *pLen=THREE_BYTES;                                      /* By default, a JP is 3 bytes in label detection */
+
                 /* Check if it is a JP nn instruction   */
                 if ((strlen(str_op1)>=2 && strlen(str_op1)<=7) && strchr(str_op1, '#'))
                 {
@@ -4861,6 +4919,8 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
             if (!strcmp(str_inst, "JR"))                                /* A JR instruction is present          */
             {
+                *pLen=TWO_BYTES;                                        /* By default, a JR is 3 bytes in label detection */
+                
                 /* Check if it is a JR e instruction   */
                 if ((strlen(str_op1)>=3 && strlen(str_op1)<=5) && !strchr(str_op1, '#') && strchr(str_op1, '$') && (strchr(str_op1, '+') || strchr(str_op1, '-') ))
                 {

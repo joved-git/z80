@@ -1,3 +1,7 @@
+# 1.1.4
+Add the loop detection process (see issue #14).
+Add ".asm" is not prese,t during a load 'l' command.
+
 # 1.1.3
 Correct bug: jp #0 was not understood.
 
