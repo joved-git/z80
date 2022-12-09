@@ -1,3 +1,6 @@
+# 1.1.6
+Add and decode LD (IX+d),n and LD (IY+d),n.
+
 # 1.1.5
 Integrate the complete 'JR e' into asm file and load function.
 
@@ -228,7 +231,7 @@ Correct the LD r,(IX+d).
 Correct the LD rr,nn. Invert low and hight bytes.
 
 # 0.6.9
-Add LD (IX+d), r and LD (IY+d),r.
+Add LD (IX+d),r and LD (IY+d),r.
 Display displacement as a positive or negative number.
 
 # 0.6.8
