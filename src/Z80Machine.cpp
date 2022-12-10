@@ -1521,7 +1521,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=EXTRACT(codeInHexa, 3, 3);
     }
 
-    /* This is a PUSH rr */
+    /* This is a PUSH qq */
     if ((codeInHexa & MASK_PUSHQQ)==CODE_PUSHQQ && len == NATURAL_CODE_LENGTH(CODE_PUSHQQ))
     {
         instruction=CODE_PUSHQQ;
@@ -1532,6 +1532,31 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         {                                           
             op1=REGAF;
         }
+    }
+
+    /* This is a POP qq */
+    if ((codeInHexa & MASK_POPQQ)==CODE_POPQQ && len == NATURAL_CODE_LENGTH(CODE_POPQQ))
+    {
+        instruction=CODE_POPQQ;
+               
+        op1=EXTRACT(codeInHexa, 4, 2) | 0b1000;
+
+        if (op1==REGSP)                          /* This is the case of qq operand       */
+        {                                           
+            op1=REGAF;
+        }
+    }
+
+    /* This is a PUSH IX */
+    if ((codeInHexa & MASK_PUSHIX)==CODE_DD_PUSHIX && len == DD_CODE_LENGTH(CODE_DD_PUSHIX))
+    {
+        instruction=CODE_DD_PUSHIX;
+    }
+
+    /* This is a PUSH IY */
+    if ((codeInHexa & MASK_PUSHIY)==CODE_FD_PUSHIY && len == FD_CODE_LENGTH(CODE_FD_PUSHIY))
+    {
+        instruction=CODE_FD_PUSHIY;
     }
 
     /* This is a LD (nn),rr    */
@@ -2827,6 +2852,30 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
+        case CODE_POPQQ:                                       /* This is a POP qq                    */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "POP %s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg16_1=get16bitsRegisterAddress(op1);
+                reg16_1->setValue(mMemory->getAddress(mRegisterPack.regSP.getValue()));
+
+                mRegisterPack.regSP.setValue(mRegisterPack.regSP.getValue()+2);
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
         case CODE_PUSHQQ:                                       /* This is a PUSH qq                    */
             ret=bitToRegister(op1, sop1);
 
@@ -2836,6 +2885,48 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             {
                 mRegisterPack.regSP.setValue(mRegisterPack.regSP.getValue()-2);
                 reg16_1=get16bitsRegisterAddress(op1);
+                mMemory->setAddress(mRegisterPack.regSP.getValue(), reg16_1->getValue());
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DD_PUSHIX:                                       /* This is a PUSH IX                    */
+            sprintf(mInstruction, "PUSH IX");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                mRegisterPack.regSP.setValue(mRegisterPack.regSP.getValue()-2);
+                reg16_1=get16bitsRegisterAddress(REGIX);
+                mMemory->setAddress(mRegisterPack.regSP.getValue(), reg16_1->getValue());
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FD_PUSHIY:                                       /* This is a PUSH IY                    */
+            sprintf(mInstruction, "PUSH IY");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                mRegisterPack.regSP.setValue(mRegisterPack.regSP.getValue()-2);
+                reg16_1=get16bitsRegisterAddress(REGIY);
                 mMemory->setAddress(mRegisterPack.regSP.getValue(), reg16_1->getValue());
 
                 if (pMode==INTP_EXECUTE)
@@ -4995,6 +5086,39 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 }
             }
 
+            if (!strcmp(str_inst, "POP"))                          /* A POP instruction is present         */
+            {
+                /* Check if it is a POP qq instruction   */
+                if (strlen(str_op1)==2 && (!strcmp(str_op1, "BC") || !strcmp(str_op1, "DE") || !strcmp(str_op1, "HL") || !strcmp(str_op1, "AF")))                             
+                {
+                    retCode=CODE_POPQQ;                              /* Prepare the POP qq                    */
+                    *pLen=ONE_BYTE;
+
+                    retCheck=clean_r(str_op1);
+
+                    if (!strcmp(str_op1, "AF"))
+                    {
+                        strcpy(str_op1, "SP");
+                    }
+
+                    PUSHBIT(retCode, registerToBit(str_op1), 4);        /* Add the register as bits             */
+                }
+
+                /* Check if it is a POP IX instruction   */
+                if (!strcmp(str_op1, "IX"))                             
+                {
+                    // retCode=CODE_DD_POPIX;                              /* Prepare the POP IX                    */
+                    *pLen=ONE_BYTE;
+                }
+
+                /* Check if it is a PUSH IY instruction   */
+                if (!strcmp(str_op1, "IY"))                             
+                {
+                    // retCode=CODE_FD_POPIY;                              /* Prepare the POP IY                    */
+                    *pLen=ONE_BYTE;
+                }
+            }
+
             if (!strcmp(str_inst, "PUSH"))                          /* A PUSH instruction is present         */
             {
                 /* Check if it is a PUSH qq instruction   */
@@ -5011,6 +5135,20 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     }
 
                     PUSHBIT(retCode, registerToBit(str_op1), 4);        /* Add the register as bits             */
+                }
+
+                /* Check if it is a PUSH IX instruction   */
+                if (!strcmp(str_op1, "IX"))                             
+                {
+                    retCode=CODE_DD_PUSHIX;                              /* Prepare the PUSH IX                    */
+                    *pLen=ONE_BYTE;
+                }
+
+                /* Check if it is a PUSH IY instruction   */
+                if (!strcmp(str_op1, "IY"))                             
+                {
+                    retCode=CODE_FD_PUSHIY;                              /* Prepare the PUSH IY                    */
+                    *pLen=ONE_BYTE;
                 }
             }
 

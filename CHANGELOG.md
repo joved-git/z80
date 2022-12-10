@@ -1,3 +1,6 @@
+# 1.1.8
+Add and decode PUSH IX, PUSH IY, POP qq, POP IX and POP IY.
+
 # 1.1.7
 Correct LD rr,nn. Add presence of '#' into the 'nn' string.
 Add and decode LD SP,HL, LD SP,IX and LD SP,IY.
