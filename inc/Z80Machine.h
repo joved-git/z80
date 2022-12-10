@@ -46,7 +46,7 @@ public:
     /// @param  The command that was entered in command line.  
     void setEntry(char *);
 
-    /// @brief  This method analyses the is used to enter the command that will be analysed.
+    /// @brief  This method analyses is used to enter the command that will be analysed.
     /// @param  Nothing. 
     bool analyse();
 

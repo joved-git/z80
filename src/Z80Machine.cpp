@@ -1950,6 +1950,24 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op2=EXTRACT(codeInHexa,0, 8);           // This is n
     }
 
+    /* This is a LD SP,HL */
+    if (((codeInHexa & MASK_LDSPHL)==CODE_LDSPHL && len == NATURAL_CODE_LENGTH(CODE_LDSPHL)))
+    {
+        instruction=CODE_LDSPHL;
+    }
+
+    /* This is a LD SP,IX */
+    if (((codeInHexa & MASK_LDSPIX)==CODE_DD_LDSPIX && len == DD_CODE_LENGTH(CODE_DD_LDSPIX)))
+    {
+        instruction=CODE_DD_LDSPIX;
+    }
+
+    /* This is a LD SP,IY */
+    if (((codeInHexa & MASK_LDSPIY)==CODE_FD_LDSPIY && len == FD_CODE_LENGTH(CODE_FD_LDSPIY)))
+    {
+        instruction=CODE_FD_LDSPIY;
+    }
+
     // bottom 1
     /*************************************************************************************************************************/
 
@@ -2530,6 +2548,69 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             if (pMode==INTP_DISPLAY)
             {
                 printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_LDSPHL:                                    /* This is a LD SP,HL          */   
+            sprintf(mInstruction, "LD SP,HL");
+            
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)
+            {
+                reg16_1=get16bitsRegisterAddress(REGSP);
+                reg16_2=get16bitsRegisterAddress(REGHL);
+                reg16_1->setValue(reg16_2->getValue());
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DD_LDSPIX:                                    /* This is a LD SP,IX          */   
+            sprintf(mInstruction, "LD SP,IX");
+            
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)
+            {
+                reg16_1=get16bitsRegisterAddress(REGSP);
+                reg16_2=get16bitsRegisterAddress(REGIX);
+                reg16_1->setValue(reg16_2->getValue());
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FD_LDSPIY:                                    /* This is a LD SP,IY          */   
+            sprintf(mInstruction, "LD SP,IY");
+            
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)
+            {
+                reg16_1=get16bitsRegisterAddress(REGSP);
+                reg16_2=get16bitsRegisterAddress(REGIY);
+                reg16_1->setValue(reg16_2->getValue());
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5047,14 +5128,36 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         *pLen=FOUR_BYTES;
                     }
 
-                    if (!strcmp(str_op1, "BC") || !strcmp(str_op1, "DE") || !strcmp(str_op1, "HL") || !strcmp(str_op1, "SP"))
+                    if ((!strcmp(str_op1, "BC") || !strcmp(str_op1, "DE") || !strcmp(str_op1, "HL") || !strcmp(str_op1, "SP")) && strchr(str_op2, '#'))
                     {
                         retCode=CODE_LDRRNN;
+
                         PUSHBIT(retCode, registerToBit(str_op1), 4);                /* Add the first register as bits   */
                         *pLen=THREE_BYTES;
                     }
 
                     retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);     /* Prepare the LD rr,nn   */              
+                }
+
+                /* Check if it is a LD SP,HL    */
+                if (!strcmp(str_op1, "SP") && !strcmp(str_op2, "HL"))
+                {
+                    retCode=CODE_LDSPHL;
+                    *pLen=ONE_BYTE;
+                }
+
+                /* Check if it is a LD SP,IX    */
+                if (!strcmp(str_op1, "SP") && !strcmp(str_op2, "IX"))
+                {
+                    retCode=CODE_DD_LDSPIX;
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a LD SP,IY    */
+                if (!strcmp(str_op1, "SP") && !strcmp(str_op2, "IY"))
+                {
+                    retCode=CODE_FD_LDSPIY;
+                    *pLen=TWO_BYTES;
                 }
 
                 /* Check if it is a LD rr,(nn), LD IX,(nn) or a LD IY,(nn) instruction    */
@@ -5260,12 +5363,6 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_ED_LDNNRR;
                         PUSHBIT(retCode, registerToBit(str_op2), 4);                /* Add the first register as bits   */
                     }
-                   /********/ 
-                    //1 retCode=CODE_ED_LDNNRR;
-
-                    //1 PUSHBIT(retCode, registerToBit(str_op2), 4);
-                    //1 str_ptr=str_op1+1;                      /* Remove '(' and ')'   */
-                    //1 str_ptr[strlen(str_ptr)-1]='\0';
 
                     retCheck=clean_inn(str_op1);                /* Clean the (nn) operand ande remove '(' and ')'  */
                     word=toValue(str_op1+1, pLen, &lenEff);

@@ -68,6 +68,7 @@
 #define CODE_JPNN           (0b11000011)                // 0xC3     / JP nn
 #define CODE_CALLNN         (0b11001101)                // 0xCD     // CALL nn
 #define CODE_EXX            (0b11011001)                // 0xD9     // EXX
+#define CODE_LDSPHL         (0b11111001)                // 0xF9     // LD SP,HL
 #define CODE_LDRR           (0b01000000)                
 #define CODE_LDRHL          (0b01000110)
 #define CODE_LDHLR          (0b01110000)
@@ -109,6 +110,7 @@
 #define CODE_DD_LDNNIX      (0b1101110100100010)        // 0xDD22   // LD (nn),IX
 #define CODE_DD_LDIXANN     (0b1101110100101010)        // 0xDD2A   // LD IX,(nn)
 #define CODE_DD_LDIXDN      (0b1101110100110110)        // 0xDD36   // LD (IX+d),n
+#define CODE_DD_LDSPIX      (0b1101110111111001)        // 0xDDF9   // LD SP,IX
 #define CODE_DD_LDRIXD      (0b1101110101000110)                    // LD r,(IX+d)
 #define CODE_DD_LDIXDR      (0b1101110101110000)                    // LD (IX+d),r     
 #define CODE_DD_ADDIXPP     (0b1101110100001001)                    // LD IX,pp
@@ -118,6 +120,7 @@
 #define CODE_FD_LDNNIY      (0b1111110100100010)        // 0xFD22   // LD (nn),IY
 #define CODE_FD_LDIYANN     (0b1111110100101010)        // 0xFD2A   // LD YX,(nn)
 #define CODE_FD_LDIYDN      (0b1111110100110110)        // 0xFD36   // LD (IX+d),n
+#define CODE_FD_LDSPIY      (0b1111110111111001)        // 0xFDF9   // LD SP,IY
 #define CODE_FD_LDRIYD      (0b1111110101000110)        //          // LD r,(IY+d)
 #define CODE_FD_LDIYDR      (0b1111110101110000)                    // LD (IY+d),r
 #define CODE_FD_ADDIYQQ     (0b1111110100001001)                    // LD IY,qq
@@ -179,6 +182,7 @@
 #define MASK_RRA            (0b11111111)
 #define MASK_JPNN           (0b11111111)
 #define MASK_JRE            (0b11111111)
+#define MASK_LDSPHL         (0b11111111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)
@@ -212,6 +216,8 @@
 #define MASK_RRHL           (0b1111111111111111)
 #define MASK_LDIXDN         (0b1111111111111111)
 #define MASK_LDIYDN         (0b1111111111111111)
+#define MASK_LDSPIX         (0b1111111111111111)
+#define MASK_LDSPIY         (0b1111111111111111)
 
 /* 32-bit mask  */
 #define MASK_RLCIXD         (0b11111111111111110000000011111111)

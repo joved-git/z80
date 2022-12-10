@@ -9,89 +9,94 @@
 int main(int argc, char *argv[])
 {
 	/* Variables definition	*/
-    bool exit=false;
-    char c=0;
+	bool exit = false;
+	char c = 0;
 	char command[MAX_LEN];
-	uint16_t i=0;
+	uint16_t i = 0;
 	char instruction[MAX_INSTR_LENGTH];
-	uint32_t machineCode=0;
-	uint8_t len=0;
+	uint32_t machineCode = 0;
+	uint8_t len = 0;
 	Z80Machine machine;
-	
+
 	/* Init the values	*/
-	command[0]='\0';
+	command[0] = '\0';
 
 	/* Display the invitational message	*/
-    std::cout << std::endl << "Hello Z80 world !" << std::endl;
-    std::cout << "Version: " << VERSION << std::endl << std::endl;
-    std::cout << "Type h if you want some help..." << std::endl << std::endl;
-    std::cout << "z> ";
+	std::cout << std::endl
+			  << "Hello Z80 world !" << std::endl;
+	std::cout << "Version: " << VERSION << std::endl
+			  << std::endl;
+	std::cout << "Type h if you want some help..." << std::endl
+			  << std::endl;
+	std::cout << "z> ";
 
 	/* Do what you do or quit !	*/
-    while (!exit)
-    {
-	    c=getchar();
+	while (!exit)
+	{
+		c = getchar();
 		/* printf("%d-", c);    */
 
 		/* Read the command	*/
-		while (c!=EOL)
+		while (c != EOL)
 		{
-			if (i<MAX_LEN-1)
+			if (i < MAX_LEN - 1)
 			{
-				command[i++]=c;		
-				c=getchar();
+				command[i++] = c;
+				c = getchar();
 			}
-			else 
+			else
 			{
-				c=EOL;
+				c = EOL;
 			}
 		}
 
-		command[i]='\0';
-		i=0;
-		
-		/* Handle the command	*/ 
-		machine.setEntry(command);
-		exit=machine.analyse();
+		command[i] = '\0';
+		i = 0;
 
-		if (!exit) 
+		/* Handle the command	*/
+		machine.setEntry(command);
+		exit = machine.analyse();
+
+		if (!exit)
 		{
 			if (machine.getExecutionMode())
 			{
 				machine.displayExecRegisters();
 				machine.displayMemory("(PC)");
-				machineCode=machine.getNextInstruction(instruction, &len);
+				machineCode = machine.getNextInstruction(instruction, &len);
 
 				std::cout << std::endl;
 
 				switch (len)
 				{
-					case ONE_BYTE:
-						printf("z [%02X] [%s]> ", machineCode, instruction);
-						break;
+				case ONE_BYTE:
+					printf("z [%02X] [%s]> ", machineCode, instruction);
+					break;
 
-					case TWO_BYTES:
-						printf("z [%04X] [%s]> ", machineCode, instruction);
-						break;
+				case TWO_BYTES:
+					printf("z [%04X] [%s]> ", machineCode, instruction);
+					break;
 
-					case THREE_BYTES:
-						printf("z [%06X] [%s]> ", machineCode, instruction);
-						break;
+				case THREE_BYTES:
+					printf("z [%06X] [%s]> ", machineCode, instruction);
+					break;
 
-					case FOUR_BYTES:
-						printf("z [%08X] [%s]> ", machineCode, instruction);
-						break;
+				case FOUR_BYTES:
+					printf("z [%08X] [%s]> ", machineCode, instruction);
+					break;
 				}
 			}
 			else
 			{
-				std::cout << std::endl << "z> ";
+				std::cout << std::endl
+						  << "z> ";
 			}
-				
 		}
-    }
+	}
 
-	std::cout << std::endl << "Bye, see you next time !!" << std::endl  << std::endl;
+	std::cout << std::endl
+			  << "Bye, see you next time !!" << std::endl
+			  << std::endl;
 
-    return 0;
+	return 0;
 }

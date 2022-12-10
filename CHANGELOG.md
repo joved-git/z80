@@ -1,3 +1,7 @@
+# 1.1.7
+Correct LD rr,nn. Add presence of '#' into the 'nn' string.
+Add and decode LD SP,HL, LD SP,IX and LD SP,IY.
+
 # 1.1.6
 Add and decode LD (IX+d),n and LD (IY+d),n.
 
