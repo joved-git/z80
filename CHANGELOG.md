@@ -1,5 +1,6 @@
 # 1.1.8
 Add and decode PUSH IX, PUSH IY, POP qq, POP IX and POP IY.
+Correct the PUSH IX/Iy (bad length).
 
 # 1.1.7
 Correct LD rr,nn. Add presence of '#' into the 'nn' string.

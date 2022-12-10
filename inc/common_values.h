@@ -19,8 +19,8 @@
 #define ASM_FILE_LOCATION       "../codefile/"
 #endif
 
-// #define DEBUG_DISPLAY_INSTR_DATA              /* Dsiplay data that will be executer   */
-// #define DEBUG_DISPLAY_CUTI_DATA               /* Display data after cutting it        */ 
+#define DEBUG_DISPLAY_INSTR_DATA              /* Dsiplay data that will be executer   */
+#define DEBUG_DISPLAY_CUTI_DATA               /* Display data after cutting it        */ 
 // #define DEBUG_DISPLAY_FINDCODE_DATA           /* Display data after decoding it       */
 
 #define EOL                 	'\n'            /* The user has typed Enter                                 */                             
