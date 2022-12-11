@@ -1,3 +1,6 @@
+# 1.1.10
+Add and decode DJNZ e.
+
 # 1.1.9
 Add and decode SLA r, SLA (HL), SLA (IX+d) and SLA (IY+d).
 Correct the RR r. Always use REGA. Prepare SRA and SRL instructions.

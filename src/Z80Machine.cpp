@@ -1217,7 +1217,7 @@ void Z80Machine::loadCode(char *pFilename)
                             strLine.resize(pos1);
                             labelAddress=labelDataset.findAddress(label);
                             delta=labelAddress-address;
-                            //printf("address=%04X / label=%04X / delta=%d\n", address, labelAddress, delta);
+                            // printf("address=%04X / label=%04X / delta=%d\n", address, labelAddress, delta);
                             
                             if (delta>=0)
                             {
@@ -1227,13 +1227,15 @@ void Z80Machine::loadCode(char *pFilename)
                             {
                                 sprintf(aLine, "%s%c$%c%d", strLine.c_str(), sepChar, '-', -delta);
                             }
+
+                            printf("--2- <%s>\n", aLine);
                         }
                     }
                 }
 
                 machineCode=findMachineCode(aLine, &len);
 
-                if (machineCode!=0xFFFFFFFF)
+                if (machineCode!=NOT_DECODED)
                 {
                     for (i=(len/2)-1; i>=0; i--)
                     {
@@ -1888,7 +1890,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     {
         instruction=CODE_CB_SRAR;
                
-        op1=EXTRACT(codeInHexa, 0, 3);          /* This is r    */
+        op1=EXTRACT(codeInHexa, 0, 3);          /* This is SRA r    */
     }
 
         /* This is a SRL r */
@@ -2048,6 +2050,15 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if (((codeInHexa & MASK_LDSPIY)==CODE_FD_LDSPIY && len == FD_CODE_LENGTH(CODE_FD_LDSPIY)))
     {
         instruction=CODE_FD_LDSPIY;
+    }
+
+    /* This is a DJNZ e */
+    if ((((codeInHexa >> SIZE_1_BYTE) & MASK_DJNZ)==CODE_DJNZ && len == NATURAL_CODE_LENGTH(CODE_DJNZ)))
+    {
+        instruction=CODE_DJNZ;
+        ret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+
+        op1=EXTRACT(codeInHexa,0, 8);           // This is e
     }
 
     // bottom 1
@@ -4100,10 +4111,8 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
 
             if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
             {
+                /* The PC is changing       */
                 mRegisterPack.regPC.setValue(mRegisterPack.regPC.getValue()+op1s);                         /* The SP is changing       */
-                // reg16_1=get16bitsRegisterAddress(REGPC);
-                // mMemory->setAddress(mRegisterPack.regSP.getValue(), reg16_1->getValue());   /* Save the PC              */
-                // reg16_1->setValue(op16);                                                     /* The PC is changing       */
 
                 if (pMode==INTP_EXECUTE)
                 {
@@ -4117,6 +4126,47 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
+        case CODE_DJNZ:                                                  /* This is a DJNZE e              */
+            if (op1<=127 || op1>=254)                                     /* Is e positive or negative ?    */
+            {
+                op1=op1+2;
+                op1s=op1;
+                sprintf(mInstruction, "DJNZ $+%0d", op1);            
+            }
+            else
+            {
+                op1=((~op1&FIRST_LOWEST_BYTE)+1)-2;
+                op1s=-op1;
+                sprintf(mInstruction, "DJNZ $-%0d", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Decremente B */
+                mRegisterPack.regB.setValue(mRegisterPack.regB.getValue()-1);
+
+                /* Branch to $+e if B!=0       */
+                if (mRegisterPack.regB.getValue())
+                {
+                    mRegisterPack.regPC.setValue(mRegisterPack.regPC.getValue()+op1s);
+                }       
+                else 
+                {
+                    /* Go to next instruction PC=PC+2   */
+                    mRegisterPack.regPC.setValue(mRegisterPack.regPC.getValue()+TWO_BYTES/2);
+                }             
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
 
        case CODE_CALLCCNN:                                       /* This is a CALL cc,nn                    */
            ret=bitToCondition(op1, sop1);
@@ -5474,12 +5524,38 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
             if (!strcmp(str_inst, "JR"))                                /* A JR instruction is present          */
             {
-                *pLen=TWO_BYTES;                                        /* By default, a JR is 3 bytes in label detection */
+                *pLen=TWO_BYTES;                                        /* By default, a JR is 2 bytes in label detection */
                 
                 /* Check if it is a JR e instruction   */
                 if ((strlen(str_op1)>=3 && strlen(str_op1)<=5) && !strchr(str_op1, '#') && strchr(str_op1, '$') && (strchr(str_op1, '+') || strchr(str_op1, '-') ))
                 {
                     retCode=CODE_JRE;                                   /* Prepare the JR e                     */
+                    
+                    retCheck=clean_e(str_op1);                          /* Clean the e operand                  */
+
+                    if (str_op1[1]=='+')
+                    {
+                        word=toDecValue(str_op1+2, pLen, &lenEff);
+                    }
+                    else
+                    {
+                        word=((~toDecValue(str_op1+2, pLen, &lenEff))+1) & FIRST_LOWEST_BYTE;
+                    }
+
+                    retCode=(retCode<<SIZE_1_BYTE) + ((word -2) & FIRST_LOWEST_BYTE); /* Calc the (e-2) operand */      
+
+                    *pLen=TWO_BYTES;
+                }
+            }
+
+            if (!strcmp(str_inst, "DJNZ"))                                /* A DJNZ instruction is present          */
+            {
+                *pLen=TWO_BYTES;                                      /* By default, a DJNZ is 2 bytes in label detection */
+
+                /* Check if it is a DJNZ e instruction   */
+                if ((strlen(str_op1)>=3 && strlen(str_op1)<=5) && !strchr(str_op1, '#') && strchr(str_op1, '$') && (strchr(str_op1, '+') || strchr(str_op1, '-') ))
+                {
+                    retCode=CODE_DJNZ;                                   /* Prepare the JR e                     */
                     
                     retCheck=clean_e(str_op1);                          /* Clean the e operand                  */
 

@@ -49,6 +49,7 @@
 #define CODE_EXAFAF         (0b00001000)                // 0x08     // EX AF,AF'
 #define CODE_LDABC          (0b00001010)                // 0x0A     // LD A,(BC)
 #define CODE_RRCA           (0b00001111)                // 0x0F     // RRCA
+#define CODE_DJNZ           (0b00010000)                // 0x10     // DJNZ e
 #define CODE_LDDEA          (0b00010010)                // 0x12     // LD (DE),A
 #define CODE_RLA            (0b00010111)                // 0x17     // RLA
 #define CODE_JRE            (0b00011000)                // 0x18     // JRE
@@ -125,7 +126,7 @@
 #define CODE_DD_ADDIXPP     (0b1101110100001001)                    // LD IX,pp
 
 /* FD instruction codes     */
-#define CODE_FD_LDIYNN      (0b1111110100100001)        // 0xFD21   // LD IY,nn 
+#define CODE_FD_LDIYNN      (0b1111110100100001)        // 0xFD21   // LD IY,nn
 #define CODE_FD_LDNNIY      (0b1111110100100010)        // 0xFD22   // LD (nn),IY
 #define CODE_FD_LDIYANN     (0b1111110100101010)        // 0xFD2A   // LD YX,(nn)
 #define CODE_FD_LDIYDN      (0b1111110100110110)        // 0xFD36   // LD (IX+d),n
@@ -201,6 +202,7 @@
 #define MASK_JPNN           (0b11111111)
 #define MASK_JRE            (0b11111111)
 #define MASK_LDSPHL         (0b11111111)
+#define MASK_DJNZ           (0b11111111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)
