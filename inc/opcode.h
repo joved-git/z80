@@ -112,6 +112,8 @@
 #define CODE_ED_LDNNRR      (0b1110110101000011)        //          // LD (nn),rr
 #define CODE_ED_LDDDNN      (0b1110110101001011)        //          // LD rr,(nn)
 #define CODE_ED_NEG         (0b1110110101000100)        // 0xED44   // NEG
+#define CODE_ED_RLD         (0b1110110101101111)        // 0xED6F   // RLD
+#define CODE_ED_RRD         (0b1110110101100111)        // 0xED67   // RRD
 
 /* DD instruction codes     */
 #define CODE_DD_LDIXNN      (0b1101110100100001)        // 0xDD21   // LD IX,nn      
@@ -248,6 +250,8 @@
 #define MASK_PUSHIY         (0b1111111111111111)
 #define MASK_POPIX          (0b1111111111111111)
 #define MASK_POPIY          (0b1111111111111111)
+#define MASK_RLD            (0b1111111111111111)
+#define MASK_RRD            (0b1111111111111111)
 
 /* 32-bit mask  */
 #define MASK_RLCIXD         (0b11111111111111110000000011111111)

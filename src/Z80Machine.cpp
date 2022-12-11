@@ -2120,6 +2120,18 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=EXTRACT(codeInHexa,0, 8);           // This is e
     }
 
+    /* This is a RLD    */
+    if (((codeInHexa & MASK_RLD)==CODE_ED_RLD && len == ED_CODE_LENGTH(CODE_ED_RLD)))
+    {
+        instruction=CODE_ED_RLD;
+    }
+
+    /* This is a RRD    */
+    if (((codeInHexa & MASK_RRD)==CODE_ED_RRD && len == ED_CODE_LENGTH(CODE_ED_RRD)))
+    {
+        instruction=CODE_ED_RRD;
+    }
+
     // bottom 1
     /*************************************************************************************************************************/
 
@@ -4672,6 +4684,66 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
+        case CODE_ED_RLD:                                         /* This is a RLD  */
+            sprintf(mInstruction, "RLD");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            { 
+                val=mRegisterPack.regA.getValue() & 0x0F;
+                newVal=mMemory->get8bitsValue(mRegisterPack.regHL.getValue());
+                mRegisterPack.regA.setValue((mRegisterPack.regA.getValue() & 0xF0) + ((newVal & 0xF0) >> 4));
+                newVal=((newVal<<4) & 0xF0) + (val);
+                mMemory->set8bitsValue(mRegisterPack.regHL.getValue(), newVal);
+
+                /* Modify flags here    */
+                S_IS(SIGN(mRegisterPack.regA.getValue()));
+                Z_IS(ZERO(mRegisterPack.regA.getValue()));
+                H_RESET;
+                PV_IS(EVEN(mRegisterPack.regA.getValue()));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ED_RRD:                                         /* This is a RRD  */
+            sprintf(mInstruction, "RRD");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            { 
+                val=mRegisterPack.regA.getValue() & 0x0F;
+                newVal=mMemory->get8bitsValue(mRegisterPack.regHL.getValue());
+                mRegisterPack.regA.setValue((mRegisterPack.regA.getValue() & 0xF0) + (newVal & 0x0F));
+                newVal=((newVal & 0xF0) >>4 ) + (val << 4);
+                mMemory->set8bitsValue(mRegisterPack.regHL.getValue(), newVal);
+
+                /* Modify flags here    */
+                S_IS(SIGN(mRegisterPack.regA.getValue()));
+                Z_IS(ZERO(mRegisterPack.regA.getValue()));
+                H_RESET;
+                PV_IS(EVEN(mRegisterPack.regA.getValue()));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
         case CODE_DDCB_SLAIXD:                                           /* This is a SLA (IX+d)        */
             if (SIGN(op1))                                               /* Check if op1 is negative    */
             {
@@ -5485,6 +5557,18 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
             {
                 retCode=CODE_RRA;
                 *pLen=ONE_BYTE;
+            }
+
+            if (!strcmp(str_inst, "RLD"))                          /* A RLD is present     */
+            {
+                retCode=CODE_ED_RLD;
+                *pLen=TWO_BYTES;
+            }
+
+            if (!strcmp(str_inst, "RRD"))                          /* A RRD is present     */
+            {
+                retCode=CODE_ED_RRD;
+                *pLen=TWO_BYTES;
             }
 
             if (!strcmp(str_inst, "EXX"))                          /* A EXX is present     */
