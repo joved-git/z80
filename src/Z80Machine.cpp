@@ -1864,7 +1864,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     {
         instruction=CODE_CB_RLR;
                
-        op1=EXTRACT(codeInHexa, 0, 3);          /* This is b    */
+        op1=EXTRACT(codeInHexa, 0, 3);          /* This is r    */
     }
 
     /* This is a RR r */
@@ -1872,7 +1872,31 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     {
         instruction=CODE_CB_RRR;
                
-        op1=EXTRACT(codeInHexa, 0, 3);          /* This is b    */
+        op1=EXTRACT(codeInHexa, 0, 3);          /* This is r    */
+    }
+
+    /* This is a SLA r */
+    if ((codeInHexa & MASK_SLAR)==CODE_CB_SLAR && len == CB_CODE_LENGTH(CODE_CB_SLAR))
+    {
+        instruction=CODE_CB_SLAR;
+               
+        op1=EXTRACT(codeInHexa, 0, 3);          /* This is r    */
+    }
+
+    /* This is a SRA r */
+    if ((codeInHexa & MASK_SRAR)==CODE_CB_SRAR && len == CB_CODE_LENGTH(CODE_CB_SRAR))
+    {
+        instruction=CODE_CB_SRAR;
+               
+        op1=EXTRACT(codeInHexa, 0, 3);          /* This is r    */
+    }
+
+        /* This is a SRL r */
+    if ((codeInHexa & MASK_SRLR)==CODE_CB_SRLR && len == CB_CODE_LENGTH(CODE_CB_SRLR))
+    {
+        instruction=CODE_CB_SRLR;
+               
+        op1=EXTRACT(codeInHexa, 0, 3);          /* This is r    */
     }
 
     /* This is a RL (HL)  */
@@ -1885,8 +1909,29 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     /* This is a RR (HL)  */
     if ((codeInHexa & MASK_RRHL)==CODE_CB_RRHL && len == CB_CODE_LENGTH(CODE_CB_RRHL))
     {
+        printf("THIS IS RR (HL)\n");
         instruction=CODE_CB_RRHL;
+    }
 
+    /* This is a SLA (HL)  */
+    if ((codeInHexa & MASK_SLAHL)==CODE_CB_SLAHL && len == CB_CODE_LENGTH(CODE_CB_SLAHL))
+    {
+        instruction=CODE_CB_SLAHL;
+    }
+
+    /* This is a SLA (IX+d) */
+    if (((codeInHexa & MASK_SLAIXD)==CODE_DDCB_SLAIXD && len == DDCB_CODE_LENGTH(CODE_DDCB_SLAIXD)))
+    {
+        printf("THIS IS SLA (IX+d)\n");
+        instruction=CODE_DDCB_SLAIXD;
+        op1=EXTRACT(codeInHexa,8, 8);
+    }
+
+    /* This is a SLA (IY+d) */
+    if (((codeInHexa & MASK_SLAIYD)==CODE_FDCB_SLAIYD && len == FDCB_CODE_LENGTH(CODE_FDCB_SLAIYD)))
+    {
+        instruction=CODE_FDCB_SLAIYD;
+        op1=EXTRACT(codeInHexa,8, 8);
     }
 
     /* This is a CPL  */
@@ -4431,7 +4476,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
 
             if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
             {
-                reg8_1=get8bitsRegisterAddress(REGA);
+                reg8_1=get8bitsRegisterAddress(op1);
                 bit=reg8_1->getBit(BIT_0);
                 
                 reg8_1->setValue(((reg8_1->getValue()>>1) & FIRST_LOWEST_BYTE) | (mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY)<<7));
@@ -4453,6 +4498,150 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             if (pMode==INTP_DISPLAY)
             {
                 printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_CB_SLAR:                                         /* This is a SLA r  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "SLA %s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(op1);
+
+                mRegisterPack.regF.setCarryFlag((bool) reg8_1->getBit(BIT_7));
+                reg8_1->setValue(reg8_1->getValue()<<1);
+                newVal=reg8_1->getValue();
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_CB_SLAHL:                                         /* This is a SLA (HL)  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "SLA (HL)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Retrieve the byte and shift it  */
+                newVal=mMemory->get8bitsValue(mRegisterPack.regHL.getValue());
+                mRegisterPack.regF.setCarryFlag((bool) BIT(newVal, BIT_7));
+                newVal=newVal<<1;
+                mMemory->set8bitsValue(mRegisterPack.regHL.getValue(), newVal);            
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DDCB_SLAIXD:                                           /* This is a SLA (IX+d)        */
+            if (SIGN(op1))                                               /* Check if op1 is negative    */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIX.getValue()-op1;
+                sprintf(mInstruction, "SLA (IX-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op1;
+                sprintf(mInstruction, "SLA (IX+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Retrieve the byte and shift it  */
+                newVal=mMemory->get8bitsValue(address);
+                mRegisterPack.regF.setCarryFlag((bool) BIT(newVal, BIT_7));
+                newVal=newVal<<1;
+                mMemory->set8bitsValue(address, newVal);            
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FDCB_SLAIYD:                                           /* This is a SLA (IY+d)        */
+            if (SIGN(op1))                                               /* Check if op1 is negative    */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIY.getValue()-op1;
+                sprintf(mInstruction, "SLA (IY-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op1;
+                sprintf(mInstruction, "SLA (IY+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Retrieve the byte and shift it  */
+                newVal=mMemory->get8bitsValue(address);
+                mRegisterPack.regF.setCarryFlag((bool) BIT(newVal, BIT_7));
+                newVal=newVal<<1;
+                mMemory->set8bitsValue(address, newVal);            
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -4491,7 +4680,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
-        case CODE_DDCB_RRIXD:                                         /* This is a RR (IX+d)  */
+        case CODE_DDCB_RRIXD:                                           /* This is a RR (IX+d)      */
             if (SIGN(op1))                                              /* Check if op1 is negative */
             {
                 op1=~op1+1;
@@ -4511,7 +4700,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 bit=EXTRACT(val, 0, 1);
                 
                 newVal=((val>>1) & FIRST_LOWEST_BYTE) | (mRegisterPack.regF.getBit(BITPOS_FLAG_CARRY)<<7);
-
                 mMemory->set8bitsValue(address, newVal);            
                 mRegisterPack.regF.setCarryFlag((bool) bit);
 
@@ -5062,7 +5250,6 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     *pLen=TWO_BYTES;
                 }
 
-
                 /* Check if it is a RR (IX+d) or RR (IY+d) instruction  */
                 if (((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")) && strchr(str_op1, '(') && strchr(str_op1, ')') && strchr(str_op1, '+'))
                 {
@@ -5083,6 +5270,47 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     *pLen=FOUR_BYTES;
                 }
             }
+
+            if (!strcmp(str_inst, "SLA"))                           /* A SLA instruction is present         */
+            {
+                if (strlen(str_op1)==1)                             /* Check if it is a SLA r instruction   */
+                {
+                    retCode=CODE_CB_SLAR;                           /* Prepare the SLA r                    */
+                    *pLen=TWO_BYTES;
+
+                    retCheck=clean_r(str_op1);
+                    
+                    PUSHBIT(retCode, registerToBit(str_op1), 0);    /* Add the register as bits             */
+                }
+
+                if (!strcmp(str_op1, "(HL)"))                       /* Check if it is a SLA (HL) instruction*/
+                {
+                    retCode=CODE_CB_SLAHL;                           /* Prepare the SLA (HL))                    */
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a SLA (IX+d) or SLA (IY+d) instruction  */
+                if (((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")) && strchr(str_op1, '(') && strchr(str_op1, ')') && strchr(str_op1, '+'))
+                {
+                    if (strstr(str_op1, "IX"))
+                    {
+                        retCode=CODE_DDCB_SLAIXD;
+                    }
+
+                    if (strstr(str_op1, "IY"))
+                    {
+                        retCode=CODE_FDCB_SLAIYD;
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op1);
+                    retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the SLA (IX+d) or the RLC (IY+d)  */
+
+                    *pLen=FOUR_BYTES;
+                }
+                
+            }
+
 
             if (!strcmp(str_inst, "INC"))                           /* A INC instruction is present         */
             {
