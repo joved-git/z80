@@ -1,3 +1,9 @@
+
+# 1.1.11
+Add and decode SRA r, SRA (HL), SRA (IX+d) and SRA (IY+d).
+Add and decode SRL r, SRL (HL), SRL (IX+d) and SRL (IY+d).
+Add 'm (ix)', 'm (hl)' and 'm (iy)' commands.
+
 # 1.1.10
 Add and decode DJNZ e.
 

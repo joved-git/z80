@@ -1035,7 +1035,28 @@ void Z80Machine::displayMemory(const char *pAddress)
         }
         else
         {
-            value=toValue(address, &lenValue, &lenEff);
+            if (!strcmp(pAddress, "(IX)"))
+            {
+                value=mRegisterPack.regIX.getValue();
+            }
+            else
+            {
+                if (!strcmp(pAddress, "(IY)"))
+                {
+                    value=mRegisterPack.regIY.getValue();
+                }
+                else
+                {
+                    if (!strcmp(pAddress, "(HL)"))
+                    {
+                        value=mRegisterPack.regHL.getValue();
+                    }
+                    else
+                    {
+                        value=toValue(address, &lenValue, &lenEff);
+                    }
+                }
+            }
         }
     }    
 
@@ -1283,7 +1304,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     
     /* bottom 0 */
     
-    sprintf(mInstruction, " not yet decoded ");
+    sprintf(mInstruction, "not yet decoded ");
 
     /* This is a NOP    */
     if ((codeInHexa & MASK_NOP)==CODE_NOP && len == ONE_BYTE)                  
@@ -1911,7 +1932,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     /* This is a RR (HL)  */
     if ((codeInHexa & MASK_RRHL)==CODE_CB_RRHL && len == CB_CODE_LENGTH(CODE_CB_RRHL))
     {
-        printf("THIS IS RR (HL)\n");
         instruction=CODE_CB_RRHL;
     }
 
@@ -1921,11 +1941,36 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         instruction=CODE_CB_SLAHL;
     }
 
+    /* This is a SRA (HL)  */
+    if ((codeInHexa & MASK_SRAHL)==CODE_CB_SRAHL && len == CB_CODE_LENGTH(CODE_CB_SRAHL))
+    {
+        instruction=CODE_CB_SRAHL;
+    }
+
+    /* This is a SRL (HL)  */
+    if ((codeInHexa & MASK_SRLHL)==CODE_CB_SRLHL && len == CB_CODE_LENGTH(CODE_CB_SRLHL))
+    {
+        instruction=CODE_CB_SRLHL;
+    }
+
     /* This is a SLA (IX+d) */
     if (((codeInHexa & MASK_SLAIXD)==CODE_DDCB_SLAIXD && len == DDCB_CODE_LENGTH(CODE_DDCB_SLAIXD)))
     {
-        printf("THIS IS SLA (IX+d)\n");
         instruction=CODE_DDCB_SLAIXD;
+        op1=EXTRACT(codeInHexa,8, 8);
+    }
+
+    /* This is a SRA (IX+d) */
+    if (((codeInHexa & MASK_SRAIXD)==CODE_DDCB_SRAIXD && len == DDCB_CODE_LENGTH(CODE_DDCB_SRAIXD)))
+    {
+        instruction=CODE_DDCB_SRAIXD;
+        op1=EXTRACT(codeInHexa,8, 8);
+    }
+
+    /* This is a SRL (IX+d) */
+    if (((codeInHexa & MASK_SRLIXD)==CODE_DDCB_SRLIXD && len == DDCB_CODE_LENGTH(CODE_DDCB_SRLIXD)))
+    {
+        instruction=CODE_DDCB_SRLIXD;
         op1=EXTRACT(codeInHexa,8, 8);
     }
 
@@ -1933,6 +1978,20 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if (((codeInHexa & MASK_SLAIYD)==CODE_FDCB_SLAIYD && len == FDCB_CODE_LENGTH(CODE_FDCB_SLAIYD)))
     {
         instruction=CODE_FDCB_SLAIYD;
+        op1=EXTRACT(codeInHexa,8, 8);
+    }
+
+    /* This is a SRA (IY+d) */
+    if (((codeInHexa & MASK_SRAIYD)==CODE_FDCB_SRAIYD && len == FDCB_CODE_LENGTH(CODE_FDCB_SRAIYD)))
+    {
+        instruction=CODE_FDCB_SRAIYD;
+        op1=EXTRACT(codeInHexa,8, 8);
+    }
+
+    /* This is a SRL (IY+d) */
+    if (((codeInHexa & MASK_SRLIYD)==CODE_FDCB_SRLIYD && len == FDCB_CODE_LENGTH(CODE_FDCB_SRLIYD)))
+    {
+        instruction=CODE_FDCB_SRLIYD;
         op1=EXTRACT(codeInHexa,8, 8);
     }
 
@@ -4584,8 +4643,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             break;
 
         case CODE_CB_SLAHL:                                         /* This is a SLA (HL)  */
-            ret=bitToRegister(op1, sop1);
-
             sprintf(mInstruction, "SLA (HL)");
 
             if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
@@ -4675,6 +4732,295 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 mRegisterPack.regF.setCarryFlag((bool) BIT(newVal, BIT_7));
                 newVal=newVal<<1;
                 mMemory->set8bitsValue(address, newVal);            
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_CB_SRAR:                                         /* This is a SRA r  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "SRA %s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(op1);
+
+                mRegisterPack.regF.setCarryFlag((bool) reg8_1->getBit(BIT_0));
+                newVal=reg8_1->getValue()>>1;
+                PUSHBIT(newVal, reg8_1->getBit(BIT_7), BIT_7);
+                reg8_1->setValue(newVal);
+               
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_CB_SRAHL:                                         /* This is a SRA (HL)  */
+            sprintf(mInstruction, "SRA (HL)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Retrieve the byte and shift it  */
+                newVal=(mMemory->get8bitsValue(mRegisterPack.regHL.getValue()));
+                mRegisterPack.regF.setCarryFlag((bool) BIT(newVal, BIT_0));
+                newVal=newVal>>1;
+                PUSHBIT(newVal, BIT(newVal, BIT_6), BIT_7);
+                mMemory->set8bitsValue(mRegisterPack.regHL.getValue(), newVal);        
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DDCB_SRAIXD:                                           /* This is a SRA (IX+d)        */
+            if (SIGN(op1))                                               /* Check if op1 is negative    */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIX.getValue()-op1;
+                sprintf(mInstruction, "SRA (IX-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op1;
+                sprintf(mInstruction, "SRA (IX+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Retrieve the byte and shift it  */
+                newVal=mMemory->get8bitsValue(address);
+                mRegisterPack.regF.setCarryFlag((bool) BIT(newVal, BIT_0));
+                newVal=newVal>>1;
+                PUSHBIT(newVal, BIT(newVal, BIT_6), BIT_7);
+                mMemory->set8bitsValue(address, newVal);           
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FDCB_SRAIYD:                                           /* This is a SRA (IY+d)        */
+            if (SIGN(op1))                                               /* Check if op1 is negative    */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIY.getValue()-op1;
+                sprintf(mInstruction, "SRA (IY-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op1;
+                sprintf(mInstruction, "SRA (IY+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Retrieve the byte and shift it  */
+                newVal=mMemory->get8bitsValue(address);
+                mRegisterPack.regF.setCarryFlag((bool) BIT(newVal, BIT_0));
+                newVal=newVal>>1;
+                PUSHBIT(newVal, BIT(newVal, BIT_6), BIT_7);
+                mMemory->set8bitsValue(address, newVal);           
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_CB_SRLR:                                         /* This is a SRL r  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "SRL %s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(op1);
+
+                mRegisterPack.regF.setCarryFlag((bool) reg8_1->getBit(BIT_0));
+                newVal=reg8_1->getValue()>>1;
+                reg8_1->setValue(newVal);
+               
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_CB_SRLHL:                                         /* This is a SRL (HL)  */
+            sprintf(mInstruction, "SRL (HL)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Retrieve the byte and shift it  */
+                newVal=(mMemory->get8bitsValue(mRegisterPack.regHL.getValue()));
+                mRegisterPack.regF.setCarryFlag((bool) BIT(newVal, BIT_0));
+                newVal=newVal>>1;
+                mMemory->set8bitsValue(mRegisterPack.regHL.getValue(), newVal);        
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DDCB_SRLIXD:                                           /* This is a SRL (IX+d)        */
+            if (SIGN(op1))                                               /* Check if op1 is negative    */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIX.getValue()-op1;
+                sprintf(mInstruction, "SRL (IX-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op1;
+                sprintf(mInstruction, "SRL (IX+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Retrieve the byte and shift it  */
+                newVal=mMemory->get8bitsValue(address);
+                mRegisterPack.regF.setCarryFlag((bool) BIT(newVal, BIT_0));
+                newVal=newVal>>1;
+                mMemory->set8bitsValue(address, newVal);           
+
+                /* Modify flags here    */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_RESET;
+                PV_IS(EVEN(newVal));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FDCB_SRLIYD:                                           /* This is a SRL (IY+d)        */
+            if (SIGN(op1))                                               /* Check if op1 is negative    */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIY.getValue()-op1;
+                sprintf(mInstruction, "SRL (IY-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op1;
+                sprintf(mInstruction, "SRL (IY+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Retrieve the byte and shift it  */
+                newVal=mMemory->get8bitsValue(address);
+                mRegisterPack.regF.setCarryFlag((bool) BIT(newVal, BIT_0));
+                newVal=newVal>>1;
+                PUSHBIT(newVal, BIT(newVal, BIT_6), BIT_7);
+                mMemory->set8bitsValue(address, newVal);           
 
                 /* Modify flags here    */
                 S_IS(SIGN(newVal));
@@ -5354,13 +5700,93 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
                     /* Clean the (IX+d) or (IY+d) for Op1 */
                     retCheck=clean_ixn(str_op1);
-                    retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the SLA (IX+d) or the RLC (IY+d)  */
+                    retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the SLA (IX+d) or the SLA (IY+d)  */
+
+                    *pLen=FOUR_BYTES;
+                }            
+            }
+
+            if (!strcmp(str_inst, "SRA"))                           /* A SRA instruction is present         */
+            {
+                if (strlen(str_op1)==1)                             /* Check if it is a SRA r instruction   */
+                {
+                    retCode=CODE_CB_SRAR;                           /* Prepare the SRA r                    */
+                    *pLen=TWO_BYTES;
+
+                    retCheck=clean_r(str_op1);
+                    
+                    PUSHBIT(retCode, registerToBit(str_op1), 0);    /* Add the register as bits             */
+                }
+
+                if (!strcmp(str_op1, "(HL)"))                       /* Check if it is a SRA (HL) instruction*/
+                {
+                    retCode=CODE_CB_SRAHL;                           /* Prepare the SRA (HL))                    */
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a SRA (IX+d) or SRA (IY+d) instruction  */
+                if (((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")) && strchr(str_op1, '(') && strchr(str_op1, ')') && strchr(str_op1, '+'))
+                {
+                    if (strstr(str_op1, "IX"))
+                    {
+                        retCode=CODE_DDCB_SRAIXD;
+                    }
+
+                    if (strstr(str_op1, "IY"))
+                    {
+                        retCode=CODE_FDCB_SRAIYD;
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op1);
+                    retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the SRA (IX+d) or the SRA (IY+d)  */
 
                     *pLen=FOUR_BYTES;
                 }
                 
             }
 
+            if (!strcmp(str_inst, "SRL"))                           /* A SRL instruction is present         */
+            {
+                if (strlen(str_op1)==1)                             /* Check if it is a SRA r instruction   */
+                {
+                    retCode=CODE_CB_SRLR;                           /* Prepare the SRL r                    */
+                    *pLen=TWO_BYTES;
+
+                    retCheck=clean_r(str_op1);
+                    
+                    PUSHBIT(retCode, registerToBit(str_op1), 0);    /* Add the register as bits             */
+                }
+
+                if (!strcmp(str_op1, "(HL)"))                       /* Check if it is a SRL (HL) instruction*/
+                {
+                    retCode=CODE_CB_SRLHL;                          /* Prepare the SRL (HL))                    */
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a SRL (IX+d) or SRL (IY+d) instruction  */
+                if (((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")) && strchr(str_op1, '(') && strchr(str_op1, ')') && strchr(str_op1, '+'))
+                {
+                    if (strstr(str_op1, "IX"))
+                    {
+                        retCode=CODE_DDCB_SRLIXD;
+                        printf("THIS IS CODE_DDCB_SRLIXD\n");
+                    }
+
+                    if (strstr(str_op1, "IY"))
+                    {
+                        retCode=CODE_FDCB_SRLIYD;
+                        printf("THIS IS CODE_FDCB_SRLIYD\n");
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op1);
+                    retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the SRL (IX+d) or the SRA (IY+d)  */
+
+                    *pLen=FOUR_BYTES;
+                }
+                
+            }
 
             if (!strcmp(str_inst, "INC"))                           /* A INC instruction is present         */
             {
