@@ -1,3 +1,6 @@
+# 1.1.14
+Add EX (SP),HL, EX (SP), IX and EX (SP),IY.
+
 # 1.1.13
 Add and decode LDI, LDIR, LDD and LDDR.
 Add and decode CPI, CPIR, CPD and CPDR.

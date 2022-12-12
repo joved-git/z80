@@ -68,6 +68,7 @@
 #define CODE_CALLCCNN       (0b11000100)                            // CALL cc,nn
 #define CODE_JPNN           (0b11000011)                // 0xC3     / JP nn
 #define CODE_CALLNN         (0b11001101)                // 0xCD     // CALL nn
+#define CODE_EXSPHL         (0b11100011)                // 0xE3     // EX (SP),HL
 #define CODE_EXX            (0b11011001)                // 0xD9     // EXX
 #define CODE_LDSPHL         (0b11111001)                // 0xF9     // LD SP,HL
 #define CODE_LDRR           (0b01000000)                
@@ -129,6 +130,7 @@
 #define CODE_DD_LDIXANN     (0b1101110100101010)        // 0xDD2A   // LD IX,(nn)
 #define CODE_DD_LDIXDN      (0b1101110100110110)        // 0xDD36   // LD (IX+d),n
 #define CODE_DD_POPIX       (0b1101110111100001)        // 0xDDE1   // POP IX
+#define CODE_DD_EXSPIX      (0b1101110111100011)        // 0xDDE3   // EX (SH),IX
 #define CODE_DD_PUSHIX      (0b1101110111100101)        // 0xDDE5   // PUSH IX
 #define CODE_DD_LDSPIX      (0b1101110111111001)        // 0xDDF9   // LD SP,IX
 #define CODE_DD_LDRIXD      (0b1101110101000110)                    // LD r,(IX+d)
@@ -141,6 +143,7 @@
 #define CODE_FD_LDIYANN     (0b1111110100101010)        // 0xFD2A   // LD YX,(nn)
 #define CODE_FD_LDIYDN      (0b1111110100110110)        // 0xFD36   // LD (IX+d),n
 #define CODE_FD_POPIY       (0b1111110111100001)        // 0xFDE1   // POP IY
+#define CODE_FD_EXSPIY      (0b1111110111100011)        // 0xDDE3   // EX (SH),IY
 #define CODE_FD_PUSHIY      (0b1111110111100101)        // 0xFDE5   // PUSH IY
 #define CODE_FD_LDSPIY      (0b1111110111111001)        // 0xFDF9   // LD SP,IY
 #define CODE_FD_LDRIYD      (0b1111110101000110)        //          // LD r,(IY+d)
@@ -214,6 +217,7 @@
 #define MASK_JRE            (0b11111111)
 #define MASK_LDSPHL         (0b11111111)
 #define MASK_DJNZ           (0b11111111)
+#define MASK_EXSPHL         (0b11111111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)
@@ -269,6 +273,8 @@
 #define MASK_CPIR           (0b1111111111111111)
 #define MASK_CPD            (0b1111111111111111)
 #define MASK_CPDR           (0b1111111111111111)
+#define MASK_EXSPIX         (0b1111111111111111)
+#define MASK_EXSPIY         (0b1111111111111111)
 
 /* 32-bit mask  */
 #define MASK_RLCIXD         (0b11111111111111110000000011111111)

@@ -2178,6 +2178,23 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         instruction=CODE_ED_CPDR;
     }
 
+    /* This is a EX (SP),HL    */
+    if (((codeInHexa & MASK_EXSPHL)==CODE_EXSPHL && len == NATURAL_CODE_LENGTH(CODE_EXSPHL)))
+    {
+        instruction=CODE_EXSPHL;
+    }
+
+    /* This is a EX,(SP),IX    */
+    if (((codeInHexa & MASK_EXSPIX)==CODE_DD_EXSPIX && len == DD_CODE_LENGTH(CODE_DD_EXSPIX)))
+    {
+        instruction=CODE_DD_EXSPIX;
+    }
+
+    /* This is a EX,(SP),IY    */
+    if (((codeInHexa & MASK_EXSPIY)==CODE_FD_EXSPIY && len == FD_CODE_LENGTH(CODE_FD_EXSPIY)))
+    {
+        instruction=CODE_FD_EXSPIY;
+    }
 
 
     // bottom 1
@@ -5676,6 +5693,69 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+        case CODE_EXSPHL:                                         /* This is a EX (SP),HL  */
+            sprintf(mInstruction, "EX (SP),HL");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                op16=mMemory->getAddress(mRegisterPack.regSP.getValue());
+                mMemory->setAddress(mRegisterPack.regSP.getValue(), mRegisterPack.regHL.getValue());
+                mRegisterPack.regHL.setValue(op16);
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DD_EXSPIX:                                         /* This is a EX (SP),IX  */
+            sprintf(mInstruction, "EX (SP),IX");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                op16=mMemory->getAddress(mRegisterPack.regSP.getValue());
+                mMemory->setAddress(mRegisterPack.regSP.getValue(), mRegisterPack.regIX.getValue());
+                mRegisterPack.regIX.setValue(op16);
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FD_EXSPIY:                                         /* This is a EX (SP),IY  */
+            sprintf(mInstruction, "EX (SP),IY");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                op16=mMemory->getAddress(mRegisterPack.regSP.getValue());
+                mMemory->setAddress(mRegisterPack.regSP.getValue(), mRegisterPack.regIY.getValue());
+                mRegisterPack.regIY.setValue(op16);
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
     }
 
 
@@ -6877,12 +6957,37 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 }
             }
 
-            if (!strcmp(str_inst, "EX") && !strcmp(str_op1, "AF") && !strcmp(str_op2,"AF'"))                          /* A EXX is present     */
+            if (!strcmp(str_inst, "EX"))                                        /* A EX is present     */
             {
-                retCode=CODE_EXAFAF;
-                *pLen=ONE_BYTE;
-            }
+                if (!strcmp(str_op1, "AF") && !strcmp(str_op2,"AF'"))           /* A EX AF,AF' is present     */
+                {
+                    retCode=CODE_EXAFAF;
+                    *pLen=ONE_BYTE;
+                }
 
+                if (!strcmp(str_op1, "(SP)") && !strcmp(str_op2,"HL"))           /* A EX (SP),HL is present     */
+                {
+                    retCode=CODE_EXSPHL;
+                    *pLen=ONE_BYTE;
+                }
+
+                if (!strcmp(str_op1, "(SP)") && !strcmp(str_op2,"IX"))           /* A EX (SP),IX is present     */
+                {
+                    retCode=CODE_DD_EXSPIX;
+                    *pLen=TWO_BYTES;
+                }
+
+                if (!strcmp(str_op1, "(SP)") && !strcmp(str_op2,"IY"))           /* A EX (SP),IY is present     */
+                {
+                    retCode=CODE_FD_EXSPIY;
+                    *pLen=TWO_BYTES;
+                }
+
+
+            }
+            
+            
+           
             if (!strcmp(str_inst, "BIT"))                               /* A BIT instruction is present  */
             {
                 /* Check if it is a BIT b,r instruction    */
