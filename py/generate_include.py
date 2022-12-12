@@ -1,14 +1,14 @@
 #---------------------------------------------------------------#
 # generate_include.py - v 0.6                                   #
 # The file aims to create ./inc/instruction_length.h file.      #
-# The instruction_length.h file contains all the instruction    #
-# lengths used to decode Z80 instruction.                       #
+# The instruction_length.h file contains all the instructions   #
+# lengths used to decode Z80 instructions.                      #
 # The original values are stored into an ODS file located in    #
 # the /docs directory (Z80_instruction_length.ods).             #
 # To generate the CSV file, open the ODS file and save as it as #
 # a CSV file. ';' is the separator and use '"' as a string      #
 # separator.                                                    #
-# To generate the .h file, just lanch this Python file and the  #
+# To generate the .h file, just launch this Python file and the #
 # inc/instruction_length.h file will be created in the inc      #
 # directory. Do that only once if needed. That's all.           # 
 #---------------------------------------------------------------#
