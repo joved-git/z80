@@ -1248,8 +1248,6 @@ void Z80Machine::loadCode(char *pFilename)
                             {
                                 sprintf(aLine, "%s%c$%c%d", strLine.c_str(), sepChar, '-', -delta);
                             }
-
-                            printf("--2- <%s>\n", aLine);
                         }
                     }
                 }
@@ -2131,6 +2129,32 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     {
         instruction=CODE_ED_RRD;
     }
+
+    /* This is a LDI    */
+    if (((codeInHexa & MASK_LDI)==CODE_ED_LDI && len == ED_CODE_LENGTH(CODE_ED_LDI)))
+    {
+        instruction=CODE_ED_LDI;
+    }
+
+    /* This is a LDIR    */
+    if (((codeInHexa & MASK_LDIR)==CODE_ED_LDIR && len == ED_CODE_LENGTH(CODE_ED_LDIR)))
+    {
+        instruction=CODE_ED_LDIR;
+    }
+
+        /* This is a LDD    */
+    if (((codeInHexa & MASK_LDD)==CODE_ED_LDD && len == ED_CODE_LENGTH(CODE_ED_LDD)))
+    {
+        instruction=CODE_ED_LDD;
+    }
+
+    /* This is a LDDR    */
+    if (((codeInHexa & MASK_LDDR)==CODE_ED_LDDR && len == ED_CODE_LENGTH(CODE_ED_LDDR)))
+    {
+        instruction=CODE_ED_LDDR;
+    }
+
+
 
     // bottom 1
     /*************************************************************************************************************************/
@@ -5306,6 +5330,164 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+        case CODE_ED_LDI:                                         /* This is a LDI  */
+            sprintf(mInstruction, "LDI");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Copy the memory case  */
+                val=mMemory->get8bitsValue(mRegisterPack.regHL.getValue());
+                mMemory->set8bitsValue(mRegisterPack.regDE.getValue(), val);
+                mRegisterPack.regDE.setValue(mRegisterPack.regDE.getValue()+1);
+                mRegisterPack.regHL.setValue(mRegisterPack.regHL.getValue()+1);
+                mRegisterPack.regBC.setValue(mRegisterPack.regBC.getValue()-1);
+
+                /* Modify flags here    */
+                H_RESET;
+
+                if ((mRegisterPack.regBC.getValue()-1) != 0) 
+                {
+                    PV_SET;
+                }
+                else
+                {
+                    PV_RESET;
+                }
+                
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ED_LDIR:                                         /* This is a LDIR  */
+            sprintf(mInstruction, "LDIR");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                do 
+                {
+                    /* Copy the memory block */
+                    val=mMemory->get8bitsValue(mRegisterPack.regHL.getValue());
+                    mMemory->set8bitsValue(mRegisterPack.regDE.getValue(), val);
+                    mRegisterPack.regDE.setValue(mRegisterPack.regDE.getValue()+1);
+                    mRegisterPack.regHL.setValue(mRegisterPack.regHL.getValue()+1);
+                    mRegisterPack.regBC.setValue(mRegisterPack.regBC.getValue()-1);
+                } while (mRegisterPack.regBC.getValue());
+
+                /* Modify flags here    */
+                H_RESET;
+
+                if ((mRegisterPack.regBC.getValue()-1) != 0) 
+                {
+                    PV_SET;
+                }
+                else
+                {
+                    PV_RESET;
+                }
+                
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ED_LDD:                                         /* This is a LDD  */
+            sprintf(mInstruction, "LDD");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Copy the memory case */
+                val=mMemory->get8bitsValue(mRegisterPack.regHL.getValue());
+                mMemory->set8bitsValue(mRegisterPack.regDE.getValue(), val);
+                mRegisterPack.regDE.setValue(mRegisterPack.regDE.getValue()-1);
+                mRegisterPack.regHL.setValue(mRegisterPack.regHL.getValue()-1);
+                mRegisterPack.regBC.setValue(mRegisterPack.regBC.getValue()-1);
+
+                /* Modify flags here    */
+                H_RESET;
+
+                if ((mRegisterPack.regBC.getValue()-1) != 0) 
+                {
+                    PV_SET;
+                }
+                else
+                {
+                    PV_RESET;
+                }
+                
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ED_LDDR:                                         /* This is a LDDR  */
+            sprintf(mInstruction, "LDDR");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                do 
+                {
+                    /* Copy the memory block */
+                    val=mMemory->get8bitsValue(mRegisterPack.regHL.getValue());
+                    mMemory->set8bitsValue(mRegisterPack.regDE.getValue(), val);
+                    mRegisterPack.regDE.setValue(mRegisterPack.regDE.getValue()-1);
+                    mRegisterPack.regHL.setValue(mRegisterPack.regHL.getValue()-1);
+                    mRegisterPack.regBC.setValue(mRegisterPack.regBC.getValue()-1);
+                } while (mRegisterPack.regBC.getValue());
+
+                /* Modify flags here    */
+                H_RESET;
+
+                if ((mRegisterPack.regBC.getValue()-1) != 0) 
+                {
+                    PV_SET;
+                }
+                else
+                {
+                    PV_RESET;
+                }
+                
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
     }
 
 
@@ -5575,6 +5757,30 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
             {
                 retCode=CODE_EXX;
                 *pLen=ONE_BYTE;
+            }
+
+            if (!strcmp(str_inst, "LDI"))                          /* A LDI is present     */
+            {
+                retCode=CODE_ED_LDI;
+                *pLen=TWO_BYTES;
+            }
+
+            if (!strcmp(str_inst, "LDIR"))                          /* A LDIR is present     */
+            {
+                retCode=CODE_ED_LDIR;
+                *pLen=TWO_BYTES;
+            }
+
+            if (!strcmp(str_inst, "LDD"))                          /* A LDD is present     */
+            {
+                retCode=CODE_ED_LDD;
+                *pLen=TWO_BYTES;
+            }
+
+            if (!strcmp(str_inst, "LDDR"))                          /* A LDDR is present     */
+            {
+                retCode=CODE_ED_LDDR;
+                *pLen=TWO_BYTES;
             }
             break;
 

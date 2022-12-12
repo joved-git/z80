@@ -114,6 +114,10 @@
 #define CODE_ED_NEG         (0b1110110101000100)        // 0xED44   // NEG
 #define CODE_ED_RLD         (0b1110110101101111)        // 0xED6F   // RLD
 #define CODE_ED_RRD         (0b1110110101100111)        // 0xED67   // RRD
+#define CODE_ED_LDI         (0b1110110110100000)        // 0xEDA0   // LDI
+#define CODE_ED_LDIR        (0b1110110110110000)        // 0xEDB0   // LDIR
+#define CODE_ED_LDD         (0b1110110110101000)        // 0xEDA8   // LDD
+#define CODE_ED_LDDR        (0b1110110110111000)        // 0xEDB8   // LDDR
 
 /* DD instruction codes     */
 #define CODE_DD_LDIXNN      (0b1101110100100001)        // 0xDD21   // LD IX,nn      
@@ -163,6 +167,7 @@
 #define CODE_FDCB_SETBIYD   (0b11111101110010110000000011000110)     // SET b,(IY+d)
 #define CODE_FDCB_RESBIYD   (0b11111101110010110000000010000110)     // RES b,(IY+d)
 
+/* Recognition masks    */
 #define MASK_NOP            (0b11111111)
 #define MASK_LDRR           (0b11000000)
 #define MASK_LDRHL          (0b11000111)
@@ -252,6 +257,10 @@
 #define MASK_POPIY          (0b1111111111111111)
 #define MASK_RLD            (0b1111111111111111)
 #define MASK_RRD            (0b1111111111111111)
+#define MASK_LDI            (0b1111111111111111)
+#define MASK_LDIR           (0b1111111111111111)
+#define MASK_LDD            (0b1111111111111111)
+#define MASK_LDDR           (0b1111111111111111)
 
 /* 32-bit mask  */
 #define MASK_RLCIXD         (0b11111111111111110000000011111111)

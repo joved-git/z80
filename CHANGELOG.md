@@ -1,4 +1,7 @@
 
+# 1.1.13
+Add and decode LDI, LDIR, LDD and LDDR.
+
 # 1.1.12
 Add and decode RLD and RRD.
 
