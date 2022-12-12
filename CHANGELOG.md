@@ -1,6 +1,6 @@
-
 # 1.1.13
 Add and decode LDI, LDIR, LDD and LDDR.
+Add and decode CPI, CPIR, CPD and CPDR.
 
 # 1.1.12
 Add and decode RLD and RRD.

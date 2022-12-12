@@ -118,6 +118,10 @@
 #define CODE_ED_LDIR        (0b1110110110110000)        // 0xEDB0   // LDIR
 #define CODE_ED_LDD         (0b1110110110101000)        // 0xEDA8   // LDD
 #define CODE_ED_LDDR        (0b1110110110111000)        // 0xEDB8   // LDDR
+#define CODE_ED_CPI         (0b1110110110100001)        // 0xEDA1   // CPI
+#define CODE_ED_CPIR        (0b1110110110110001)        // 0xEDB1   // CPIR
+#define CODE_ED_CPD         (0b1110110110101001)        // 0xEDA9   // CPD
+#define CODE_ED_CPDR        (0b1110110110111001)        // 0xEDB9   // CPDR
 
 /* DD instruction codes     */
 #define CODE_DD_LDIXNN      (0b1101110100100001)        // 0xDD21   // LD IX,nn      
@@ -261,6 +265,10 @@
 #define MASK_LDIR           (0b1111111111111111)
 #define MASK_LDD            (0b1111111111111111)
 #define MASK_LDDR           (0b1111111111111111)
+#define MASK_CPI            (0b1111111111111111)
+#define MASK_CPIR           (0b1111111111111111)
+#define MASK_CPD            (0b1111111111111111)
+#define MASK_CPDR           (0b1111111111111111)
 
 /* 32-bit mask  */
 #define MASK_RLCIXD         (0b11111111111111110000000011111111)

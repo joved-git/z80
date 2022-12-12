@@ -2154,6 +2154,30 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         instruction=CODE_ED_LDDR;
     }
 
+    /* This is a CPI    */
+    if (((codeInHexa & MASK_CPI)==CODE_ED_CPI && len == ED_CODE_LENGTH(CODE_ED_CPI)))
+    {
+        instruction=CODE_ED_CPI;
+    }
+
+    /* This is a CPIR    */
+    if (((codeInHexa & MASK_CPIR)==CODE_ED_CPIR && len == ED_CODE_LENGTH(CODE_ED_CPIR)))
+    {
+        instruction=CODE_ED_CPIR;
+    }
+
+        /* This is a CPD    */
+    if (((codeInHexa & MASK_CPD)==CODE_ED_CPD && len == ED_CODE_LENGTH(CODE_ED_CPD)))
+    {
+        instruction=CODE_ED_CPD;
+    }
+
+    /* This is a CPDR    */
+    if (((codeInHexa & MASK_CPDR)==CODE_ED_CPDR && len == ED_CODE_LENGTH(CODE_ED_CPDR)))
+    {
+        instruction=CODE_ED_CPDR;
+    }
+
 
 
     // bottom 1
@@ -5382,7 +5406,8 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                     mRegisterPack.regDE.setValue(mRegisterPack.regDE.getValue()+1);
                     mRegisterPack.regHL.setValue(mRegisterPack.regHL.getValue()+1);
                     mRegisterPack.regBC.setValue(mRegisterPack.regBC.getValue()-1);
-                } while (mRegisterPack.regBC.getValue());
+                } 
+                while (mRegisterPack.regBC.getValue());
 
                 /* Modify flags here    */
                 H_RESET;
@@ -5461,7 +5486,8 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                     mRegisterPack.regDE.setValue(mRegisterPack.regDE.getValue()-1);
                     mRegisterPack.regHL.setValue(mRegisterPack.regHL.getValue()-1);
                     mRegisterPack.regBC.setValue(mRegisterPack.regBC.getValue()-1);
-                } while (mRegisterPack.regBC.getValue());
+                } 
+                while (mRegisterPack.regBC.getValue());
 
                 /* Modify flags here    */
                 H_RESET;
@@ -5476,6 +5502,168 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 }
                 
                 N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ED_CPI:                                         /* This is a CPI  */
+            sprintf(mInstruction, "CPI");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Copy the memory case  */
+                val=mRegisterPack.regA.getValue() - mMemory->get8bitsValue(mRegisterPack.regHL.getValue());
+                mRegisterPack.regHL.setValue(mRegisterPack.regHL.getValue()+1);
+                mRegisterPack.regBC.setValue(mRegisterPack.regBC.getValue()-1);
+
+                /* Modify flags here    */
+                S_IS(SIGN(val));
+                Z_IS(ZERO(val));
+
+                H_IS(checkHalfBorrowOnSub8(mRegisterPack.regA.getValue(), mMemory->get8bitsValue(mRegisterPack.regHL.getValue())));
+
+                if ((mRegisterPack.regBC.getValue()-1) != 0) 
+                {
+                    PV_SET;
+                }
+                else
+                {
+                    PV_RESET;
+                }
+                
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ED_CPIR:                                         /* This is a CPIR  */
+            sprintf(mInstruction, "CPIR");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Copy the memory case  */
+                do {
+                    val=mRegisterPack.regA.getValue() - mMemory->get8bitsValue(mRegisterPack.regHL.getValue());
+                    mRegisterPack.regHL.setValue(mRegisterPack.regHL.getValue()+1);
+                    mRegisterPack.regBC.setValue(mRegisterPack.regBC.getValue()-1);
+
+                    /* Modify flags here    */
+                    S_IS(SIGN(val));
+                    Z_IS(ZERO(val));
+
+                    H_IS(checkHalfBorrowOnSub8(mRegisterPack.regA.getValue(), mMemory->get8bitsValue(mRegisterPack.regHL.getValue())));
+
+                    if ((mRegisterPack.regBC.getValue()-1) != 0) 
+                    {
+                        PV_SET;
+                    }
+                    else
+                    {
+                        PV_RESET;
+                    }
+                    
+                    N_RESET;
+                } 
+                while (mRegisterPack.regBC.getValue() && !mRegisterPack.regF.getZeroFlag());
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ED_CPD:                                         /* This is a CPD  */
+            sprintf(mInstruction, "CPD");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Copy the memory case  */
+                val=mRegisterPack.regA.getValue() - mMemory->get8bitsValue(mRegisterPack.regHL.getValue());
+                mRegisterPack.regHL.setValue(mRegisterPack.regHL.getValue()-1);
+                mRegisterPack.regBC.setValue(mRegisterPack.regBC.getValue()-1);
+
+                /* Modify flags here    */
+                S_IS(SIGN(val));
+                Z_IS(ZERO(val));
+
+                H_IS(checkHalfBorrowOnSub8(mRegisterPack.regA.getValue(), mMemory->get8bitsValue(mRegisterPack.regHL.getValue())));
+
+                if ((mRegisterPack.regBC.getValue()-1) != 0) 
+                {
+                    PV_SET;
+                }
+                else
+                {
+                    PV_RESET;
+                }
+                
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ED_CPDR:                                         /* This is a CPDR  */
+            sprintf(mInstruction, "CPDR");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Copy the memory case  */
+                do {
+                    val=mRegisterPack.regA.getValue() - mMemory->get8bitsValue(mRegisterPack.regHL.getValue());
+                    mRegisterPack.regHL.setValue(mRegisterPack.regHL.getValue()-1);
+                    mRegisterPack.regBC.setValue(mRegisterPack.regBC.getValue()-1);
+
+                    /* Modify flags here    */
+                    S_IS(SIGN(val));
+                    Z_IS(ZERO(val));
+
+                    H_IS(checkHalfBorrowOnSub8(mRegisterPack.regA.getValue(), mMemory->get8bitsValue(mRegisterPack.regHL.getValue())));
+
+                    if ((mRegisterPack.regBC.getValue()-1) != 0) 
+                    {
+                        PV_SET;
+                    }
+                    else
+                    {
+                        PV_RESET;
+                    }
+                    
+                    N_RESET;
+                } 
+                while (mRegisterPack.regBC.getValue() && !mRegisterPack.regF.getZeroFlag());
 
                 if (pMode==INTP_EXECUTE)
                 {
@@ -5782,23 +5970,33 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 retCode=CODE_ED_LDDR;
                 *pLen=TWO_BYTES;
             }
+
+            if (!strcmp(str_inst, "CPI"))                          /* A CPI is present     */
+            {
+                retCode=CODE_ED_CPI;
+                *pLen=TWO_BYTES;
+            }
+
+            if (!strcmp(str_inst, "CPIR"))                          /* A CPIR is present     */
+            {
+                retCode=CODE_ED_CPIR;
+                *pLen=TWO_BYTES;
+            }
+
+            if (!strcmp(str_inst, "CPD"))                          /* A CPD is present     */
+            {
+                retCode=CODE_ED_CPD;
+                *pLen=TWO_BYTES;
+            }
+
+            if (!strcmp(str_inst, "CPDR"))                          /* A CPDR is present     */
+            {
+                retCode=CODE_ED_CPDR;
+                *pLen=TWO_BYTES;
+            }
             break;
 
         case 2:
-            if (!strcmp(str_inst, "ORG"))                           /* A ORG directive is present         */
-            {
-                /* Check if it is a ORG nn instruction   */
-#ifdef TOTO
-                if ((strlen(str_op1)>=4 && strlen(str_op1)<=7) && strchr(str_op1, '#'))
-                {
-                    retCheck=clean_nn(str_op1);                         /* Clean the (nn) operand   */
-                    word=toValue(str_op1+1, pLen, &lenEff);
-
-                    mRegisterPack.regPC.setValue(word);
-                }
-#endif
-            }
-
             if (!strcmp(str_inst, "RLC"))                           /* A RLC instruction is present         */
             {
                 if (strlen(str_op1)==1)                             /* Check if it is a RLC r instruction   */
