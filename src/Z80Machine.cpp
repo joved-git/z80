@@ -1349,17 +1349,13 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD r,n  */
-    if ((codeInHexa>>8 & MASK_LDRN)==CODE_LDRN && len == TWO_BYTES)
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_LDRN)==CODE_LDRN && len == NATURAL_CODE_LENGTH(CODE_LDRN))
     {
         instruction=CODE_LDRN;
         
         /* Extract the value of the register (in bits)    */
         op1=EXTRACT(codeInHexa, 11, 3);
         op2=codeInHexa & 0xFF;
-
-        //printf("cih=%02X (%d)", codeInHexa, codeInHexa);
-        //printf("op1=%s\n", byteToBinary(op1));
-        //printf("n=%d\n", op2);
     }
 
     /* This is a LD (HL),n  */
@@ -2194,6 +2190,60 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if (((codeInHexa & MASK_EXSPIY)==CODE_FD_EXSPIY && len == FD_CODE_LENGTH(CODE_FD_EXSPIY)))
     {
         instruction=CODE_FD_EXSPIY;
+    }
+
+    /* This is a ADD A,n  */
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_ADDAN)==CODE_ADDAN && len == NATURAL_CODE_LENGTH(CODE_ADDAN))
+    {
+        instruction=CODE_ADDAN;
+        
+        /* Extract the value of the register (in bits)    */
+        op1=EXTRACT(codeInHexa, 0, 8);
+    }
+
+    /* This is a ADC A,n  */
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_ADCAN)==CODE_ADCAN && len == NATURAL_CODE_LENGTH(CODE_ADCAN))
+    {
+        instruction=CODE_ADCAN;
+        
+        /* Extract the value of the register (in bits)    */
+        op1=EXTRACT(codeInHexa, 0, 8);
+    }
+
+    /* This is a ADD A,(IX+d)  */
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_ADDAIXD)==CODE_DD_ADDAIXD && len == DD_CODE_LENGTH(CODE_DD_ADDAIXD))
+    {
+        instruction=CODE_DD_ADDAIXD;
+        
+        /* Extract the value of the register (in bits)    */
+        op1=EXTRACT(codeInHexa, 0, 8);
+    }
+
+    /* This is a ADD A,(IY+d)  */
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_ADDAIYD)==CODE_FD_ADDAIYD && len == FD_CODE_LENGTH(CODE_FD_ADDAIYD))
+    {
+        instruction=CODE_FD_ADDAIYD;
+        
+        /* Extract the value of the register (in bits)    */
+        op1=EXTRACT(codeInHexa, 0, 8);
+    }
+
+    /* This is a INC (IX+d)  */
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_INCIXD)==CODE_DD_INCIXD && len == DD_CODE_LENGTH(CODE_DD_INCIXD))
+    {
+        instruction=CODE_DD_INCIXD;
+        
+        /* Extract the value of the register (in bits)    */
+        op1=EXTRACT(codeInHexa, 0, 8);
+    }
+
+    /* This is a INC (IY+d)  */
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_INCIYD)==CODE_FD_INCIYD && len == FD_CODE_LENGTH(CODE_FD_INCIYD))
+    {
+        instruction=CODE_FD_INCIYD;
+        
+        /* Extract the value of the register (in bits)    */
+        op1=EXTRACT(codeInHexa, 0, 8);
     }
 
 
@@ -3609,7 +3659,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
-        case CODE_ADDAHL:                                         /* This is a ADD A,HL  */
+        case CODE_ADDAHL:                                         /* This is a ADD A,(HL)  */
             sprintf(mInstruction, "ADD A,(HL)");
 
             if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
@@ -3644,6 +3694,282 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             if (pMode==INTP_DISPLAY)
             {
                 printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DD_ADDAIXD:                                           /* This is a ADD A,(IX+d)  */
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIX.getValue()-op1;
+                sprintf(mInstruction, "ADD A,(IX-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op1;
+                sprintf(mInstruction, "ADD A,(IX+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=mMemory->get8bitsValue(address);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfCarryOnAdd8(reg8_1->getValue(), val));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkCarryOnAdd8(reg8_1->getValue(), val));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), val))
+
+                reg8_1->setValue(reg8_1->getValue() + val);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DD_INCIXD:                                            /* This is a INC (IX+d)     */
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIX.getValue()-op1;
+                sprintf(mInstruction, "INC (IX-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op1;
+                sprintf(mInstruction, "INC (IX+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                val=mMemory->get8bitsValue(address);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfCarryOnAdd8(val, 1));
+                               
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnAdd(val, 1))
+
+                mMemory->set8bitsValue(address, val+1);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(val+1));
+                Z_IS(ZERO(val+1));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FD_INCIYD:                                            /* This is a INC (IY+d)     */
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIY.getValue()-op1;
+                sprintf(mInstruction, "INC (IY-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op1;
+                sprintf(mInstruction, "INC (IY+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                val=mMemory->get8bitsValue(address);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfCarryOnAdd8(val, 1));
+                               
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnAdd(val, 1))
+
+                mMemory->set8bitsValue(address, val+1);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(val+1));
+                Z_IS(ZERO(val+1));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FD_ADDAIYD:                                           /* This is a ADD A,(IY+d)  */
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIY.getValue()-op1;
+                sprintf(mInstruction, "ADD A,(IY-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op1;
+                sprintf(mInstruction, "ADD A,(IY+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=mMemory->get8bitsValue(address);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfCarryOnAdd8(reg8_1->getValue(), val));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkCarryOnAdd8(reg8_1->getValue(), val));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), val))
+
+                reg8_1->setValue(reg8_1->getValue() + val);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DD_ADCAIXD:                                           /* This is a ADC A,(IX+d)  */
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIX.getValue()-op1;
+                sprintf(mInstruction, "ADC A,(IX-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op1;
+                sprintf(mInstruction, "ADC A,(IX+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=mMemory->get8bitsValue(address);
+                carry=(mRegisterPack.regF.getCarryFlag()?1:0);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfCarryOnAdd8(reg8_1->getValue(), val+carry));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkCarryOnAdd8(reg8_1->getValue(), val+carry));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), val+carry))
+
+                reg8_1->setValue(reg8_1->getValue() + val+carry);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FD_ADCAIYD:                                           /* This is a ADC A,(IY+d)  */
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIY.getValue()-op1;
+                sprintf(mInstruction, "ADC A,(IY-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op1;
+                sprintf(mInstruction, "ADC A,(IY+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=mMemory->get8bitsValue(address);
+                carry=(mRegisterPack.regF.getCarryFlag()?1:0);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfCarryOnAdd8(reg8_1->getValue(), val+carry));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkCarryOnAdd8(reg8_1->getValue(), val+carry));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), val+carry))
+
+                reg8_1->setValue(reg8_1->getValue() + val+carry);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -4536,7 +4862,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
 
             break;
-
         
         case CODE_INCHL:                                            /* This is a INC (HL)    */
             sprintf(mInstruction, "INC (HL)");
@@ -5756,6 +6081,79 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+        case CODE_ADDAN:                             /* This is a ADD A,n    */
+            sprintf(mInstruction, "ADD A,#%02X", op1);
+            
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfCarryOnAdd8(reg8_1->getValue(), op1));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkCarryOnAdd8(reg8_1->getValue(), op1));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), op1))
+
+                reg8_1->setValue(reg8_1->getValue() + op1);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ADCAN:                             /* This is a ADC A,n    */
+            sprintf(mInstruction, "ADC A,#%02X", op1);
+            
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=(mRegisterPack.regF.getCarryFlag()?1:0);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfCarryOnAdd8(reg8_1->getValue(), op1+val));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkCarryOnAdd8(reg8_1->getValue(), op1+val));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), op1+val))
+
+                reg8_1->setValue(reg8_1->getValue() + op1+val);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
     }
 
 
@@ -5957,6 +6355,8 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
     printf(">>> <%s> <%s> <%s>\n", str_inst, str_op1, str_op2);
     printf("comp=%d\n", nbOfComponents);
 #endif
+
+    /* bottom 3 */
 
     switch (nbOfComponents)
     {
@@ -6382,6 +6782,28 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 {
                     retCode=CODE_INCHL;                             /* Prepare the INC (HL)                     */
                     *pLen=ONE_BYTE;
+                }
+
+                /* Check if it is a INC (IX+d) instruction    */
+                if ((strlen(str_op1)==7) || (strlen(str_op1)==8) && strstr(str_op1, "IX") || strstr(str_op1, "IY"))     
+                {
+                    printf("INC IX/IY\n");
+                    if (strstr(str_op1, "IX"))
+                    {
+                        retCode=CODE_DD_INCIXD;
+                    }
+
+                    if (strstr(str_op1, "IY"))
+                    {
+                        retCode=CODE_FD_INCIYD;
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op1);
+
+                    retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
+                    *pLen=THREE_BYTES;
+                    str_op1[0]='\0';
                 }
             }
 
@@ -6890,7 +7312,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
             if (!strcmp(str_inst, "ADD"))                            /* A ADD instruction is present  */
             {
                 /* Check if it is a ADD A,r instruction    */
-                if (!strcmp(str_op1, "A") && strlen(str_op2)==1)       
+                if (!strcmp(str_op1, "A") && (strlen(str_op2)==1))       
                 {
                     retCode=CODE_ADDAR;                              /* Prepare the ADD r,r'  */
                     *pLen=ONE_BYTE;
@@ -6899,6 +7321,38 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCheck=clean_r(str_op2);
                     
                     PUSHBIT(retCode, registerToBit(str_op2), 0);    /* Add the second register as bits   */
+                }
+
+                /* Check if it is a ADD A,(IX+d) instruction    */
+                if (!strcmp(str_op1, "A") && ((strlen(str_op2)==7) || (strlen(str_op2)==8)) && (strstr(str_op2, "IX") || strstr(str_op2, "IY")))       
+                {
+                    if (strstr(str_op2, "IX"))
+                    {
+                        retCode=CODE_DD_ADDAIXD;
+                    }
+
+                    if (strstr(str_op2, "IY"))
+                    {
+                        retCode=CODE_FD_ADDAIYD;
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op2);
+
+                    retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);
+                    *pLen=THREE_BYTES;
+                    str_op2[0]='\0';
+                }
+
+                /* Check if it is a ADD A,n instruction    */
+                if (!strcmp(str_op1, "A") && ((strlen(str_op2)==2) || (strlen(str_op2)==3)) && strchr(str_op2, '#'))       
+                {
+                    retCode=CODE_ADDAN;                              /* Prepare the ADD A,n  */
+                    
+                    retCheck=clean_n(str_op2);
+                    retCode=(retCode << SIZE_1_BYTE)+toValue(str_op2+1, pLen, &lenEff);
+                    //PUSHBIT(retCode, registerToBit(str_op2), 0);    /* Add the n    */
+                    *pLen=TWO_BYTES;
                 }
 
                 /* Check if it is a ADD A,(HL) instruction    */
@@ -6955,6 +7409,37 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCode=CODE_ADCAHL;                              /* Prepare the ADC r,(HL)  */
                     *pLen=ONE_BYTE;
                 }
+
+                /* Check if it is a ADC A,(IX+d) instruction    */
+                if (!strcmp(str_op1, "A") && ((strlen(str_op2)==7) || (strlen(str_op2)==8)) && (strstr(str_op2, "IX") || strstr(str_op2, "IY")))       
+                {
+                    if (strstr(str_op2, "IX"))
+                    {
+                        retCode=CODE_DD_ADCAIXD;
+                    }
+
+                    if (strstr(str_op2, "IY"))
+                    {
+                        retCode=CODE_FD_ADCAIYD;
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op2);
+
+                    retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);
+                    *pLen=THREE_BYTES;
+                    str_op2[0]='\0';
+                }
+
+                /* Check if it is a ADC A,n instruction    */
+                if (!strcmp(str_op1, "A") && ((strlen(str_op2)==2) || (strlen(str_op2)==3)) && strchr(str_op2, '#'))       
+                {
+                    retCode=CODE_ADCAN;                              /* Prepare the ADD A,n  */
+                    
+                    retCheck=clean_n(str_op2);
+                    retCode=(retCode << SIZE_1_BYTE)+toValue(str_op2+1, pLen, &lenEff);
+                    *pLen=TWO_BYTES;
+                }
             }
 
             if (!strcmp(str_inst, "EX"))                                        /* A EX is present     */
@@ -6985,8 +7470,6 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
 
             }
-            
-            
            
             if (!strcmp(str_inst, "BIT"))                               /* A BIT instruction is present  */
             {

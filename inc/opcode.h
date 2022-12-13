@@ -66,8 +66,10 @@
 #define CODE_ADDAHL         (0b10000110)                // 0x86     // ADD A,(HL)
 #define CODE_ADCAHL         (0b10001110)                // 0x8E     // ADC A,(HL)
 #define CODE_CALLCCNN       (0b11000100)                            // CALL cc,nn
-#define CODE_JPNN           (0b11000011)                // 0xC3     / JP nn
+#define CODE_JPNN           (0b11000011)                // 0xC3     // JP nn
+#define CODE_ADDAN          (0b11000110)                // 0xC6     // ADD A,n
 #define CODE_CALLNN         (0b11001101)                // 0xCD     // CALL nn
+#define CODE_ADCAN          (0b11001110)                // 0xCE     // ADC A,n
 #define CODE_EXSPHL         (0b11100011)                // 0xE3     // EX (SP),HL
 #define CODE_EXX            (0b11011001)                // 0xD9     // EXX
 #define CODE_LDSPHL         (0b11111001)                // 0xF9     // LD SP,HL
@@ -128,7 +130,10 @@
 #define CODE_DD_LDIXNN      (0b1101110100100001)        // 0xDD21   // LD IX,nn      
 #define CODE_DD_LDNNIX      (0b1101110100100010)        // 0xDD22   // LD (nn),IX
 #define CODE_DD_LDIXANN     (0b1101110100101010)        // 0xDD2A   // LD IX,(nn)
+#define CODE_DD_INCIXD      (0b1101110100110100)        // 0xDD34   // INC (IX+d)
 #define CODE_DD_LDIXDN      (0b1101110100110110)        // 0xDD36   // LD (IX+d),n
+#define CODE_DD_ADDAIXD     (0b1101110110000110)        // 0xDD86   // ADD A,(IX+d)
+#define CODE_DD_ADCAIXD     (0b1101110110001110)        // 0xDD8E   // ADC A,(IX+d)
 #define CODE_DD_POPIX       (0b1101110111100001)        // 0xDDE1   // POP IX
 #define CODE_DD_EXSPIX      (0b1101110111100011)        // 0xDDE3   // EX (SH),IX
 #define CODE_DD_PUSHIX      (0b1101110111100101)        // 0xDDE5   // PUSH IX
@@ -141,7 +146,10 @@
 #define CODE_FD_LDIYNN      (0b1111110100100001)        // 0xFD21   // LD IY,nn
 #define CODE_FD_LDNNIY      (0b1111110100100010)        // 0xFD22   // LD (nn),IY
 #define CODE_FD_LDIYANN     (0b1111110100101010)        // 0xFD2A   // LD YX,(nn)
+#define CODE_FD_INCIYD      (0b1111110100110100)        // 0xFD34   // INC (IY+d)
 #define CODE_FD_LDIYDN      (0b1111110100110110)        // 0xFD36   // LD (IX+d),n
+#define CODE_FD_ADDAIYD     (0b1111110110000110)        // 0xFD86   // ADD A,(IY+d)
+#define CODE_FD_ADCAIYD     (0b1111110110001110)        // 0xFD8E   // ADC A,(IY+d)
 #define CODE_FD_POPIY       (0b1111110111100001)        // 0xFDE1   // POP IY
 #define CODE_FD_EXSPIY      (0b1111110111100011)        // 0xDDE3   // EX (SH),IY
 #define CODE_FD_PUSHIY      (0b1111110111100101)        // 0xFDE5   // PUSH IY
@@ -218,6 +226,8 @@
 #define MASK_LDSPHL         (0b11111111)
 #define MASK_DJNZ           (0b11111111)
 #define MASK_EXSPHL         (0b11111111)
+#define MASK_ADDAN          (0b11111111)
+#define MASK_ADCAN          (0b11111111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)
@@ -275,6 +285,12 @@
 #define MASK_CPDR           (0b1111111111111111)
 #define MASK_EXSPIX         (0b1111111111111111)
 #define MASK_EXSPIY         (0b1111111111111111)
+#define MASK_ADDAIXD        (0b1111111111111111)
+#define MASK_ADDAIYD        (0b1111111111111111)
+#define MASK_ADCAIXD        (0b1111111111111111)
+#define MASK_ADCAIYD        (0b1111111111111111)
+#define MASK_INCIXD         (0b1111111111111111)
+#define MASK_INCIYD         (0b1111111111111111)
 
 /* 32-bit mask  */
 #define MASK_RLCIXD         (0b11111111111111110000000011111111)

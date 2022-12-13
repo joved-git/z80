@@ -1,3 +1,10 @@
+# 1.1.15
+Add and decode ADD A,n.
+Correct the size of ADD A,n into ods and csv (.h regenerated).
+Add and decode ADD A,(IX+d) and ADD A,(IY+d). 
+Add and decode ADC A,n, ADC A,(IX+d) and ADC A,(IY+d). 
+Add and decode INC (IX+d) and INC (IY+D).
+
 # 1.1.14
 Add EX (SP),HL, EX (SP), IX and EX (SP),IY.
 
