@@ -96,9 +96,14 @@ private:
     bool mExecMode;                      /* The mode of the machine (exec or normal/default) */
     char mInstruction[MAX_INSTR_LENGTH]; /* The decoded instruction                          */
 
+    /// @brief  This method give the parity of a byte.
+    /// @param  A byte. 
+    /// @return The parity (1 = even, 0 = odd).
+    uint8_t calcParity(uint8_t);
+
     /// @brief  This method find the type of the entry command.
     /// @param  Nothing. 
-    /// @return The type of the entre (NOTHING, COMMAND, INSTRUCTION OR CODE).
+    /// @return The type of the entry (NOTHING, COMMAND, INSTRUCTION OR CODE).
     typeOfEntry findEntryType();
 
     /// @brief  Verify is the string is an hexa number.

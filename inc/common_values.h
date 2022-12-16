@@ -127,4 +127,16 @@ enum typeOfEntry
         INSTRUCTION,
         CODE
     };
+
+/* Array used to calculate parity   */
+/* Be carreful, result is inverted  */
+/* to calculate easly the result    */
+static unsigned char parityTable[16] = 
+{
+    1, 0, 0, 1,
+    0, 1, 1, 0,
+    0, 1, 1, 0,
+    1, 0, 0, 1
+};
+
 #endif

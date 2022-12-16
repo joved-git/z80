@@ -1,3 +1,10 @@
+# 1.1.16
+Add and decode DEC (IX+d) and DEC (IY+D).
+Correct INC (HL) and DEC (HL): no flags setting.
+Add and decode AND r, AND n, AND (HL), AND (IX+d) and AND (IY+d).
+Create calcParity() function.
+Change EVEN(a) macro to calcParity(a).
+
 # 1.1.15
 Add and decode ADD A,n.
 Correct the size of ADD A,n into ods and csv (.h regenerated).
