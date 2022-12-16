@@ -2309,6 +2309,44 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=codeInHexa & FIRST_LOWEST_BYTE;
     }
 
+    /* This is a OR r */
+    if ((codeInHexa & MASK_ORR)==CODE_ORR && len == NATURAL_CODE_LENGTH(CODE_ORR))
+    {
+        instruction=CODE_ORR;
+               
+        op1=EXTRACT(codeInHexa, 0, 3);
+    }
+
+    /* This is a OR n */
+    if (((codeInHexa >> SIZE_1_BYTE) & MASK_ORN)==CODE_ORN && len == NATURAL_CODE_LENGTH(CODE_ORN))
+    {
+        instruction=CODE_ORN;
+               
+        op1=codeInHexa & FIRST_LOWEST_BYTE;
+    }
+
+    /* This is a OR (HL) */
+    if ((codeInHexa & MASK_ORHL)==CODE_ORHL && len == NATURAL_CODE_LENGTH(CODE_ORHL))
+    {
+        instruction=CODE_ORHL;
+    }
+
+    /* This is a OR (IX+d) */
+    if (((codeInHexa >> SIZE_1_BYTE) & MASK_ORIXD)==CODE_DD_ORIXD && len == DD_CODE_LENGTH(CODE_DD_ORIXD))
+    {
+        instruction=CODE_DD_ORIXD;
+               
+        op1=codeInHexa & FIRST_LOWEST_BYTE;
+    }
+
+    /* This is a OR (IY+d) */
+    if (((codeInHexa >> SIZE_1_BYTE) & MASK_ORIYD)==CODE_FD_ORIYD && len == FD_CODE_LENGTH(CODE_FD_ORIYD))
+    {
+        instruction=CODE_FD_ORIYD;
+               
+        op1=codeInHexa & FIRST_LOWEST_BYTE;
+    }
+
     // bottom 1
     /*************************************************************************************************************************/
 
@@ -3943,7 +3981,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             else
             {
-                address=mRegisterPack.regIX.getValue()+op1;
+                address=mRegisterPack.regIY.getValue()+op1;
                 sprintf(mInstruction, "AND (IY+#%02X)", op1);
             }
 
@@ -3951,6 +3989,340 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             {
                 reg8_1=get8bitsRegisterAddress(REGA);
                 val=(mMemory->get8bitsValue(address) & reg8_1->getValue());
+                reg8_1->setValue(val);
+
+                /* Modify flags here after operation   */
+                S_IS(SIGN(val));
+                Z_IS(ZERO(val));
+                H_SET;
+                PV_IS(calcParity(val));
+                N_RESET;
+                C_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ORR:                                         /* This is a OR r  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "OR %s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg8_2=get8bitsRegisterAddress(op1);
+                reg8_1->setValue(reg8_1->getValue() | reg8_2->getValue());
+
+                /* Modify flags here after operation   */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                H_SET;
+                PV_IS(calcParity(reg8_2->getValue()));
+                N_RESET;
+                C_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ORN:                                            /* This is a OR n  */
+            sprintf(mInstruction, "OR #%02X", op1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg8_1->setValue(reg8_1->getValue() | op1);
+
+                /* Modify flags here after operation   */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                H_SET;
+                PV_IS(calcParity(reg8_1->getValue()));
+                N_RESET;
+                C_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ORHL:                                         /* This is a OR (HL)  */
+            sprintf(mInstruction, "OR (HL)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg16_1=get16bitsRegisterAddress(REGHL);
+                val=(mMemory->get8bitsValue(reg16_1->getValue()) | reg8_1->getValue());
+                reg8_1->setValue(val);
+
+                /* Modify flags here after operation   */
+                S_IS(SIGN(val));
+                Z_IS(ZERO(val));
+                H_SET;
+                PV_IS(calcParity(val));
+                N_RESET;
+                C_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DD_ORIXD:                                            /* This is a OR (IX+d)  */
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIX.getValue()-op1;
+                sprintf(mInstruction, "OR (IX-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op1;
+                sprintf(mInstruction, "OR (IX+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=(mMemory->get8bitsValue(address) | reg8_1->getValue());
+                reg8_1->setValue(val);
+
+                /* Modify flags here after operation   */
+                S_IS(SIGN(val));
+                Z_IS(ZERO(val));
+                H_SET;
+                PV_IS(calcParity(val));
+                N_RESET;
+                C_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+            case CODE_FD_ORIYD:                                             /* This is a OR (IY+d)  */
+            if (SIGN(op1))                                                  /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIY.getValue()-op1;
+                sprintf(mInstruction, "OR (IY-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op1;
+                sprintf(mInstruction, "OR (IY+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=(mMemory->get8bitsValue(address) | reg8_1->getValue());
+                reg8_1->setValue(val);
+
+                /* Modify flags here after operation   */
+                S_IS(SIGN(val));
+                Z_IS(ZERO(val));
+                H_SET;
+                PV_IS(calcParity(val));
+                N_RESET;
+                C_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_XORR:                                         /* This is a XOR r  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "XOR %s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg8_2=get8bitsRegisterAddress(op1);
+                reg8_1->setValue(reg8_1->getValue() ^ reg8_2->getValue());
+
+                /* Modify flags here after operation   */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                H_SET;
+                PV_IS(calcParity(reg8_2->getValue()));
+                N_RESET;
+                C_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_XORN:                                            /* This is a XOR n  */
+            sprintf(mInstruction, "XOR #%02X", op1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg8_1->setValue(reg8_1->getValue() ^ op1);
+
+                /* Modify flags here after operation   */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                H_SET;
+                PV_IS(calcParity(reg8_1->getValue()));
+                N_RESET;
+                C_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_XORHL:                                         /* This is a XOR (HL)  */
+            sprintf(mInstruction, "XOR (HL)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg16_1=get16bitsRegisterAddress(REGHL);
+                val=(mMemory->get8bitsValue(reg16_1->getValue()) ^ reg8_1->getValue());
+                reg8_1->setValue(val);
+
+                /* Modify flags here after operation   */
+                S_IS(SIGN(val));
+                Z_IS(ZERO(val));
+                H_SET;
+                PV_IS(calcParity(val));
+                N_RESET;
+                C_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DD_XORIXD:                                             /* This is a XOR (IX+d)  */
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIX.getValue()-op1;
+                sprintf(mInstruction, "XOR (IX-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op1;
+                sprintf(mInstruction, "XOR (IX+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=(mMemory->get8bitsValue(address) ^ reg8_1->getValue());
+                reg8_1->setValue(val);
+
+                /* Modify flags here after operation   */
+                S_IS(SIGN(val));
+                Z_IS(ZERO(val));
+                H_SET;
+                PV_IS(calcParity(val));
+                N_RESET;
+                C_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+            case CODE_FD_XORIYD:                                            /* This is a OXR (IY+d)  */
+            if (SIGN(op1))                                                  /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIY.getValue()-op1;
+                sprintf(mInstruction, "XOR (IY-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op1;
+                sprintf(mInstruction, "XOR (IY+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=(mMemory->get8bitsValue(address) ^ reg8_1->getValue());
                 reg8_1->setValue(val);
 
                 /* Modify flags here after operation   */
@@ -7252,7 +7624,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
             if (!strcmp(str_inst, "AND"))                            /* A AND instruction is present  */
             {
-                /* Check if it is a AND A,r instruction    */
+                /* Check if it is a AND r instruction    */
                 if (strlen(str_op1)==1)       
                 {
                     retCode=CODE_ANDR;                              /* Prepare the AND r,r'  */
@@ -7295,9 +7667,113 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 }
 
                 /* Check if it is a AND (HL) instruction    */
-                if (!strcmp(str_op1, "A") && !strcmp(str_op2, "(HL)"))       
+                if (!strcmp(str_op1, "(HL)"))       
                 {
                     retCode=CODE_ANDHL;                              /* Prepare the AND (HL)  */
+                    *pLen=ONE_BYTE;
+                }
+            }
+
+            if (!strcmp(str_inst, "OR"))                            /* A OR instruction is present  */
+            {
+                /* Check if it is a OR r instruction    */
+                if (strlen(str_op1)==1)       
+                {
+                    retCode=CODE_ORR;                              /* Prepare the AND r,r'  */
+                    *pLen=ONE_BYTE;
+
+                    retCheck=clean_r(str_op1);
+                    
+                    PUSHBIT(retCode, registerToBit(str_op1), 0);    /* Add the register as bits   */
+                }
+
+                /* Check if it is a OR (IX+d) or OR (IY+d) instruction    */
+                if (((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")))     
+                {
+                    if (strstr(str_op1, "IX"))
+                    {
+                        retCode=CODE_DD_ORIXD;
+                    }
+
+                    if (strstr(str_op1, "IY"))
+                    {
+                        retCode=CODE_FD_ORIYD;
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op1);
+
+                    retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
+                    *pLen=THREE_BYTES;
+                    str_op1[0]='\0';
+                }
+
+                /* Check if it is a AND n instruction    */
+                if (((strlen(str_op1)==2) || (strlen(str_op1)==3)) && strchr(str_op1, '#'))       
+                {
+                    retCode=CODE_ORN;                              /* Prepare the OR n  */
+                    
+                    retCheck=clean_n(str_op1);
+                    retCode=(retCode << SIZE_1_BYTE)+toValue(str_op1+1, pLen, &lenEff);
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a AND (HL) instruction    */
+                if (!strcmp(str_op1, "(HL)"))       
+                {
+                    retCode=CODE_ORHL;                              /* Prepare the OR (HL)  */
+                    *pLen=ONE_BYTE;
+                }
+            }
+
+            if (!strcmp(str_inst, "XOR"))                            /* A XOR instruction is present  */
+            {
+                /* Check if it is a XOR A,r instruction    */
+                if (strlen(str_op1)==1)       
+                {
+                    retCode=CODE_XORR;                              /* Prepare the XOR r,r'  */
+                    *pLen=ONE_BYTE;
+
+                    retCheck=clean_r(str_op1);
+                    
+                    PUSHBIT(retCode, registerToBit(str_op1), 0);    /* Add the register as bits   */
+                }
+
+                /* Check if it is a AND (IX+d) or AND (IY+d) instruction    */
+                if (((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")))     
+                {
+                    if (strstr(str_op1, "IX"))
+                    {
+                        retCode=CODE_DD_XORIXD;
+                    }
+
+                    if (strstr(str_op1, "IY"))
+                    {
+                        retCode=CODE_FD_XORIYD;
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op1);
+
+                    retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
+                    *pLen=THREE_BYTES;
+                    str_op1[0]='\0';
+                }
+
+                /* Check if it is a AND n instruction    */
+                if (((strlen(str_op1)==2) || (strlen(str_op1)==3)) && strchr(str_op1, '#'))       
+                {
+                    retCode=CODE_XORN;                              /* Prepare the XOR n  */
+                    
+                    retCheck=clean_n(str_op1);
+                    retCode=(retCode << SIZE_1_BYTE)+toValue(str_op1+1, pLen, &lenEff);
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a XOR (HL) instruction    */
+                if (!strcmp(str_op1, "(HL)"))       
+                {
+                    retCode=CODE_XORHL;                              /* Prepare the XOR (HL)  */
                     *pLen=ONE_BYTE;
                 }
             }

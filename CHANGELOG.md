@@ -1,3 +1,7 @@
+# 1.1.17
+Add and decode OR r, OR n, OR (HL), OR (IX+d) and OR (IY+d).
+Add and decode XOR r, XOR n, XOR (HL), XOR (IX+d) and XOR (IY+d).
+
 # 1.1.16
 Add and decode DEC (IX+d) and DEC (IY+D).
 Correct INC (HL) and DEC (HL): no flags setting.
@@ -36,7 +40,7 @@ Correct the RR r. Always use REGA. Prepare SRA and SRL instructions.
 
 # 1.1.8
 Add and decode PUSH IX, PUSH IY, POP qq, POP IX and POP IY.
-Correct the PUSH IX/Iy (bad length).
+Correct the PUSH IX/IyY(bad length).
 
 # 1.1.7
 Correct LD rr,nn. Add presence of '#' into the 'nn' string.
