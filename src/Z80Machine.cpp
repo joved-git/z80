@@ -2423,6 +2423,30 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=codeInHexa & FIRST_LOWEST_BYTE;
     }
 
+    /* This is a INC IX */
+    if ((codeInHexa & MASK_INCIX)==CODE_DD_INCIX && len == DD_CODE_LENGTH(CODE_DD_INCIX))
+    {
+        instruction=CODE_DD_INCIX;
+    }
+
+    /* This is a INC IY */
+    if ((codeInHexa & MASK_INCIY)==CODE_FD_INCIY && len == FD_CODE_LENGTH(CODE_FD_INCIY))
+    {
+        instruction=CODE_FD_INCIY;
+    }
+
+    /* This is a DEC IX */
+    if ((codeInHexa & MASK_DECIX)==CODE_DD_DECIX && len == DD_CODE_LENGTH(CODE_DD_DECIX))
+    {
+        instruction=CODE_DD_DECIX;
+    }
+
+    /* This is a DEC IY */
+    if ((codeInHexa & MASK_DECIY)==CODE_FD_DECIY && len == FD_CODE_LENGTH(CODE_FD_DECIY))
+    {
+        instruction=CODE_FD_DECIY;
+    }
+
     // bottom 1
     /*************************************************************************************************************************/
 
@@ -3279,6 +3303,86 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             if (pMode==INTP_DISPLAY)
             {
                 printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DD_INCIX:                                            /* This is a INC IX    */
+            sprintf(mInstruction, "INC IX");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                                
+            {
+                reg16_1=get16bitsRegisterAddress(REGIX);
+                reg16_1->setValue(reg16_1->getValue()+1);
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+        
+        case CODE_FD_INCIY:                                            /* This is a INC IY    */
+            sprintf(mInstruction, "INC IY");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                                
+            {
+                reg16_1=get16bitsRegisterAddress(REGIY);
+                reg16_1->setValue(reg16_1->getValue()+1);
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DD_DECIX:                                            /* This is a DEC IX    */
+            sprintf(mInstruction, "DEC IX");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                                
+            {
+                reg16_1=get16bitsRegisterAddress(REGIX);
+                reg16_1->setValue(reg16_1->getValue()-1);
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+        
+        case CODE_FD_DECIY:                                            /* This is a DEC IY    */
+            sprintf(mInstruction, "DEC IY");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                                
+            {
+                reg16_1=get16bitsRegisterAddress(REGIY);
+                reg16_1->setValue(reg16_1->getValue()-1);
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -7812,9 +7916,23 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     *pLen=ONE_BYTE;
                 }
 
-                /* Check if it is a INC (IX+d) instruction    */
-                if ((strlen(str_op1)==7) || (strlen(str_op1)==8) && strstr(str_op1, "IX") || strstr(str_op1, "IY"))     
+                if (!strcmp(str_op1, "IX"))                         /* Check if it is a INC IX instruction      */
                 {
+                    retCode=CODE_DD_INCIX;                          /* Prepare the INC IX                       */
+                    *pLen=TWO_BYTES;
+                }
+
+                if (!strcmp(str_op1, "IY"))                         /* Check if it is a INC IY instruction      */
+                {
+                    printf("CODE_DD_INCIY\n");
+                    retCode=CODE_FD_INCIY;                          /* Prepare the INC IY                       */
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a INC (IX+d) instruction    */
+                if (((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")))     
+                {
+                    printf("CODE_DD_INCIYD\n");
                     if (strstr(str_op1, "IX"))
                     {
                         retCode=CODE_DD_INCIXD;
@@ -7856,14 +7974,26 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     PUSHBIT(retCode, registerToBit(str_op1), 4);    /* Add the register as bits             */
                 }
 
-                if (!strcmp(str_op1, "(HL)"))                        /* Check if it is a DEC (HL) instruction    */
+                if (!strcmp(str_op1, "(HL)"))                        /* Check if it is a DEC (HL) instruction       */
                 {
-                    retCode=CODE_DECHL;                             /* Prepare the DEC (HL)                     */
+                    retCode=CODE_DECHL;                             /* Prepare the DEC (HL)                         */
                     *pLen=ONE_BYTE;
                 }
 
+                if (!strcmp(str_op1, "IX"))                         /* Check if it is a DEC IX instruction      */
+                {
+                    retCode=CODE_DD_DECIX;                          /* Prepare the DEC IX                       */
+                    *pLen=TWO_BYTES;
+                }
+
+                if (!strcmp(str_op1, "IY"))                         /* Check if it is a DEC IY instruction      */
+                {
+                    retCode=CODE_FD_DECIY;                          /* Prepare the DEC IY                       */
+                    *pLen=TWO_BYTES;
+                }
+
                 /* Check if it is a DEC (IX+d) instruction    */
-                if ((strlen(str_op1)==7) || (strlen(str_op1)==8) && strstr(str_op1, "IX") || strstr(str_op1, "IY"))     
+                if (((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")))    
                 {
                     if (strstr(str_op1, "IX"))
                     {

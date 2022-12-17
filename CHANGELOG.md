@@ -1,3 +1,8 @@
+
+# 1.1.18
+Add and decode INC IX, INC IY, DEC IX and DEC IY.
+Correct detection of "INC" or "DEC": add parenthesys into the test.
+
 # 1.1.17
 Add and decode OR r, OR n, OR (HL), OR (IX+d) and OR (IY+d).
 Add and decode XOR r, XOR n, XOR (HL), XOR (IX+d) and XOR (IY+d).
