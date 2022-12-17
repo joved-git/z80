@@ -1,4 +1,7 @@
 
+# 1.1.19
+Add and decode ADC HL,rr.
+
 # 1.1.18
 Add and decode INC IX, INC IY, DEC IX and DEC IY.
 Correct detection of "INC" or "DEC": add parenthesys into the test.

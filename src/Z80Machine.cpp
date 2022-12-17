@@ -1726,6 +1726,14 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op2=EXTRACT(codeInHexa, 4, 2) | 0b1000;
     }
 
+    /* This is a ADC HL,rr      */
+    if ((codeInHexa & MASK_ADCHLRR)==CODE_ED_ADCHLRR && len == ED_CODE_LENGTH(CODE_ED_ADCHLRR))
+    {
+        instruction=CODE_ED_ADCHLRR;
+               
+        op1=EXTRACT(codeInHexa, 4, 2) | 0b1000;
+    }
+
     /* This is a BIT b,r */
     if ((codeInHexa & MASK_BITBR)==CODE_CB_BITBR && len == CB_CODE_LENGTH(CODE_CB_BITBR))
     {
@@ -5219,6 +5227,41 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd16(reg16_1->getValue(), reg16_2->getValue()));
 
                 reg16_1->setValue(reg16_1->getValue() + reg16_2->getValue());
+
+                /* Modify flags here after operation    */
+                N_RESET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ED_ADCHLRR:                                      /* This is a ADC HL,rr  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "ADC HL,%s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg16_1=get16bitsRegisterAddress(REGHL);
+                reg16_2=get16bitsRegisterAddress(op1);
+                carry=(mRegisterPack.regF.getCarryFlag()?1:0);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfCarryOnAdd16(reg16_1->getValue(), reg16_2->getValue()+carry));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkCarryOnAdd16(reg16_1->getValue(), reg16_2->getValue()+carry));
+
+                reg16_1->setValue(reg16_1->getValue() + reg16_2->getValue()+carry);
 
                 /* Modify flags here after operation    */
                 N_RESET;
@@ -8824,6 +8867,14 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     
                     retCheck=clean_n(str_op2);
                     retCode=(retCode << SIZE_1_BYTE)+toValue(str_op2+1, pLen, &lenEff);
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a ADC HL,rr instruction    */
+                if (!strcmp(str_op1, "HL") && strlen(str_op2)==2 && !strchr(str_op2, '#'))       
+                {
+                    retCode=CODE_ED_ADCHLRR;                            /* Prepare the ADC HL,rr  */
+                    PUSHBIT(retCode, registerToBit(str_op2), 4);        /* Add the first register as bits   */
                     *pLen=TWO_BYTES;
                 }
             }

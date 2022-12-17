@@ -1,9 +1,6 @@
 #ifndef OPCODE_H
 #define OPCODE_H
 
-// #define EVEN(a)                 (BIT(a, 0)==0?1:0)   
-// #define ODD(a)                  (BIT(a, 0)==1?1:0) 
-
 #define ONE_BYTE                    (2)
 #define TWO_BYTES                   (4)
 #define THREE_BYTES                 (6)
@@ -96,8 +93,8 @@
 #define CODE_POPQQ          (0b11000001)                            // POP qq
 #define CODE_DECR           (0b00000101)
 #define CODE_ADDAR          (0b10000000)
-#define CODE_ADCAR          (0b10001000)
-#define CODE_ADDHLRR        (0b00001001)
+#define CODE_ADCAR          (0b10001000)                            // ADC A,r
+#define CODE_ADDHLRR        (0b00001001)                            // ADD HL,rr
 #define CODE_DECRR          (0b00001011)
 #define CODE_ANDR           (0b10100000)                            // AND r
 #define CODE_ORR            (0b10110000)                            // OR r
@@ -140,6 +137,7 @@
 #define CODE_ED_CPIR        (0b1110110110110001)        // 0xEDB1   // CPIR
 #define CODE_ED_CPD         (0b1110110110101001)        // 0xEDA9   // CPD
 #define CODE_ED_CPDR        (0b1110110110111001)        // 0xEDB9   // CPDR
+#define CODE_ED_ADCHLRR     (0b1110110101001010)                    // ADC HL,rr
 
 /* DD instruction codes     */
 #define CODE_DD_LDIXNN      (0b1101110100100001)        // 0xDD21   // LD IX,nn      
@@ -346,6 +344,7 @@
 #define MASK_INCIY          (0b1111111111111111)
 #define MASK_DECIX          (0b1111111111111111)
 #define MASK_DECIY          (0b1111111111111111)
+#define MASK_ADCHLRR        (0b1111111111001111)
 
 /* 32-bit mask  */
 #define MASK_RLCIXD         (0b11111111111111110000000011111111)
