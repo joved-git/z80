@@ -1,0 +1,13 @@
+org #1234
+
+1234    loop:	ld a,#1                 3E01             
+1236            ld b,#CD                06CD
+1238		    add a,b                 80
+1239		    jr loop                 18XX
+123B            ld a,b                  78
+123C		    jr loop2                18XX
+123E            ld b,c                  41
+123F    loop2:  ld hl,#3412             211234
+1242    loop3:  halt                    76
+
+end
