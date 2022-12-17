@@ -258,7 +258,12 @@ private:
     /// @brief  Check if it will be an overflow on an addition.
     /// @param  The 2 bytes to add.
     /// @return true if it will be an overflow.
-    bool checkOverflowOnAdd(uint8_t, uint8_t);
+    bool checkOverflowOnAdd8(uint8_t, uint8_t);
+
+    /// @brief  Check if it will be an overflow on an subscraction.
+    /// @param  The 2 bytes to add.
+    /// @return true if it will be an overflow.
+    bool checkOverflowOnSub8(uint8_t, uint8_t);
 
     /// @brief  Check if it will be an half borrow on an 8-bit substraction.
     /// @param  The 2 bytes to substract (#1 - #2).

@@ -1,6 +1,9 @@
 # 1.1.17
 Add and decode OR r, OR n, OR (HL), OR (IX+d) and OR (IY+d).
 Add and decode XOR r, XOR n, XOR (HL), XOR (IX+d) and XOR (IY+d).
+Add and decode CP r, CP n, CP (HL), CP (IX+d) and CP (IY+d).
+Change the name of checkOverflowOnAdd() to checkOverflowOnAdd8();
+Create the checkOverflowOnSub8() fucntion.
 
 # 1.1.16
 Add and decode DEC (IX+d) and DEC (IY+D).

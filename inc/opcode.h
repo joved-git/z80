@@ -69,17 +69,19 @@
 #define CODE_ADDAHL         (0b10000110)                // 0x86     // ADD A,(HL)
 #define CODE_ADCAHL         (0b10001110)                // 0x8E     // ADC A,(HL)
 #define CODE_ANDHL          (0b10100110)                // 0xA6     // AND (HL)
-#define CODE_XORHL          (0b10111110)                // 0xAE     // XOR (HL)
+#define CODE_XORHL          (0b10101110)                // 0xAE     // XOR (HL)
 #define CODE_ORHL           (0b10110110)                // 0xB6     // OR (HL)
+#define CODE_CPHL           (0b10111110)                // 0xBE     // CP (HL)
 #define CODE_JPNN           (0b11000011)                // 0xC3     // JP nn
 #define CODE_ADDAN          (0b11000110)                // 0xC6     // ADD A,n
 #define CODE_CALLNN         (0b11001101)                // 0xCD     // CALL nn
 #define CODE_ADCAN          (0b11001110)                // 0xCE     // ADC A,n
 #define CODE_EXSPHL         (0b11100011)                // 0xE3     // EX (SP),HL
-#define CODE_XORN           (0b11101110)                // 0xEE     // XOR n
 #define CODE_ANDN           (0b11100110)                // 0xE6     // AND n 
+#define CODE_XORN           (0b11101110)                // 0xEE     // XOR n
 #define CODE_EXX            (0b11011001)                // 0xD9     // EXX
 #define CODE_ORN            (0b11110110)                // 0xF6     // OR n
+#define CODE_CPN            (0b11111110)                // 0xFE     // CP n
 #define CODE_LDSPHL         (0b11111001)                // 0xF9     // LD SP,HL
 #define CODE_CALLCCNN       (0b11000100)                            // CALL cc,nn
 #define CODE_LDRR           (0b01000000)                            // LD r,r'       
@@ -99,7 +101,8 @@
 #define CODE_DECRR          (0b00001011)
 #define CODE_ANDR           (0b10100000)                            // AND r
 #define CODE_ORR            (0b10110000)                            // OR r
-#define CODE_XORR           (0b10111000)                            // XOR r
+#define CODE_XORR           (0b10101000)                            // XOR r
+#define CODE_CPR            (0b10111000)                            // CP r
 
 /* CB instructions codes    */
 #define CODE_CB_RLCR        (0b1100101100000000)                    // RLC r
@@ -150,6 +153,7 @@
 #define CODE_DD_ANDIXD      (0b1101110110100110)        // 0XDDA6   // AND (IX+d)
 #define CODE_DD_XORIXD      (0b1101110110101110)        // 0XDDAE   // XOR (IX+d)
 #define CODE_DD_ORIXD       (0b1101110110110110)        // 0XDDB6   // OR (IX+d)
+#define CODE_DD_CPIXD       (0b1101110110111110)        // 0XDDBE   // CP (IX+d)
 #define CODE_DD_POPIX       (0b1101110111100001)        // 0xDDE1   // POP IX
 #define CODE_DD_EXSPIX      (0b1101110111100011)        // 0xDDE3   // EX (SH),IX
 #define CODE_DD_PUSHIX      (0b1101110111100101)        // 0xDDE5   // PUSH IX
@@ -169,12 +173,13 @@
 #define CODE_FD_ADCAIYD     (0b1111110110001110)        // 0xFD8E   // ADC A,(IY+d)
 #define CODE_FD_ANDIYD      (0b1111110110100110)        // 0XFDA6   // AND (IY+d)
 #define CODE_FD_XORIYD      (0b1111110110101110)        // 0XFDAE   // XOR (IX+d)
-#define CODE_FD_ORIYD       (0b1111110110110110)        // 0XFDB6   // OR (IX+d)
+#define CODE_FD_ORIYD       (0b1111110110110110)        // 0XFDB6   // OR (IY+d)
+#define CODE_FD_CPIYD       (0b1111110110111110)        // 0XFDBE   // CP (IY+d)
 #define CODE_FD_POPIY       (0b1111110111100001)        // 0xFDE1   // POP IY
 #define CODE_FD_EXSPIY      (0b1111110111100011)        // 0xFDE3   // EX (SH),IY
 #define CODE_FD_PUSHIY      (0b1111110111100101)        // 0xFDE5   // PUSH IY
 #define CODE_FD_LDSPIY      (0b1111110111111001)        // 0xFDF9   // LD SP,IY
-#define CODE_FD_LDRIYD      (0b1111110101000110)        //          // LD r,(IY+d)
+#define CODE_FD_LDRIYD      (0b1111110101000110)                    // LD r,(IY+d)
 #define CODE_FD_LDIYDR      (0b1111110101110000)                    // LD (IY+d),r
 #define CODE_FD_ADDIYQQ     (0b1111110100001001)                    // LD IY,qq
 
@@ -233,6 +238,7 @@
 #define MASK_ANDR           (0b11111000)
 #define MASK_ORR            (0b11111000)
 #define MASK_XORR           (0b11111000)
+#define MASK_CPR            (0b11111000)
 #define MASK_ADDAHL         (0b11111111)
 #define MASK_ADCAHL         (0b11111111)
 #define MASK_ADDHLRR        (0b11001111)
@@ -257,6 +263,8 @@
 #define MASK_ORHL           (0b11111111)
 #define MASK_XORN           (0b11111111)
 #define MASK_XORHL          (0b11111111)
+#define MASK_CPN           (0b11111111)
+#define MASK_CPHL          (0b11111111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)
@@ -328,6 +336,8 @@
 #define MASK_ORIYD          (0b1111111111111111)
 #define MASK_XORIXD         (0b1111111111111111)
 #define MASK_XORIYD         (0b1111111111111111)
+#define MASK_CPIXD          (0b1111111111111111)
+#define MASK_CPIYD          (0b1111111111111111)
 
 /* 32-bit mask  */
 #define MASK_RLCIXD         (0b11111111111111110000000011111111)

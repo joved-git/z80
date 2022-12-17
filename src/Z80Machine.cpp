@@ -2347,6 +2347,82 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=codeInHexa & FIRST_LOWEST_BYTE;
     }
 
+    /* This is a XOR r */
+    if ((codeInHexa & MASK_XORR)==CODE_XORR && len == NATURAL_CODE_LENGTH(CODE_XORR))
+    {
+        instruction=CODE_XORR;
+               
+        op1=EXTRACT(codeInHexa, 0, 3);
+    }
+
+    /* This is a XOR n */
+    if (((codeInHexa >> SIZE_1_BYTE) & MASK_XORN)==CODE_XORN && len == NATURAL_CODE_LENGTH(CODE_XORN))
+    {
+        instruction=CODE_XORN;
+               
+        op1=codeInHexa & FIRST_LOWEST_BYTE;
+    }
+
+    /* This is a XOR (HL) */
+    if ((codeInHexa & MASK_XORHL)==CODE_XORHL && len == NATURAL_CODE_LENGTH(CODE_XORHL))
+    {
+        instruction=CODE_XORHL;
+    }
+
+    /* This is a XOR (IX+d) */
+    if (((codeInHexa >> SIZE_1_BYTE) & MASK_XORIXD)==CODE_DD_XORIXD && len == DD_CODE_LENGTH(CODE_DD_XORIXD))
+    {
+        instruction=CODE_DD_XORIXD;
+               
+        op1=codeInHexa & FIRST_LOWEST_BYTE;
+    }
+
+    /* This is a XOR (IY+d) */
+    if (((codeInHexa >> SIZE_1_BYTE) & MASK_XORIYD)==CODE_FD_XORIYD && len == FD_CODE_LENGTH(CODE_FD_XORIYD))
+    {
+        instruction=CODE_FD_XORIYD;
+               
+        op1=codeInHexa & FIRST_LOWEST_BYTE;
+    }
+
+    /* This is a CP r */
+    if ((codeInHexa & MASK_CPR)==CODE_CPR && len == NATURAL_CODE_LENGTH(CODE_CPR))
+    {
+        instruction=CODE_CPR;
+               
+        op1=EXTRACT(codeInHexa, 0, 3);
+    }
+
+    /* This is a CP n */
+    if (((codeInHexa >> SIZE_1_BYTE) & MASK_CPN)==CODE_CPN && len == NATURAL_CODE_LENGTH(CODE_CPN))
+    {
+        instruction=CODE_CPN;
+               
+        op1=codeInHexa & FIRST_LOWEST_BYTE;
+    }
+
+    /* This is a CP (HL) */
+    if ((codeInHexa & MASK_CPHL)==CODE_CPHL && len == NATURAL_CODE_LENGTH(CODE_CPHL))
+    {
+        instruction=CODE_CPHL;
+    }
+
+    /* This is a CP (IX+d) */
+    if (((codeInHexa >> SIZE_1_BYTE) & MASK_CPIXD)==CODE_DD_CPIXD && len == DD_CODE_LENGTH(CODE_DD_CPIXD))
+    {
+        instruction=CODE_DD_CPIXD;
+               
+        op1=codeInHexa & FIRST_LOWEST_BYTE;
+    }
+
+    /* This is a CP (IY+d) */
+    if (((codeInHexa >> SIZE_1_BYTE) & MASK_CPIYD)==CODE_FD_CPIYD && len == FD_CODE_LENGTH(CODE_FD_CPIYD))
+    {
+        instruction=CODE_FD_CPIYD;
+               
+        op1=codeInHexa & FIRST_LOWEST_BYTE;
+    }
+
     // bottom 1
     /*************************************************************************************************************************/
 
@@ -3738,7 +3814,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), reg8_2->getValue()));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), reg8_2->getValue()))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), reg8_2->getValue()))
 
                 reg8_1->setValue(reg8_1->getValue() + reg8_2->getValue());
 
@@ -3776,7 +3852,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), val));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), val))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val))
 
                 reg8_1->setValue(reg8_1->getValue() + val);
 
@@ -3823,7 +3899,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), val));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), val))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val))
 
                 reg8_1->setValue(reg8_1->getValue() + val);
 
@@ -4010,6 +4086,178 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+        case CODE_CPR:                                         /* This is a CP r  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "CP %s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg8_2=get8bitsRegisterAddress(op1);
+                val=reg8_1->getValue() - reg8_2->getValue();           /* A - r is executed    */
+
+                /* Modify flags here after operation   */
+                S_IS(SIGN(val));
+                Z_IS(ZERO(val));
+                H_IS(checkHalfBorrowOnSub8(reg8_1->getValue(), reg8_2->getValue()));
+                PV_IS(checkOverflowOnSub8(reg8_1->getValue(), reg8_2->getValue())); 
+                
+                N_SET;
+                C_IS(checkBorrowOnSub8(reg8_1->getValue(), reg8_2->getValue()));
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_CPN:                                            /* This is a CP n  */
+            sprintf(mInstruction, "CP #%02X", op1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=reg8_1->getValue() - op1;           /* A - n is executed    */
+
+                /* Modify flags here after operation   */
+                S_IS(SIGN(val));
+                Z_IS(ZERO(val));
+                H_IS(checkHalfBorrowOnSub8(reg8_1->getValue(), op1));
+                PV_IS(checkOverflowOnSub8(reg8_1->getValue(), op1)); 
+                
+                N_SET;
+                C_IS(checkBorrowOnSub8(reg8_1->getValue(), op1));
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_CPHL:                                         /* This is a CP (HL)  */
+            sprintf(mInstruction, "CP (HL)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=mMemory->get8bitsValue(mRegisterPack.regHL.getValue());
+                newVal=reg8_1->getValue() - val;     /* A - (HL) is executed    */
+
+                /* Modify flags here after operation   */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_IS(checkHalfBorrowOnSub8(reg8_1->getValue(), val));
+                PV_IS(checkOverflowOnSub8(reg8_1->getValue(), val)); 
+                
+                N_SET;
+                C_IS(checkBorrowOnSub8(reg8_1->getValue(), val));
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DD_CPIXD:                                            /* This is a CP (IX+d)  */
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIX.getValue()-op1;
+                sprintf(mInstruction, "CP (IX-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op1;
+                sprintf(mInstruction, "CP (IX+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=mMemory->get8bitsValue(address);
+                newVal=reg8_1->getValue() - val;                /* A - (IX+d) is executed    */
+
+                /* Modify flags here after operation   */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_IS(checkHalfBorrowOnSub8(reg8_1->getValue(), val));
+                PV_IS(checkOverflowOnSub8(reg8_1->getValue(), val)); 
+                
+                N_SET;
+                C_IS(checkBorrowOnSub8(reg8_1->getValue(), val));
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+            case CODE_FD_CPIYD:                                            /* This is a CP (IY+d)  */
+            if (SIGN(op1))                                                  /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIY.getValue()-op1;
+                sprintf(mInstruction, "CP (IY-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op1;
+                sprintf(mInstruction, "CP (IY+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=mMemory->get8bitsValue(address);
+                newVal=reg8_1->getValue() - val;                        /* A - (IY+d) is executed    */
+
+                /* Modify flags here after operation   */
+                S_IS(SIGN(newVal));
+                Z_IS(ZERO(newVal));
+                H_IS(checkHalfBorrowOnSub8(reg8_1->getValue(), val));
+                PV_IS(checkOverflowOnSub8(reg8_1->getValue(), val)); 
+                
+                N_SET;
+                C_IS(checkBorrowOnSub8(reg8_1->getValue(), val));
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+        
 
         case CODE_ORR:                                         /* This is a OR r  */
             ret=bitToRegister(op1, sop1);
@@ -4367,7 +4615,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 H_IS(checkHalfCarryOnAdd8(val, 1));
                                
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd(val, 1))
+                PV_IS(checkOverflowOnAdd8(val, 1))
 
                 mMemory->set8bitsValue(address, val+1);
 
@@ -4410,7 +4658,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 H_IS(checkHalfCarryOnAdd8(val, 1));
                                
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd(val, 1))
+                PV_IS(checkOverflowOnAdd8(val, 1))
 
                 mMemory->set8bitsValue(address, val+1);
 
@@ -4571,7 +4819,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), val));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), val))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val))
 
                 reg8_1->setValue(reg8_1->getValue() + val);
 
@@ -4619,7 +4867,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), val+carry));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), val+carry))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val+carry))
 
                 reg8_1->setValue(reg8_1->getValue() + val+carry);
 
@@ -4667,7 +4915,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), val+carry));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), val+carry))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val+carry))
 
                 reg8_1->setValue(reg8_1->getValue() + val+carry);
 
@@ -4707,7 +4955,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), reg8_2->getValue()+carry));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), reg8_2->getValue()+carry))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), reg8_2->getValue()+carry))
 
                 reg8_1->setValue(reg8_1->getValue() + reg8_2->getValue()+carry);
 
@@ -4748,7 +4996,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), val + carry));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), val + carry))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val + carry))
 
                 reg8_1->setValue(reg8_1->getValue() + val + carry);
 
@@ -6863,7 +7111,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), op1));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), op1))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), op1))
 
                 reg8_1->setValue(reg8_1->getValue() + op1);
 
@@ -6900,7 +7148,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), op1+val));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd(reg8_1->getValue(), op1+val))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), op1+val))
 
                 reg8_1->setValue(reg8_1->getValue() + op1+val);
 
@@ -6985,9 +7233,23 @@ bool Z80Machine::checkCarryOnAdd16(uint16_t pW1, uint16_t pW2)
 
 
 /* Check if it will be an overflow on an addition.      */
-bool Z80Machine::checkOverflowOnAdd(uint8_t pB1, uint8_t pB2)
+bool Z80Machine::checkOverflowOnAdd8(uint8_t pB1, uint8_t pB2)
 {
     if ((SIGN(pB1)==SIGN(pB2)) && (SIGN(pB1) != SIGN(pB1+pB2)))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+/* Check if it will be an overflow on an substraction.      */
+bool Z80Machine::checkOverflowOnSub8(uint8_t pB1, uint8_t pB2)
+{
+    if ((SIGN(pB1)!=SIGN(pB2)) && (SIGN(pB1) != SIGN(pB1-pB2)))
     {
         return true;
     }
@@ -7627,7 +7889,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 /* Check if it is a AND r instruction    */
                 if (strlen(str_op1)==1)       
                 {
-                    retCode=CODE_ANDR;                              /* Prepare the AND r,r'  */
+                    retCode=CODE_ANDR;                              /* Prepare the AND r  */
                     *pLen=ONE_BYTE;
 
                     retCheck=clean_r(str_op1);
@@ -7679,7 +7941,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 /* Check if it is a OR r instruction    */
                 if (strlen(str_op1)==1)       
                 {
-                    retCode=CODE_ORR;                              /* Prepare the AND r,r'  */
+                    retCode=CODE_ORR;                              /* Prepare the AND r  */
                     *pLen=ONE_BYTE;
 
                     retCheck=clean_r(str_op1);
@@ -7731,7 +7993,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 /* Check if it is a XOR A,r instruction    */
                 if (strlen(str_op1)==1)       
                 {
-                    retCode=CODE_XORR;                              /* Prepare the XOR r,r'  */
+                    retCode=CODE_XORR;                              /* Prepare the XOR r  */
                     *pLen=ONE_BYTE;
 
                     retCheck=clean_r(str_op1);
@@ -7774,6 +8036,58 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 if (!strcmp(str_op1, "(HL)"))       
                 {
                     retCode=CODE_XORHL;                              /* Prepare the XOR (HL)  */
+                    *pLen=ONE_BYTE;
+                }
+            }
+
+            if (!strcmp(str_inst, "CP"))                            /* A CP instruction is present  */
+            {
+                /* Check if it is a CP A,r instruction    */
+                if (strlen(str_op1)==1)       
+                {
+                    retCode=CODE_CPR;                              /* Prepare the CP r  */
+                    *pLen=ONE_BYTE;
+
+                    retCheck=clean_r(str_op1);
+                    
+                    PUSHBIT(retCode, registerToBit(str_op1), 0);    /* Add the register as bits   */
+                }
+
+                /* Check if it is a CP (IX+d) or CP (IY+d) instruction    */
+                if (((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")))     
+                {
+                    if (strstr(str_op1, "IX"))
+                    {
+                        retCode=CODE_DD_CPIXD;
+                    }
+
+                    if (strstr(str_op1, "IY"))
+                    {
+                        retCode=CODE_FD_CPIYD;
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op1);
+
+                    retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
+                    *pLen=THREE_BYTES;
+                    str_op1[0]='\0';
+                }
+
+                /* Check if it is a CP n instruction    */
+                if (((strlen(str_op1)==2) || (strlen(str_op1)==3)) && strchr(str_op1, '#'))       
+                {
+                    retCode=CODE_CPN;                              /* Prepare the CP n  */
+                    
+                    retCheck=clean_n(str_op1);
+                    retCode=(retCode << SIZE_1_BYTE)+toValue(str_op1+1, pLen, &lenEff);
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a CP (HL) instruction    */
+                if (!strcmp(str_op1, "(HL)"))       
+                {
+                    retCode=CODE_CPHL;                              /* Prepare the CP (HL)  */
                     *pLen=ONE_BYTE;
                 }
             }
