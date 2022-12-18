@@ -83,23 +83,24 @@
 #define CODE_CALLCCNN       (0b11000100)                            // CALL cc,nn
 #define CODE_LDRR           (0b01000000)                            // LD r,r'       
 #define CODE_LDRHL          (0b01000110)                            // LD r,(HL)
-#define CODE_LDHLR          (0b01110000)
+#define CODE_LDHLR          (0b01110000)                            // 
 #define CODE_LDRN           (0b00000110)
-#define CODE_HALT           (0b01110110)
-#define CODE_LDRRNN         (0b00000001)
-#define CODE_INCR           (0b00000100)
+#define CODE_HALT           (0b01110110)                            // HALT
+#define CODE_LDRRNN         (0b00000001)                            //
+#define CODE_INCR           (0b00000100)                            // INC r
 #define CODE_INCRR          (0b00000011)                            // INC rr
 #define CODE_PUSHQQ         (0b11000101)                            // PUSH qq
 #define CODE_POPQQ          (0b11000001)                            // POP qq
-#define CODE_DECR           (0b00000101)
-#define CODE_ADDAR          (0b10000000)
+#define CODE_DECR           (0b00000101)                            // DEC r
+#define CODE_ADDAR          (0b10000000)                            // ADD A,r
 #define CODE_ADCAR          (0b10001000)                            // ADC A,r
 #define CODE_ADDHLRR        (0b00001001)                            // ADD HL,rr
-#define CODE_DECRR          (0b00001011)
+#define CODE_DECRR          (0b00001011)                            // DEC rr
 #define CODE_ANDR           (0b10100000)                            // AND r
 #define CODE_ORR            (0b10110000)                            // OR r
 #define CODE_XORR           (0b10101000)                            // XOR r
 #define CODE_CPR            (0b10111000)                            // CP r
+#define CODE_JPCCNN         (0b11000010)                            // JP cc,nn
 
 /* CB instructions codes    */
 #define CODE_CB_RLCR        (0b1100101100000000)                    // RLC r
@@ -186,28 +187,28 @@
 #define CODE_FD_ADDIYQQ     (0b1111110100001001)                    // LD IY,qq
 
 /* DDCB instruction codes   */
-#define CODE_DDCB_RLCIXD    (0b11011101110010110000000000000110)     // RLC (IX+d)
-#define CODE_DDCB_RRCIXD    (0b11011101110010110000000000001110)     // RRC (IX+d)
-#define CODE_DDCB_RLIXD     (0b11011101110010110000000000010110)     // RL (IX+d)
-#define CODE_DDCB_RRIXD     (0b11011101110010110000000000011110)     // RR (IX+d)
-#define CODE_DDCB_SLAIXD    (0b11011101110010110000000000100110)     // SLA (IX+d)
-#define CODE_DDCB_SRAIXD    (0b11011101110010110000000000101110)     // SRA (IX+d)
-#define CODE_DDCB_SRLIXD    (0b11011101110010110000000000111110)     // SRL (IX+d)
-#define CODE_DDCB_BITBIXD   (0b11011101110010110000000001000110)     // BIT b,(IX+d)
-#define CODE_DDCB_SETBIXD   (0b11011101110010110000000011000110)     // SET b,(IX+d)
-#define CODE_DDCB_RESBIXD   (0b11011101110010110000000010000110)     // RES b,(IX+d)
+#define CODE_DDCB_RLCIXD    (0b11011101110010110000000000000110)    // RLC (IX+d)
+#define CODE_DDCB_RRCIXD    (0b11011101110010110000000000001110)    // RRC (IX+d)
+#define CODE_DDCB_RLIXD     (0b11011101110010110000000000010110)    // RL (IX+d)
+#define CODE_DDCB_RRIXD     (0b11011101110010110000000000011110)    // RR (IX+d)
+#define CODE_DDCB_SLAIXD    (0b11011101110010110000000000100110)    // SLA (IX+d)
+#define CODE_DDCB_SRAIXD    (0b11011101110010110000000000101110)    // SRA (IX+d)
+#define CODE_DDCB_SRLIXD    (0b11011101110010110000000000111110)    // SRL (IX+d)
+#define CODE_DDCB_BITBIXD   (0b11011101110010110000000001000110)    // BIT b,(IX+d)
+#define CODE_DDCB_SETBIXD   (0b11011101110010110000000011000110)    // SET b,(IX+d)
+#define CODE_DDCB_RESBIXD   (0b11011101110010110000000010000110)    // RES b,(IX+d)
 
 /* FDCB instruction codes   */
-#define CODE_FDCB_RLCIYD    (0b11111101110010110000000000000110)     // RLC (IY+d)
-#define CODE_FDCB_RRCIYD    (0b11111101110010110000000000001110)     // RRC (IY+d)
-#define CODE_FDCB_RLIYD     (0b11111101110010110000000000010110)     // RL (IY+d)
-#define CODE_FDCB_RRIYD     (0b11111101110010110000000000011110)     // RR (IY+d)
-#define CODE_FDCB_SLAIYD    (0b11111101110010110000000000100110)     // SLA (IY+d)
-#define CODE_FDCB_SRAIYD    (0b11111101110010110000000000101110)     // SRA (IY+d)
-#define CODE_FDCB_SRLIYD    (0b11111101110010110000000000111110)     // SRL (IY+d)
-#define CODE_FDCB_BITBIYD   (0b11111101110010110000000001000110)     // BIT b,(IY+d)
-#define CODE_FDCB_SETBIYD   (0b11111101110010110000000011000110)     // SET b,(IY+d)
-#define CODE_FDCB_RESBIYD   (0b11111101110010110000000010000110)     // RES b,(IY+d)
+#define CODE_FDCB_RLCIYD    (0b11111101110010110000000000000110)    // RLC (IY+d)
+#define CODE_FDCB_RRCIYD    (0b11111101110010110000000000001110)    // RRC (IY+d)
+#define CODE_FDCB_RLIYD     (0b11111101110010110000000000010110)    // RL (IY+d)
+#define CODE_FDCB_RRIYD     (0b11111101110010110000000000011110)    // RR (IY+d)
+#define CODE_FDCB_SLAIYD    (0b11111101110010110000000000100110)    // SLA (IY+d)
+#define CODE_FDCB_SRAIYD    (0b11111101110010110000000000101110)    // SRA (IY+d)
+#define CODE_FDCB_SRLIYD    (0b11111101110010110000000000111110)    // SRL (IY+d)
+#define CODE_FDCB_BITBIYD   (0b11111101110010110000000001000110)    // BIT b,(IY+d)
+#define CODE_FDCB_SETBIYD   (0b11111101110010110000000011000110)    // SET b,(IY+d)
+#define CODE_FDCB_RESBIYD   (0b11111101110010110000000010000110)    // RES b,(IY+d)
 
 /* Recognition masks    */
 #define MASK_NOP            (0b11111111)
@@ -246,6 +247,7 @@
 #define MASK_ADDHLRR        (0b11001111)
 #define MASK_CALLNN         (0b11111111)
 #define MASK_CALLCCNN       (0b11000111)
+#define MASK_JPCCNN       (0b11000111)
 #define MASK_DECRR          (0b11001111)
 #define MASK_DECHL          (0b11111111)
 #define MASK_INCHL          (0b11111111)

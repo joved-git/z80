@@ -1,4 +1,8 @@
 
+# 1.1.20
+Add and decode JP cc,nn (see xxxjoexxx).
+Create a clean_cc() function. To be written.
+
 # 1.1.19
 Add and decode ADC HL,rr.
 

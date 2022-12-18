@@ -207,30 +207,35 @@ private:
 
     /// @brief  Clean a n operand.
     /// @param  The operand as a string.
-    /// @return OK or error code (bas operand).
+    /// @return OK or error code (bad operand).
     int8_t clean_n(char *);
 
     /// @brief  Clean a nn operand.
     /// @param  The operand as a string.
-    /// @return OK or error code (bas operand).
+    /// @return OK or error code (bad operand).
     int8_t clean_nn(char *);
+
+    /// @brief  Clean a cc operand.
+    /// @param  The operand as a string.
+    /// @return OK or error code (bad operand).
+    int8_t clean_cc(char *);
 
     /// @brief  Clean a (nn) operand.
     /// @param  The operand as a string.
-    /// @return OK or error code (bas operand).
+    /// @return OK or error code (bad operand).
     int8_t clean_inn(char *);
 
     /// @brief  Clean a r operand.
     /// @param  The operand as a string.
-    /// @return OK or error code (bas operand).
+    /// @return OK or error code (bad operand).
     int8_t clean_r(char *);
 
     /// @brief  Clean a e operand.
     /// @param  The operand as a string.
-    /// @return OK or error code (bas operand).
+    /// @return OK or error code (bad operand).
     int8_t clean_e(char *);
 
-    /// @brief  Clean a (Ix+n) operand.
+    /// @brief  Clean a (IX+d) or (IY+d) operand.
     /// @param  The operand as a string.
     /// @return OK or error code (bas operand).
     int8_t clean_ixn(char *);

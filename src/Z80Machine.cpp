@@ -847,6 +847,14 @@ int8_t Z80Machine::clean_nn(char *pOp)
     return retCode;
 }
 
+
+/* Clean a cc operand   */
+int8_t Z80Machine::clean_cc(char *pOp)
+{
+    return 0;
+}
+
+
 /* Clean the (nn) operand    */
 int8_t Z80Machine::clean_inn(char *pOp)
 {
@@ -914,22 +922,19 @@ int8_t Z80Machine::clean_ixn(char *pOp)
         retCode=ERR_BAD_OPERAND;
     }
 
-    //printf("op_o=<%s>\n", pOp);
-    //printf("rc=%d", retCode);
-
     return retCode;
 }
 
 
 /* Clean the r operand  (IX+#00)  */
-int8_t Z80Machine::clean_r(char *)
+int8_t Z80Machine::clean_r(char *pOp)
 {
     return 0;
 }
 
 
 /* Clean the r operand  (IX+#00)  */
-int8_t Z80Machine::clean_e(char *)
+int8_t Z80Machine::clean_e(char *pOp)
 {
     return 0;
 }
@@ -1768,6 +1773,16 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
 
         op1=EXTRACT(codeInHexa, 19, 3);
         op16=EXTRACT(codeInHexa, 0, 16);
+    }
+
+    /* This is a JP cc,nn */
+    if ((codeInHexa>>SIZE_2_BYTES & MASK_JPCCNN)==CODE_JPCCNN && len == NATURAL_CODE_LENGTH(CODE_JPCCNN))
+    {
+        instruction=CODE_JPCCNN;
+        ret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+
+        op1=EXTRACT(codeInHexa, 19, 3);         /* This is cc   */
+        op16=EXTRACT(codeInHexa, 0, 16);        /* This is nn   */
     }
 
     /* This is a RLC (IX+d) */
@@ -5274,7 +5289,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5650,11 +5665,8 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
 
             if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
             {
-                mRegisterPack.regPC.setValue(op16);                         /* The SP is changing       */
-                // reg16_1=get16bitsRegisterAddress(REGPC);
-                // mMemory->setAddress(mRegisterPack.regSP.getValue(), reg16_1->getValue());   /* Save the PC              */
-                // reg16_1->setValue(op16);                                                     /* The PC is changing       */
-
+                mRegisterPack.regPC.setValue(op16);                         /* The PC is changing       */
+                
                 if (pMode==INTP_EXECUTE)
                 {
                     printf("\n%s was executed\n", mInstruction);
@@ -5763,7 +5775,32 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_JPCCNN:                                                       /* This is a JP cc,nn                    */
+           ret=bitToCondition(op1, sop1);
+           REVERT(op16);
+           
+           sprintf(mInstruction, "JP %s,#%04X", sop1, op16);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                if (isConditionTrue(op1))
+                {
+                    mRegisterPack.regPC.setValue(op16);                         /* The PC is changing       */
+                }                             
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -9050,7 +9087,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCode=CODE_CALLCCNN;                              /* Prepare the CALL cc,nn                    */
                     
                     // To be done.
-                    // retCheck=clean_cond(str_op1);
+                    retCheck=clean_cc(str_op1);                         /* Clean the cc operand     */
                     retCheck=clean_nn(str_op2);                         /* Clean the (nn) operand   */
                     word=toValue(str_op2+1, pLen, &lenEff);
 
@@ -9060,8 +9097,28 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 }
             }
 
-            break;
-            
+            if (!strcmp(str_inst, "JP"))                                /* A JP instruction is present                      */
+            {
+                *pLen=THREE_BYTES;                                      /* By default, a JP is 3 bytes in label detection */
+
+                /* xxxjoexxx Add here code to translate JP cc,nn   */
+
+                if ((strlen(str_op1)==1 || strlen(str_op1)==2) && (strlen(str_op2)>=4 && strlen(str_op2)<=7) && strchr(str_op2, '#'))
+                {
+                    retCode=CODE_JPCCNN;                                /* Prepare the JP cc,nn                    */
+                    
+                    // To be done.
+                    retCheck=clean_cc(str_op1);                         /* Clean the cc operand     */
+                    retCheck=clean_nn(str_op2);                         /* Clean the (nn) operand   */
+                    word=toValue(str_op2+1, pLen, &lenEff);
+
+                    PUSHBIT(retCode, conditionToBit(str_op1), 3);
+                    retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);     /* Add the nn into the code */      
+                    *pLen=THREE_BYTES;
+                }
+            }
+
+            break;           
     }
 
 #ifdef DEBUG_DISPLAY_FINDCODE_DATA
