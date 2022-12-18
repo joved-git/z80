@@ -2,6 +2,7 @@
 # 1.1.20
 Add and decode JP cc,nn (see xxxjoexxx).
 Create a clean_cc() function. To be written.
+Correct the NO_PC_CHANGE for CALL cc,nn and JP cc,nn.
 
 # 1.1.19
 Add and decode ADC HL,rr.

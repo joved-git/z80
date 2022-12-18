@@ -1306,6 +1306,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     char strInstr[MAX_OP_LENGTH*3];
     uint8_t carry=0;
     uint8_t ret=NOTHING_SPECIAL;
+    uint8_t retInterpret=NOTHING_SPECIAL;
     char sop1[MAX_OP_LENGTH], sop2[MAX_OP_LENGTH];
 
 #ifdef DEBUG_DISPLAY_INSTR_DATA 
@@ -1760,7 +1761,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if ((codeInHexa>>SIZE_2_BYTES & MASK_CALLNN)==CODE_CALLNN && len == NATURAL_CODE_LENGTH(CODE_CALLNN))
     {
         instruction=CODE_CALLNN;
-        ret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+        retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
              
         op16=EXTRACT(codeInHexa, 0, 16); 
     }
@@ -1769,7 +1770,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if ((codeInHexa>>SIZE_2_BYTES & MASK_CALLCCNN)==CODE_CALLCCNN && len == NATURAL_CODE_LENGTH(CODE_CALLCCNN))
     {
         instruction=CODE_CALLCCNN;
-        ret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+        retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
 
         op1=EXTRACT(codeInHexa, 19, 3);
         op16=EXTRACT(codeInHexa, 0, 16);
@@ -1779,7 +1780,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if ((codeInHexa>>SIZE_2_BYTES & MASK_JPCCNN)==CODE_JPCCNN && len == NATURAL_CODE_LENGTH(CODE_JPCCNN))
     {
         instruction=CODE_JPCCNN;
-        ret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+        retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
 
         op1=EXTRACT(codeInHexa, 19, 3);         /* This is cc   */
         op16=EXTRACT(codeInHexa, 0, 16);        /* This is nn   */
@@ -2085,7 +2086,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if ((codeInHexa>>SIZE_2_BYTES & MASK_JPNN)==CODE_JPNN && len == NATURAL_CODE_LENGTH(CODE_JPNN))
     {
         instruction=CODE_JPNN;
-        ret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+        retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
 
         op16=EXTRACT(codeInHexa, 0, 16);
     }
@@ -2094,7 +2095,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if ((codeInHexa>>SIZE_1_BYTE & MASK_JRE)==CODE_JRE && len == NATURAL_CODE_LENGTH(CODE_JRE))
     {
         instruction=CODE_JRE;
-        ret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+        retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
 
         op1=EXTRACT(codeInHexa, 0, 8);
     }
@@ -2139,7 +2140,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if ((((codeInHexa >> SIZE_1_BYTE) & MASK_DJNZ)==CODE_DJNZ && len == NATURAL_CODE_LENGTH(CODE_DJNZ)))
     {
         instruction=CODE_DJNZ;
-        ret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+        retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
 
         op1=EXTRACT(codeInHexa,0, 8);           // This is e
     }
@@ -5765,7 +5766,11 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                     reg16_1=get16bitsRegisterAddress(REGPC);
                     mMemory->setAddress(mRegisterPack.regSP.getValue(), reg16_1->getValue());   /* Save the PC              */
                     reg16_1->setValue(op16);                                                    /* The PC is changing       */
-                }                             
+                }                
+                else
+                {
+                    retInterpret=NOTHING_SPECIAL;                         /* Go to next instruction   */
+                }               
 
                 if (pMode==INTP_EXECUTE)
                 {
@@ -5789,8 +5794,12 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             {
                 if (isConditionTrue(op1))
                 {
-                    mRegisterPack.regPC.setValue(op16);                         /* The PC is changing       */
-                }                             
+                    mRegisterPack.regPC.setValue(op16);                   /* The PC is changing       */
+                }          
+                else
+                {
+                    retInterpret=NOTHING_SPECIAL;                         /* Go to next instruction   */
+                }                   
 
                 if (pMode==INTP_EXECUTE)
                 {
@@ -7357,8 +7366,8 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
 
     /* bottom 2*/
     /*************************************************************************************************************************/
-  
-    return ret;
+
+    return retInterpret;
 }
 
 /* Check if it will be an half carry on an 8-bit addition.    */
@@ -9100,8 +9109,6 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
             if (!strcmp(str_inst, "JP"))                                /* A JP instruction is present                      */
             {
                 *pLen=THREE_BYTES;                                      /* By default, a JP is 3 bytes in label detection */
-
-                /* xxxjoexxx Add here code to translate JP cc,nn   */
 
                 if ((strlen(str_op1)==1 || strlen(str_op1)==2) && (strlen(str_op2)>=4 && strlen(str_op2)<=7) && strchr(str_op2, '#'))
                 {
