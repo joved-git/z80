@@ -2513,6 +2513,88 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=EXTRACT(codeInHexa, 0, 8);
     }
 
+    /* This is a SUB A,r */
+    if ((codeInHexa & MASK_SUBAR)==CODE_SUBAR && len == NATURAL_CODE_LENGTH(CODE_SUBAR))
+    {
+        instruction=CODE_SUBAR;
+               
+        op1=EXTRACT(codeInHexa, 0, 3);
+    }
+
+    /* This is a SUB A,(HL) */
+    if ((codeInHexa & MASK_SUBAHL)==CODE_SUBAHL && len == NATURAL_CODE_LENGTH(CODE_SUBAHL))
+    {
+        instruction=CODE_SUBAHL;
+    }
+
+    /* This is a SUB A,n  */
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_SUBAN)==CODE_SUBAN && len == NATURAL_CODE_LENGTH(CODE_SUBAN))
+    {
+        instruction=CODE_SUBAN;
+        
+        /* Extract the value of the register (in bits)    */
+        op1=EXTRACT(codeInHexa, 0, 8);
+    }
+
+    /* This is a SUB A,(IX+d)  */
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_SUBAIXD)==CODE_DD_SUBAIXD && len == DD_CODE_LENGTH(CODE_DD_SUBAIXD))
+    {
+        instruction=CODE_DD_SUBAIXD;
+        
+        /* Extract the value of the register (in bits)    */
+        op1=EXTRACT(codeInHexa, 0, 8);
+    }
+
+    /* This is a SUB A,(IY+d)  */
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_SUBAIYD)==CODE_FD_SUBAIYD && len == FD_CODE_LENGTH(CODE_FD_SUBAIYD))
+    {
+        instruction=CODE_FD_SUBAIYD;
+        
+        /* Extract the value of the register (in bits)    */
+        op1=EXTRACT(codeInHexa, 0, 8);
+    }
+
+    /* This is a SBC A,r */
+    if ((codeInHexa & MASK_SBCAR)==CODE_SBCAR && len == NATURAL_CODE_LENGTH(CODE_SBCAR))
+    {
+        instruction=CODE_SBCAR;
+               
+        op1=EXTRACT(codeInHexa, 0, 3);
+    }
+
+    /* This is a SBC A,(HL) */
+    if ((codeInHexa & MASK_SBCAHL)==CODE_SBCAHL && len == NATURAL_CODE_LENGTH(CODE_SBCAHL))
+    {
+        instruction=CODE_SBCAHL;
+    }
+
+    /* This is a SBC A,n  */
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_SBCAN)==CODE_SBCAN && len == NATURAL_CODE_LENGTH(CODE_SBCAN))
+    {
+        instruction=CODE_SBCAN;
+        
+        /* Extract the value of the register (in bits)    */
+        op1=EXTRACT(codeInHexa, 0, 8);
+    }
+
+    /* This is a SBC A,(IX+d)  */
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_SBCAIXD)==CODE_DD_SBCAIXD && len == DD_CODE_LENGTH(CODE_DD_SBCAIXD))
+    {
+        instruction=CODE_DD_SBCAIXD;
+        
+        /* Extract the value of the register (in bits)    */
+        op1=EXTRACT(codeInHexa, 0, 8);
+    }
+
+    /* This is a SBC A,(IY+d)  */
+    if (((codeInHexa>>SIZE_1_BYTE) & MASK_SBCAIYD)==CODE_FD_SBCAIYD && len == FD_CODE_LENGTH(CODE_FD_SBCAIYD))
+    {
+        instruction=CODE_FD_SBCAIYD;
+        
+        /* Extract the value of the register (in bits)    */
+        op1=EXTRACT(codeInHexa, 0, 8);
+    }
+
     // bottom 1
     /*************************************************************************************************************************/
 
@@ -7559,6 +7641,425 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+        case CODE_SUBAR:                                         /* This is a SUB A,r  */
+            ret=bitToRegister(op1, sop1);
+            /* to be done   */
+            sprintf(mInstruction, "SUB A,%s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg8_2=get8bitsRegisterAddress(op1);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfBorrowOnSub8(reg8_1->getValue(), reg8_2->getValue()));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkBorrowOnSub8(reg8_1->getValue(), reg8_2->getValue()));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnSub8(reg8_1->getValue(), reg8_2->getValue()));
+
+                reg8_1->setValue(reg8_1->getValue() - reg8_2->getValue());
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_SET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_SUBAN:                             /* This is a SUB A,n    */
+            sprintf(mInstruction, "SUB A,#%02X", op1);
+            
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfBorrowOnSub8(reg8_1->getValue(), op1));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkBorrowOnSub8(reg8_1->getValue(), op1));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnSub8(reg8_1->getValue(), op1));
+
+                reg8_1->setValue(reg8_1->getValue() - op1);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_SET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_SUBAHL:                                         /* This is a SUB A,(HL)  */
+            sprintf(mInstruction, "SUB A,(HL)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg16_1=get16bitsRegisterAddress(REGHL);
+                val=mMemory->get8bitsValue(reg16_1->getValue());
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfBorrowOnSub8(reg8_1->getValue(), val));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkBorrowOnSub8(reg8_1->getValue(), val));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnSub8(reg8_1->getValue(), val));
+
+                reg8_1->setValue(reg8_1->getValue() - val);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_SET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DD_SUBAIXD:                                           /* This is a SUB A,(IX+d)  */
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIX.getValue()-op1;
+                sprintf(mInstruction, "SUB A,(IX-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op1;
+                sprintf(mInstruction, "SUB A,(IX+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=mMemory->get8bitsValue(address);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfBorrowOnSub8(reg8_1->getValue(), val));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkBorrowOnSub8(reg8_1->getValue(), val));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnSub8(reg8_1->getValue(), val));
+
+                reg8_1->setValue(reg8_1->getValue() - val);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_SET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FD_SUBAIYD:                                           /* This is a SUB A,(IY+d)  */
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIY.getValue()-op1;
+                sprintf(mInstruction, "SUB A,(IY-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op1;
+                sprintf(mInstruction, "SUB A,(IY+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=mMemory->get8bitsValue(address);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfBorrowOnSub8(reg8_1->getValue(), val));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkBorrowOnSub8(reg8_1->getValue(), val));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnSub8(reg8_1->getValue(), val));
+
+                reg8_1->setValue(reg8_1->getValue() - val);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_SET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_SBCAR:                                         /* This is a SBC A,r  */
+            ret=bitToRegister(op1, sop1);
+            /* to be done   */
+            sprintf(mInstruction, "SBC A,%s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg8_2=get8bitsRegisterAddress(op1);
+                carry=(mRegisterPack.regF.getCarryFlag()?1:0);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfBorrowOnSub8(reg8_1->getValue(), reg8_2->getValue() + carry));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkBorrowOnSub8(reg8_1->getValue(), reg8_2->getValue() + carry));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnSub8(reg8_1->getValue(), reg8_2->getValue() + carry));
+
+                reg8_1->setValue(reg8_1->getValue() - reg8_2->getValue() -  carry);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_SET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_SBCAN:                             /* This is a SBC A,n    */
+            sprintf(mInstruction, "SBC A,#%02X", op1);
+            
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                carry=(mRegisterPack.regF.getCarryFlag()?1:0);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfBorrowOnSub8(reg8_1->getValue(), op1 + carry));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkBorrowOnSub8(reg8_1->getValue(), op1 + carry));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnSub8(reg8_1->getValue(), op1 + carry));
+
+                reg8_1->setValue(reg8_1->getValue() - op1 - carry);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_SET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_SBCAHL:                                         /* This is a SBC A,(HL)  */
+            sprintf(mInstruction, "SBC A,(HL)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                reg16_1=get16bitsRegisterAddress(REGHL);
+                val=mMemory->get8bitsValue(reg16_1->getValue());
+                carry=(mRegisterPack.regF.getCarryFlag()?1:0);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfBorrowOnSub8(reg8_1->getValue(), val + carry));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkBorrowOnSub8(reg8_1->getValue(), val + carry));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnSub8(reg8_1->getValue(), val + carry));
+
+                reg8_1->setValue(reg8_1->getValue() - val - carry);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_SET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DD_SBCAIXD:                                           /* This is a SBC A,(IX+d)  */
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIX.getValue()-op1;
+                sprintf(mInstruction, "SBC A,(IX-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIX.getValue()+op1;
+                sprintf(mInstruction, "SBC A,(IX+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=mMemory->get8bitsValue(address);
+                carry=(mRegisterPack.regF.getCarryFlag()?1:0);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfBorrowOnSub8(reg8_1->getValue(), val + carry));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkBorrowOnSub8(reg8_1->getValue(), val + carry));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnSub8(reg8_1->getValue(), val + carry));
+
+                reg8_1->setValue(reg8_1->getValue() - val - carry);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_SET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FD_SBCAIYD:                                           /* This is a SBC A,(IY+d)  */
+            if (SIGN(op1))                                              /* Check if op1 is negative */
+            {
+                op1=~op1+1;
+                address=mRegisterPack.regIY.getValue()-op1;
+                sprintf(mInstruction, "SBC A,(IY-#%02X)", op1);
+            }
+            else
+            {
+                address=mRegisterPack.regIY.getValue()+op1;
+                sprintf(mInstruction, "SBC A,(IY+#%02X)", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg8_1=get8bitsRegisterAddress(REGA);
+                val=mMemory->get8bitsValue(address);
+                carry=(mRegisterPack.regF.getCarryFlag()?1:0);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfBorrowOnSub8(reg8_1->getValue(), val + carry));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkBorrowOnSub8(reg8_1->getValue(), val + carry));
+                
+                /* IS there an overflow ?               */
+                PV_IS(checkOverflowOnSub8(reg8_1->getValue(), val + carry));
+
+                reg8_1->setValue(reg8_1->getValue() - val - carry);
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(reg8_1->getValue()));
+                Z_IS(ZERO(reg8_1->getValue()));
+                N_SET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
     }
 
 
@@ -9120,6 +9621,113 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCode=CODE_ED_ADCHLRR;                            /* Prepare the ADC HL,rr  */
                     PUSHBIT(retCode, registerToBit(str_op2), 4);        /* Add the first register as bits   */
                     *pLen=TWO_BYTES;
+                }
+            }
+
+            if (!strcmp(str_inst, "SUB"))                            /* A SUB instruction is present  */
+            {
+                /* Check if it is a SUB A,r instruction    */
+                if (!strcmp(str_op1, "A") && (strlen(str_op2)==1))       
+                {
+                    retCode=CODE_SUBAR;                              /* Prepare the SUB r,r'  */
+                    *pLen=ONE_BYTE;
+
+                    retCheck=clean_r(str_op1);
+                    retCheck=clean_r(str_op2);
+                    
+                    PUSHBIT(retCode, registerToBit(str_op2), 0);    /* Add the second register as bits   */
+                }
+
+                /* Check if it is a SUB A,(IX+d) instruction    */
+                if (!strcmp(str_op1, "A") && ((strlen(str_op2)==7) || (strlen(str_op2)==8)) && (strstr(str_op2, "IX") || strstr(str_op2, "IY")))       
+                {
+                    if (strstr(str_op2, "IX"))
+                    {
+                        retCode=CODE_DD_SUBAIXD;
+                    }
+
+                    if (strstr(str_op2, "IY"))
+                    {
+                        retCode=CODE_FD_SUBAIYD;
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op2);
+
+                    retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);
+                    *pLen=THREE_BYTES;
+                    str_op2[0]='\0';
+                }
+
+                /* Check if it is a SUB A,n instruction    */
+                if (!strcmp(str_op1, "A") && ((strlen(str_op2)==2) || (strlen(str_op2)==3)) && strchr(str_op2, '#'))       
+                {
+                    retCode=CODE_SUBAN;                              /* Prepare the SUB A,n  */
+                    
+                    retCheck=clean_n(str_op2);
+                    retCode=(retCode << SIZE_1_BYTE)+toValue(str_op2+1, pLen, &lenEff);
+                    //PUSHBIT(retCode, registerToBit(str_op2), 0);    /* Add the n    */
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a SUB A,(HL) instruction    */
+                if (!strcmp(str_op1, "A") && !strcmp(str_op2, "(HL)"))       
+                {
+                    retCode=CODE_SUBAHL;                              /* Prepare the SUB A,(HL)  */
+                    *pLen=ONE_BYTE;
+                } 
+            }
+
+            if (!strcmp(str_inst, "SBC"))                            /* A SBC instruction is present  */
+            {
+                /* Check if it is a SBC A,r instruction    */
+                if (!strcmp(str_op1, "A") && (strlen(str_op2)==1))       
+                {
+                    retCode=CODE_SBCAR;                              /* Prepare the SBC r,r'  */
+                    *pLen=ONE_BYTE;
+
+                    retCheck=clean_r(str_op1);
+                    retCheck=clean_r(str_op2);
+                    
+                    PUSHBIT(retCode, registerToBit(str_op2), 0);    /* Add the second register as bits   */
+                }
+
+                /* Check if it is a SBC A,(IX+d) instruction    */
+                if (!strcmp(str_op1, "A") && ((strlen(str_op2)==7) || (strlen(str_op2)==8)) && (strstr(str_op2, "IX") || strstr(str_op2, "IY")))       
+                {
+                    if (strstr(str_op2, "IX"))
+                    {
+                        retCode=CODE_DD_SBCAIXD;
+                    }
+
+                    if (strstr(str_op2, "IY"))
+                    {
+                        retCode=CODE_FD_SBCAIYD;
+                    }
+
+                    /* Clean the (IX+d) or (IY+d) for Op1 */
+                    retCheck=clean_ixn(str_op2);
+
+                    retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);
+                    *pLen=THREE_BYTES;
+                    str_op2[0]='\0';
+                }
+
+                /* Check if it is a SBC A,n instruction    */
+                if (!strcmp(str_op1, "A") && ((strlen(str_op2)==2) || (strlen(str_op2)==3)) && strchr(str_op2, '#'))       
+                {
+                    retCode=CODE_SBCAN;                              /* Prepare the SBC A,n  */
+                    
+                    retCheck=clean_n(str_op2);
+                    retCode=(retCode << SIZE_1_BYTE)+toValue(str_op2+1, pLen, &lenEff);
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a SBC A,(HL) instruction    */
+                if (!strcmp(str_op1, "A") && !strcmp(str_op2, "(HL)"))       
+                {
+                    retCode=CODE_SBCAHL;                              /* Prepare the SBC A,(HL)  */
+                    *pLen=ONE_BYTE;
                 }
             }
 

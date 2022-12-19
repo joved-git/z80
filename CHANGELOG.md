@@ -1,3 +1,7 @@
+# 1.2.1
+Add and decode SUB r, SUB n, SUB (HL), SUB (IX+d) and SUB (IX+d).
+Add and decode SBC r, SBC n, SBC (HL), SBC (IX+d) and SBC (IX+d).
+
 # 1.2.0
 Add JR C,e, JR NC,e, JE Z,e and JR NZ,e.
 Correct many printf '02X' in BIT, SET, RES instructions.
