@@ -22,6 +22,9 @@
 // #define DEBUG_DISPLAY_INSTR_DATA              /* Dsiplay data that will be executer   */
 // #define DEBUG_DISPLAY_CUTI_DATA               /* Display data after cutting it        */ 
 // #define DEBUG_DISPLAY_FINDCODE_DATA           /* Display data after decoding it       */
+// #define DEBUG_DISPLAY_READ_ASM_DATA           /* Display the data read from asm file  */
+// #define DEBUG_DISPLAY_READ_ASM_DATA           /* Display the data read from asm file  */
+// #define DEBUG_DISPLAY_LABEL_ASM_DATA          /* Display label calc asm data          */
 
 #define EOL                 	'\n'            /* The user has typed Enter                                 */                             
 #define MAX_LEN	            	256             /* Max length of an entry                                   */

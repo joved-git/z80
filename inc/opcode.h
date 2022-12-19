@@ -55,13 +55,17 @@
 #define CODE_JRE            (0b00011000)                // 0x18     // JRE
 #define CODE_LDADE          (0b00011010)                // 0x1A     // LD A,(DE)
 #define CODE_RRA            (0b00011111)                // 0x1F     // RRA
+#define CODE_JRNZE          (0b00100000)                // 0x20     // JRNZE
 #define CODE_LDNNHL         (0b00100010)                // 0x22     // LD (nn),HL
+#define CODE_JRZE           (0b00101000)                // 0x28     // JRZE
 #define CODE_LDHLNN         (0b00101010)                // 0x2A     // LD HL,(nn)
 #define CODE_CPL            (0b00101111)                // 0x2F     // CPL
+#define CODE_JRNCE          (0b00110000)                // 0x30     // JRNCE
 #define CODE_LDNNA          (0b00110010)                // 0x32     // LD (nn),A
 #define CODE_INCHL          (0b00110100)                // 0x34     // INC (HL)
 #define CODE_DECHL          (0b00110101)                // 0x35     // DEC (HL)
 #define CODE_LDHLN          (0b00110110)                // 0x36     // LD (HL),n
+#define CODE_JRCE           (0b00111000)                // 0x38     // JRCE
 #define CODE_LDANN          (0b00111010)                // 0x3A     // LD A,(nn)
 #define CODE_ADDAHL         (0b10000110)                // 0x86     // ADD A,(HL)
 #define CODE_ADCAHL         (0b10001110)                // 0x8E     // ADC A,(HL)
@@ -269,6 +273,10 @@
 #define MASK_XORHL          (0b11111111)
 #define MASK_CPN            (0b11111111)
 #define MASK_CPHL           (0b11111111)
+#define MASK_JRCE           (0b11111111)
+#define MASK_JRNCE          (0b11111111)
+#define MASK_JRZE           (0b11111111)
+#define MASK_JRNZE          (0b11111111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)

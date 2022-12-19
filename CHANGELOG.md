@@ -1,6 +1,11 @@
+# 1.2.0
+Add JR C,e, JR NC,e, JE Z,e and JR NZ,e.
+Correct many printf '02X' in BIT, SET, RES instructions.
+Correct the label decoding: some instruction lengths were bad.
+Add JRCOND asm files (with and without opcodes).
 
 # 1.1.20
-Add and decode JP cc,nn (see xxxjoexxx).
+Add and decode JP cc,nn.
 Create a clean_cc() function. To be written.
 Correct the NO_PC_CHANGE for CALL cc,nn and JP cc,nn.
 

@@ -1159,6 +1159,10 @@ void Z80Machine::loadCode(char *pFilename)
                 }
 
                 machineCode=findMachineCode(aLine, &len);
+    
+#ifdef DEBUG_DISPLAY_READ_ASM_DATA
+                printf("[%08X] - %s - (len=%d) is at %04X\n", machineCode, aLine, len, address);
+#endif
 
                 /* Go to the next instruction   */
                 if (len!=NOT_DECODED)
@@ -1250,8 +1254,10 @@ void Z80Machine::loadCode(char *pFilename)
                             strLine.resize(pos1);
                             labelAddress=labelDataset.findAddress(label);
                             delta=labelAddress-address;
-                            // printf("address=%04X / label=%04X / delta=%d\n", address, labelAddress, delta);
-                            
+
+#ifdef DEBUG_DISPLAY_LABEL_ASM_DATA
+                            printf("address=%04X / label=%s / label @=%04X / delta=%d\n", address, label, labelAddress, delta);
+#endif 
                             if (delta>=0)
                             {
                                 sprintf(aLine, "%s%c$%c%d", strLine.c_str(), sepChar, '+', delta);
@@ -2469,6 +2475,42 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if ((codeInHexa & MASK_DECIY)==CODE_FD_DECIY && len == FD_CODE_LENGTH(CODE_FD_DECIY))
     {
         instruction=CODE_FD_DECIY;
+    }
+
+    /* This is a JR C,e */
+    if ((codeInHexa>>SIZE_1_BYTE & MASK_JRCE)==CODE_JRCE && len == NATURAL_CODE_LENGTH(CODE_JRCE))
+    {
+        instruction=CODE_JRCE;
+        retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+
+        op1=EXTRACT(codeInHexa, 0, 8);
+    }
+
+    /* This is a JR NC,e */
+    if ((codeInHexa>>SIZE_1_BYTE & MASK_JRNCE)==CODE_JRNCE && len == NATURAL_CODE_LENGTH(CODE_JRNCE))
+    {
+        instruction=CODE_JRNCE;
+        retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+
+        op1=EXTRACT(codeInHexa, 0, 8);
+    }
+
+    /* This is a JR Z,e */
+    if ((codeInHexa>>SIZE_1_BYTE & MASK_JRZE)==CODE_JRZE && len == NATURAL_CODE_LENGTH(CODE_JRZE))
+    {
+        instruction=CODE_JRZE;
+        retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+
+        op1=EXTRACT(codeInHexa, 0, 8);
+    }
+
+    /* This is a JR NZ,e */
+    if ((codeInHexa>>SIZE_1_BYTE & MASK_JRNZE)==CODE_JRNZE && len == NATURAL_CODE_LENGTH(CODE_JRNZE))
+    {
+        instruction=CODE_JRNZE;
+        retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+
+        op1=EXTRACT(codeInHexa, 0, 8);
     }
 
     // bottom 1
@@ -5215,7 +5257,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5255,7 +5297,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5316,7 +5358,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5338,7 +5380,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5360,7 +5402,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5385,7 +5427,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%42X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5419,7 +5461,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5453,7 +5495,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5487,7 +5529,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5521,7 +5563,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5555,7 +5597,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5589,7 +5631,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%08X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5611,7 +5653,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5633,7 +5675,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5656,7 +5698,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5676,7 +5718,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -5707,7 +5749,163 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             
             if (pMode==INTP_DISPLAY)
             {
-                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_JRCE:                                                         /* This is a JR C,e                         */
+            if (op1<=127 || op1>=254)                                           /* Is e positive or negative ?              */
+            {
+                op1=op1+2;
+                op1s=op1;
+                sprintf(mInstruction, "JR C,$+%0d", op1);            
+            }
+            else
+            {
+                op1=((~op1&FIRST_LOWEST_BYTE)+1)-2;
+                op1s=-op1;
+                sprintf(mInstruction, "JR C,$-%0d", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* The PC is changing       */
+                if (isConditionTrue(CONDC))
+                {
+                    mRegisterPack.regPC.setValue(mRegisterPack.regPC.getValue()+op1s);      /* The PC is changing       */
+                }          
+                else
+                {
+                    retInterpret=NOTHING_SPECIAL;                                           /* Go to next instruction   */
+                }     
+                
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_JRNCE:                                                        /* This is a JR NC,e                        */
+            if (op1<=127 || op1>=254)                                           /* Is e positive or negative ?              */
+            {
+                op1=op1+2;
+                op1s=op1;
+                sprintf(mInstruction, "JR NC,$+%0d", op1);            
+            }
+            else
+            {
+                op1=((~op1&FIRST_LOWEST_BYTE)+1)-2;
+                op1s=-op1;
+                sprintf(mInstruction, "JR NC,$-%0d", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* The PC is changing       */
+                if (isConditionTrue(CONDNC))
+                {
+                    mRegisterPack.regPC.setValue(mRegisterPack.regPC.getValue()+op1s);      /* The PC is changing       */
+                }          
+                else
+                {
+                    retInterpret=NOTHING_SPECIAL;                                           /* Go to next instruction   */
+                }     
+                
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_JRZE:                                                         /* This is a JR Z,e                         */
+            if (op1<=127 || op1>=254)                                           /* Is e positive or negative ?              */
+            {
+                op1=op1+2;
+                op1s=op1;
+                sprintf(mInstruction, "JR Z,$+%0d", op1);            
+            }
+            else
+            {
+                op1=((~op1&FIRST_LOWEST_BYTE)+1)-2;
+                op1s=-op1;
+                sprintf(mInstruction, "JR Z,$-%0d", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* The PC is changing       */
+                if (isConditionTrue(CONDZ))
+                {
+                    mRegisterPack.regPC.setValue(mRegisterPack.regPC.getValue()+op1s);      /* The PC is changing       */
+                }          
+                else
+                {
+                    retInterpret=NOTHING_SPECIAL;                                           /* Go to next instruction   */
+                }     
+                
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_JRNZE:                                                        /* This is a JR NZ,e                        */
+            if (op1<=127 || op1>=254)                                           /* Is e positive or negative ?              */
+            {
+                op1=op1+2;
+                op1s=op1;
+                sprintf(mInstruction, "JR NZ,$+%0d", op1);            
+            }
+            else
+            {
+                op1=((~op1&FIRST_LOWEST_BYTE)+1)-2;
+                op1s=-op1;
+                sprintf(mInstruction, "JR NZ,$-%0d", op1);
+            }
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* The PC is changing       */
+                if (isConditionTrue(CONDNZ))
+                {
+                    mRegisterPack.regPC.setValue(mRegisterPack.regPC.getValue()+op1s);      /* The PC is changing       */
+                }          
+                else
+                {
+                    retInterpret=NOTHING_SPECIAL;                                           /* Go to next instruction   */
+                }     
+                
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -8418,7 +8616,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 *pLen=TWO_BYTES;                                        /* By default, a JR is 2 bytes in label detection */
                 
                 /* Check if it is a JR e instruction   */
-                if ((strlen(str_op1)>=3 && strlen(str_op1)<=5) && !strchr(str_op1, '#') && strchr(str_op1, '$') && (strchr(str_op1, '+') || strchr(str_op1, '-') ))
+                if ((strlen(str_op1)>=3 && strlen(str_op1)<=5) && !strchr(str_op1, '#') && strchr(str_op1, '$') && (strchr(str_op1, '+') || strchr(str_op1, '-')))
                 {
                     retCode=CODE_JRE;                                   /* Prepare the JR e                     */
                     
@@ -8433,7 +8631,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         word=((~toDecValue(str_op1+2, pLen, &lenEff))+1) & FIRST_LOWEST_BYTE;
                     }
 
-                    retCode=(retCode<<SIZE_1_BYTE) + ((word -2) & FIRST_LOWEST_BYTE); /* Calc the (e-2) operand */      
+                    retCode=(retCode<<SIZE_1_BYTE) + ((word - 2) & FIRST_LOWEST_BYTE); /* Calc the (e-2) operand */      
 
                     *pLen=TWO_BYTES;
                 }
@@ -9122,6 +9320,95 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     PUSHBIT(retCode, conditionToBit(str_op1), 3);
                     retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);     /* Add the nn into the code */      
                     *pLen=THREE_BYTES;
+                }
+            }
+
+            if (!strcmp(str_inst, "JR"))                                /* A JR instruction is present                      */
+            {
+                *pLen=TWO_BYTES;                                      /* By default, a JR is 3 bytes in label detection */
+
+                if (!strcmp(str_op1, "C") && (strlen(str_op2)>=3 && strlen(str_op2)<=5) && !strchr(str_op2, '#') && strchr(str_op2, '$') && (strchr(str_op2, '+') || strchr(str_op2, '-')))
+                {
+                    retCode=CODE_JRCE;                                  /* Prepare the JR C,e                   */
+                    
+                    retCheck=clean_cc(str_op1);                         /* Clean the cc operand                 */
+                    retCheck=clean_e(str_op2);                          /* Clean the e operand                  */
+
+                    if (str_op2[1]=='+')
+                    {
+                        word=toDecValue(str_op2+2, pLen, &lenEff);
+                    }
+                    else
+                    {
+                        word=((~toDecValue(str_op2+2, pLen, &lenEff))+1) & FIRST_LOWEST_BYTE;
+                    }
+
+                    retCode=(retCode<<SIZE_1_BYTE) + ((word - 2) & FIRST_LOWEST_BYTE); /* Calc the (e-2) operand */     
+
+                    *pLen=TWO_BYTES;
+                }
+
+                if (!strcmp(str_op1, "NC") && (strlen(str_op2)>=3 && strlen(str_op2)<=5) && !strchr(str_op2, '#') && strchr(str_op2, '$') && (strchr(str_op2, '+') || strchr(str_op2, '-')))
+                {
+                    retCode=CODE_JRNCE;                                  /* Prepare the JR NC,e                 */
+                    
+                    retCheck=clean_cc(str_op1);                         /* Clean the cc operand                 */
+                    retCheck=clean_e(str_op2);                          /* Clean the e operand                  */
+
+                    if (str_op2[1]=='+')
+                    {
+                        word=toDecValue(str_op2+2, pLen, &lenEff);
+                    }
+                    else
+                    {
+                        word=((~toDecValue(str_op2+2, pLen, &lenEff))+1) & FIRST_LOWEST_BYTE;
+                    }
+
+                    retCode=(retCode<<SIZE_1_BYTE) + ((word - 2) & FIRST_LOWEST_BYTE); /* Calc the (e-2) operand */  
+
+                    *pLen=TWO_BYTES;
+                }
+
+                if (!strcmp(str_op1, "Z") && (strlen(str_op2)>=3 && strlen(str_op2)<=5) && !strchr(str_op2, '#') && strchr(str_op2, '$') && (strchr(str_op2, '+') || strchr(str_op2, '-')))
+                {
+                    retCode=CODE_JRZE;                                  /* Prepare the JR Z,e                   */
+
+                    retCheck=clean_cc(str_op1);                         /* Clean the cc operand                 */
+                    retCheck=clean_e(str_op2);                          /* Clean the e operand                  */
+
+                    if (str_op2[1]=='+')
+                    {
+                        word=toDecValue(str_op2+2, pLen, &lenEff);
+                    }
+                    else
+                    {
+                        word=((~toDecValue(str_op2+2, pLen, &lenEff))+1) & FIRST_LOWEST_BYTE;
+                    }
+
+                    retCode=(retCode<<SIZE_1_BYTE) + ((word - 2) & FIRST_LOWEST_BYTE);   /* Calc the (e-2) operand */  
+
+                    *pLen=TWO_BYTES;
+                }
+
+                if (!strcmp(str_op1, "NZ") && (strlen(str_op2)>=3 && strlen(str_op2)<=5) && !strchr(str_op2, '#') && strchr(str_op2, '$') && (strchr(str_op2, '+') || strchr(str_op2, '-')))
+                {
+                    retCode=CODE_JRNZE;                                 /* Prepare the JR NZ,e                  */
+
+                    retCheck=clean_cc(str_op1);                         /* Clean the cc operand                 */
+                    retCheck=clean_e(str_op2);                          /* Clean the e operand                  */
+
+                    if (str_op2[1]=='+')
+                    {
+                        word=toDecValue(str_op2+2, pLen, &lenEff);
+                    }
+                    else
+                    {
+                        word=((~toDecValue(str_op2+2, pLen, &lenEff))+1) & FIRST_LOWEST_BYTE;
+                    }
+
+                    retCode=(retCode<<SIZE_1_BYTE) + ((word - 2) & FIRST_LOWEST_BYTE);       /* Calc the (e-2) operand */  
+
+                    *pLen=TWO_BYTES;
                 }
             }
 
