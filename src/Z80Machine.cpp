@@ -1746,6 +1746,14 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=EXTRACT(codeInHexa, 4, 2) | 0b1000;
     }
 
+    /* This is a SBC HL,rr      */
+    if ((codeInHexa & MASK_SBCHLRR)==CODE_ED_SBCHLRR && len == ED_CODE_LENGTH(CODE_ED_SBCHLRR))
+    {
+        instruction=CODE_ED_SBCHLRR;
+               
+        op1=EXTRACT(codeInHexa, 4, 2) | 0b1000;
+    }
+
     /* This is a BIT b,r */
     if ((codeInHexa & MASK_BITBR)==CODE_CB_BITBR && len == CB_CODE_LENGTH(CODE_CB_BITBR))
     {
@@ -5427,6 +5435,47 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 /* Modify flags here after operation    */
                 N_RESET;
 
+                Z_IS((reg16_1->getValue()==0)?1:0);
+                S_IS((reg16_1->getValue() & 0x7FFF)?1:0);
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ED_SBCHLRR:                                      /* This is a SBC HL,rr  */
+            ret=bitToRegister(op1, sop1);
+
+            sprintf(mInstruction, "SBC HL,%s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                reg16_1=get16bitsRegisterAddress(REGHL);
+                reg16_2=get16bitsRegisterAddress(op1);
+                carry=(mRegisterPack.regF.getCarryFlag()?1:0);
+
+                /* Modify flags here before operation   */
+                /* Is there an Half Carry ?             */
+                H_IS(checkHalfBorrowOnSub16(reg16_1->getValue(), reg16_2->getValue() + carry));
+                
+                /* Is there a Carry ?                   */
+                C_IS(checkBorrowOnSub16(reg16_1->getValue(), reg16_2->getValue() + carry));
+
+                reg16_1->setValue(reg16_1->getValue() - reg16_2->getValue() - carry);
+
+                /* Modify flags here after operation    */
+                N_SET;
+
+                Z_IS((reg16_1->getValue()==0)?1:0);
+                S_IS((reg16_1->getValue() & 0x7FFF)?1:0);
+
                 if (pMode==INTP_EXECUTE)
                 {
                     printf("\n%s was executed\n", mInstruction);
@@ -8242,6 +8291,18 @@ bool Z80Machine::checkHalfBorrowOnSub8(uint8_t pB1, uint8_t pB2)
     }
 }
 
+/* Check if it will be an half borrow on an 8-bit substraction  */
+bool Z80Machine::checkHalfBorrowOnSub16(uint16_t pW1, uint16_t pW2)
+{
+    if ((pW1 & 0x0FFF) < (pW2 & 0x0FFF))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
 /* Check if it will be a borrow on an 8-bit substraction */
 bool Z80Machine::checkBorrowOnSub8(uint8_t pB1, uint8_t pB2)
@@ -8254,13 +8315,6 @@ bool Z80Machine::checkBorrowOnSub8(uint8_t pB1, uint8_t pB2)
     {
         return false;
     }
-}
-
-
-/* Check if it will be an half borrow on an 16-bit substraction */
-bool Z80Machine::checkHalfBorrowOnSub16(uint16_t pW1, uint16_t pW2)
-{
-    return false;
 }
 
 
@@ -9833,6 +9887,14 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 {
                     retCode=CODE_SBCAHL;                              /* Prepare the SBC A,(HL)  */
                     *pLen=ONE_BYTE;
+                }
+
+                /* Check if it is a SBC HL,rr instruction    */
+                if (!strcmp(str_op1, "HL") && strlen(str_op2)==2 && !strchr(str_op2, '#'))       
+                {
+                    retCode=CODE_ED_SBCHLRR;                            /* Prepare the SBC HL,rr  */
+                    PUSHBIT(retCode, registerToBit(str_op2), 4);        /* Add the first register as bits   */
+                    *pLen=TWO_BYTES;
                 }
             }
 

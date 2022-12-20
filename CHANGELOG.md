@@ -1,3 +1,7 @@
+# 1.2.3
+Add and decode SBC HL,ss.
+Add checkHalfBorrowOnSub16() function.
+
 # 1.2.2
 Add and decode JP (HL), JP (IX) and JP (IY).
 

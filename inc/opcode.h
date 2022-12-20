@@ -150,6 +150,8 @@
 #define CODE_ED_CPD         (0b1110110110101001)        // 0xEDA9   // CPD
 #define CODE_ED_CPDR        (0b1110110110111001)        // 0xEDB9   // CPDR
 #define CODE_ED_ADCHLRR     (0b1110110101001010)                    // ADC HL,rr
+#define CODE_ED_SBCHLRR     (0b1110110101000010)                    // SBC HL,rr
+
 
 /* DD instruction codes     */
 #define CODE_DD_LDIXNN      (0b1101110100100001)        // 0xDD21   // LD IX,nn      
@@ -183,7 +185,7 @@
 #define CODE_FD_INCIY       (0b1111110100100011)        // 0xFD22   // INC IY
 #define CODE_FD_LDIYANN     (0b1111110100101010)        // 0xFD2A   // LD YX,(nn)
 #define CODE_FD_DECIY       (0b1111110100101011)        // 0xFD2B   // DEC IY
-#define CODE_FD_INCIYD      (0b1111110100110100)        // 0xFD34   // INC (IY+d)
+#define CODE_FD_INCIYD      (0b1111110100110100)        // 0xFD34   // INC (IY+d)F
 #define CODE_FD_DECIYD      (0b1111110100110101)        // 0xFD35   // DEC (IY+d)
 #define CODE_FD_LDIYDN      (0b1111110100110110)        // 0xFD36   // LD (IX+d),n
 #define CODE_FD_ADDAIYD     (0b1111110110000110)        // 0xFD86   // ADD A,(IY+d)
@@ -375,6 +377,7 @@
 #define MASK_DECIX          (0b1111111111111111)
 #define MASK_DECIY          (0b1111111111111111)
 #define MASK_ADCHLRR        (0b1111111111001111)
+#define MASK_SBCHLRR        (0b1111111111001111)
 #define MASK_SUBAIXD        (0b1111111111111111)
 #define MASK_SUBAIYD        (0b1111111111111111)
 #define MASK_SBCAIXD        (0b1111111111111111)

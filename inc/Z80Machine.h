@@ -250,10 +250,16 @@ private:
     /// @return true if it will be a carry.
     bool checkCarryOnAdd8(uint8_t, uint8_t);
 
-        /// @brief  Check if it will be an half carry on an 16-bit addition.
+    /// @brief  Check if it will be an half carry on an 16-bit addition.
     /// @param  The 2 bytes to add.
     /// @return true if it will be a half carry.
     bool checkHalfCarryOnAdd16(uint16_t, uint16_t);
+
+
+    /// @brief  Check if it will be an half borrow on an 16-bit substrction.
+    /// @param  The 2 bytes to add.
+    /// @return true if it will be a half borrow.
+    bool checkHalfBorrowOnAdd16(uint16_t, uint16_t);
 
     /// @brief  Check if it will be a carry on an 16-bit addition.
     /// @param  The 2 bytes to add.
