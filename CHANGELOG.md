@@ -1,3 +1,6 @@
+# 1.2.2
+Add and decode JP (HL), JP (IX) and JP (IY).
+
 # 1.2.1
 Add and decode SUB r, SUB n, SUB (HL), SUB (IX+d) and SUB (IX+d).
 Add and decode SBC r, SBC n, SBC (HL), SBC (IX+d) and SBC (IX+d).

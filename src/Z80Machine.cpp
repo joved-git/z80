@@ -2595,6 +2595,27 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=EXTRACT(codeInHexa, 0, 8);
     }
 
+    /* This is a JP (HL) */
+    if ((codeInHexa & MASK_JPHL)==CODE_JPHL && len == NATURAL_CODE_LENGTH(CODE_JPHL))
+    {
+        instruction=CODE_JPHL;
+        retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+    }
+
+    /* This is a JP (IX) */
+    if ((codeInHexa & MASK_JPIX)==CODE_DD_JPIX && len == DD_CODE_LENGTH(CODE_DD_JPIX))
+    {
+        instruction=CODE_DD_JPIX;
+        retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+    }
+
+    /* This is a JP (IY) */
+    if ((codeInHexa & MASK_JPIX)==CODE_FD_JPIY && len == FD_CODE_LENGTH(CODE_FD_JPIY))
+    {
+        instruction=CODE_FD_JPIY;
+        retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+    }
+
     // bottom 1
     /*************************************************************************************************************************/
 
@@ -5801,6 +5822,63 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             if (pMode==INTP_DISPLAY)
             {
                 printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_JPHL:                                                     /* This is a JP (HL)                    */
+            sprintf(mInstruction, "JP (HL)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                mRegisterPack.regPC.setValue(mRegisterPack.regHL.getValue());           /* The PC is changing       */
+                
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DD_JPIX:                                                     /* This is a JP (IX)                    */
+            sprintf(mInstruction, "JP (IX)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                mRegisterPack.regPC.setValue(mRegisterPack.regIX.getValue());           /* The PC is changing       */
+                
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_FD_JPIY:                                                     /* This is a JP (IY)                    */
+            sprintf(mInstruction, "JP (IY)");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                mRegisterPack.regPC.setValue(mRegisterPack.regIY.getValue());           /* The PC is changing       */
+                
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -9110,6 +9188,33 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
                     *pLen=THREE_BYTES;
                 }
+
+                /* Check if it is a JP (HL) instruction   */
+                if (!strcmp(str_op1, "(HL)"))
+                {
+                    retCode=CODE_JPHL;                                  /* Prepare the JP (HL)                 */
+                    
+                    *pLen=ONE_BYTE;
+                }
+
+                /* Check if it is a JP (IX) instruction   */
+                if (!strcmp(str_op1, "(IX)"))
+                {
+                    retCode=CODE_DD_JPIX;                               /* Prepare the JP (IX)                 */
+                    
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a JP (IX) instruction   */
+                if (!strcmp(str_op1, "(IY)"))
+                {
+                    retCode=CODE_FD_JPIY;                               /* Prepare the JP (IY)                 */
+                    
+                    *pLen=TWO_BYTES;
+                }
+
+
+
             }
 
             if (!strcmp(str_inst, "JR"))                                /* A JR instruction is present          */

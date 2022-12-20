@@ -83,6 +83,7 @@
 #define CODE_SBCAN          (0b11011110)                // 0xDE     // SBC A,n
 #define CODE_EXSPHL         (0b11100011)                // 0xE3     // EX (SP),HL
 #define CODE_ANDN           (0b11100110)                // 0xE6     // AND n 
+#define CODE_JPHL           (0b11101001)                // 0xE9     // JP (HL)
 #define CODE_XORN           (0b11101110)                // 0xEE     // XOR n
 #define CODE_EXX            (0b11011001)                // 0xD9     // EXX
 #define CODE_ORN            (0b11110110)                // 0xF6     // OR n
@@ -170,6 +171,7 @@
 #define CODE_DD_POPIX       (0b1101110111100001)        // 0xDDE1   // POP IX
 #define CODE_DD_EXSPIX      (0b1101110111100011)        // 0xDDE3   // EX (SH),IX
 #define CODE_DD_PUSHIX      (0b1101110111100101)        // 0xDDE5   // PUSH IX
+#define CODE_DD_JPIX        (0b1101110111101001)        // 0XDDE9   // JP (IX)
 #define CODE_DD_LDSPIX      (0b1101110111111001)        // 0xDDF9   // LD SP,IX
 #define CODE_DD_LDRIXD      (0b1101110101000110)                    // LD r,(IX+d)
 #define CODE_DD_LDIXDR      (0b1101110101110000)                    // LD (IX+d),r     
@@ -195,6 +197,7 @@
 #define CODE_FD_POPIY       (0b1111110111100001)        // 0xFDE1   // POP IY
 #define CODE_FD_EXSPIY      (0b1111110111100011)        // 0xFDE3   // EX (SH),IY
 #define CODE_FD_PUSHIY      (0b1111110111100101)        // 0xFDE5   // PUSH IY
+#define CODE_FD_JPIY        (0b1111110111101001)        // 0XFDE9   // JP (IY)
 #define CODE_FD_LDSPIY      (0b1111110111111001)        // 0xFDF9   // LD SP,IY
 #define CODE_FD_LDRIYD      (0b1111110101000110)                    // LD r,(IY+d)
 #define CODE_FD_LDIYDR      (0b1111110101110000)                    // LD (IY+d),r
@@ -293,6 +296,7 @@
 #define MASK_SBCAR          (0b11111000)
 #define MASK_SBCAN          (0b11111111)
 #define MASK_SBCAHL         (0b11111111)
+#define MASK_JPHL           (0b11111111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)
@@ -375,6 +379,8 @@
 #define MASK_SUBAIYD        (0b1111111111111111)
 #define MASK_SBCAIXD        (0b1111111111111111)
 #define MASK_SBCAIYD        (0b1111111111111111)
+#define MASK_JPIX           (0b1111111111111111)
+#define MASK_JPIY           (0b1111111111111111)
 
 /* 32-bit mask  */
 #define MASK_RLCIXD         (0b11111111111111110000000011111111)
