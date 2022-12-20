@@ -7237,8 +7237,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
-        
-
         case CODE_CPL:                                              /* This is a CPL  */
             sprintf(mInstruction, "CPL");
 
