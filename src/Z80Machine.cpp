@@ -1320,11 +1320,13 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
 #endif
     
     /* bottom 0 */
+
+    /* xxxjoexxx revoir les len== ci-dessus ^ */
     
     sprintf(mInstruction, "not yet decoded ");
 
     /* This is a NOP    */
-    if ((codeInHexa & MASK_NOP)==CODE_NOP && len == ONE_BYTE)                  
+    if ((codeInHexa & MASK_NOP)==CODE_NOP && len == NATURAL_CODE_LENGTH(CODE_NOP))                  
     {
         instruction=CODE_NOP;
     }
@@ -1332,7 +1334,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     //printf("%02x %02x\n", (codeInHexa & MASK_LDRR), CODE_LDRR);     
     
     /* This is a LD r,r' */
-    if ((codeInHexa & MASK_LDRR)==CODE_LDRR && len == ONE_BYTE)
+    if ((codeInHexa & MASK_LDRR)==CODE_LDRR && len == NATURAL_CODE_LENGTH(CODE_LDRR))
     {
         instruction=CODE_LDRR;
                
@@ -1348,7 +1350,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD (HL),r  */
-    if ((codeInHexa & MASK_LDHLR)==CODE_LDHLR && len == ONE_BYTE)
+    if ((codeInHexa & MASK_LDHLR)==CODE_LDHLR && len == NATURAL_CODE_LENGTH(CODE_LDHLR))
     {
         instruction=CODE_LDHLR;
         
@@ -1358,7 +1360,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD r,(HL)  */
-    if ((codeInHexa & MASK_LDRHL)==CODE_LDRHL && len == ONE_BYTE)
+    if ((codeInHexa & MASK_LDRHL)==CODE_LDRHL && len == NATURAL_CODE_LENGTH(CODE_LDRHL))
     {
         instruction=CODE_LDRHL;
         
@@ -1378,7 +1380,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD (HL),n  */
-    if ((codeInHexa>>SIZE_1_BYTE & MASK_LDHLN)==CODE_LDHLN && len == TWO_BYTES)
+    if ((codeInHexa>>SIZE_1_BYTE & MASK_LDHLN)==CODE_LDHLN && len == NATURAL_CODE_LENGTH(CODE_LDHLN))
     {
         instruction=CODE_LDHLN;
         
@@ -1387,25 +1389,25 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a HALT    */
-    if ((codeInHexa & MASK_HALT)==CODE_HALT && len == ONE_BYTE)                  
+    if ((codeInHexa & MASK_HALT)==CODE_HALT && (len == NATURAL_CODE_LENGTH(CODE_HALT)))                  
     {
         instruction=CODE_HALT;
     }
 
     /* This is a LD A,(BC) */
-    if ((codeInHexa & MASK_LDABC)==CODE_LDABC && len == ONE_BYTE)
+    if ((codeInHexa & MASK_LDABC)==CODE_LDABC && (len == NATURAL_CODE_LENGTH(CODE_LDABC)))
     {
         instruction=CODE_LDABC;
     }
 
     /* This is a LD A,(DE) */
-    if ((codeInHexa & MASK_LDADE)==CODE_LDADE && len == ONE_BYTE)
+    if ((codeInHexa & MASK_LDADE)==CODE_LDADE && (len == NATURAL_CODE_LENGTH(CODE_LDADE)))
     {
         instruction=CODE_LDADE;
     }
 
     /* This is a LD A,(nn)  */
-    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDANN)==CODE_LDANN && len == THREE_BYTES)
+    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDANN)==CODE_LDANN && len == NATURAL_CODE_LENGTH(CODE_LDANN))
     {
         instruction=CODE_LDANN;
         
@@ -1415,7 +1417,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD (nn),A  */
-    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDNNA)==CODE_LDNNA && len == THREE_BYTES)
+    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDNNA)==CODE_LDNNA && (len == NATURAL_CODE_LENGTH(CODE_LDNNA)))
     {
         instruction=CODE_LDNNA;
         
@@ -1425,14 +1427,14 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD (BC),A  */
-    if ((codeInHexa & MASK_LDBCA)==CODE_LDBCA && len == ONE_BYTE)
+    if ((codeInHexa & MASK_LDBCA)==CODE_LDBCA && (len == NATURAL_CODE_LENGTH(CODE_LDBCA)))
     {
         instruction=CODE_LDBCA;
         
     }
 
     /* This is a LD (DE),A  */
-    if ((codeInHexa & MASK_LDDEA)==CODE_LDDEA && len == ONE_BYTE)
+    if ((codeInHexa & MASK_LDDEA)==CODE_LDDEA && (len == NATURAL_CODE_LENGTH(CODE_LDDEA)))
     {
         instruction=CODE_LDDEA;
         
@@ -1447,7 +1449,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD rr,nn    */
-    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDRRNN)==CODE_LDRRNN && len == THREE_BYTES)
+    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDRRNN)==CODE_LDRRNN && (len == NATURAL_CODE_LENGTH(CODE_LDRRNN)))
     {
         instruction=CODE_LDRRNN;
         
@@ -1504,13 +1506,11 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a LD HL,(nn)    */
-    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDHLNN)==CODE_LDHLNN && len == THREE_BYTES)
+    if ((codeInHexa>>SIZE_2_BYTES & MASK_LDHLNN)==CODE_LDHLNN && (len == NATURAL_CODE_LENGTH(CODE_LDHLNN)))
     {
         instruction=CODE_LDHLNN; 
         op16=((codeInHexa & FIRST_LOWEST_BYTE)<<SIZE_1_BYTE)+((codeInHexa & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);
     }
-
-    /* xxxjoexxx revoir les len== ci-dessus ^ */
 
     /* This is a LD IX,(nn)    */
     if (((codeInHexa>>SIZE_2_BYTES) & MASK_LDIXANN)==CODE_DD_LDIXANN && len == DD_CODE_LENGTH(CODE_DD_LDIXANN))
@@ -1534,7 +1534,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a INC r */
-    if ((codeInHexa & MASK_INCR)==CODE_INCR && len == NATURAL_CODE_LENGTH(CODE_INCR))
+    if ((codeInHexa & MASK_INCR)==CODE_INCR && len == (len == NATURAL_CODE_LENGTH(CODE_INCR)))
     {
         instruction=CODE_INCR;
                

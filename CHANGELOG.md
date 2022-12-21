@@ -1,3 +1,6 @@
+# 1.2.4
+#Resolve the issue #2.
+
 # 1.2.3
 Add and decode SBC HL,ss.
 Add checkHalfBorrowOnSub16() function.
