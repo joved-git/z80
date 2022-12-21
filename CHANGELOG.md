@@ -1,5 +1,6 @@
 # 1.2.4
-#Resolve the issue #2.
+Resolve the issue #2.
+Color changing in Register_8bits and Register_16bits.
 
 # 1.2.3
 Add and decode SBC HL,ss.

@@ -15,8 +15,10 @@ public:
     uint8_t getValue();
     void setValue(uint8_t);
 
-    /* Some useful result   */
+    /* Some useful methods   */
     bool isZero();
+    bool hasJustChanged();
+    void resetChanged();
 
     /* Set flags    */
     void setSignFlag(bool);
@@ -42,6 +44,7 @@ public:
 
 private:
     uint8_t mValue;
+    bool mHasJustChanged;
 };	
 
 #endif

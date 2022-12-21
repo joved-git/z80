@@ -3,6 +3,7 @@
 Register_8bits::Register_8bits()
 {
     mValue=0;
+    mHasJustChanged=false;
 }
 
 Register_8bits::~Register_8bits()
@@ -12,6 +13,11 @@ Register_8bits::~Register_8bits()
 
 void Register_8bits::setValue(uint8_t pValue)
 {
+    if (pValue != mValue)
+    {
+        mHasJustChanged=true;
+    }
+
     mValue=pValue;
 }
 
@@ -116,4 +122,14 @@ void Register_8bits::resetBit(uint8_t pBit)
 void Register_8bits::setBitValue(uint8_t pBit, uint8_t pValue)
 {
     PUSHBIT(mValue, pValue, pBit);
+}
+
+void Register_8bits::resetChanged()
+{
+    mHasJustChanged=false;
+}
+
+bool Register_8bits::hasJustChanged()
+{
+    return mHasJustChanged;
 }

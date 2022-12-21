@@ -3,6 +3,7 @@
 Register_16bits::Register_16bits()
 {
     mValue=0;
+    mHasJustChanged=false;
 }
 
 Register_16bits::~Register_16bits()
@@ -15,7 +16,7 @@ void Register_16bits::set16bitsRegisterType(bool mType)
     mFullRegister=mType;
 }
 
-void Register_16bits::setHightLowRegister(Register_8bits *pHighReg, Register_8bits *pLowReg)
+void Register_16bits::setHighLowRegister(Register_8bits *pHighReg, Register_8bits *pLowReg)
 {
     mValueH=pHighReg;  
     mValueL=pLowReg;
@@ -37,7 +38,13 @@ void Register_16bits::setValue(uint16_t pValue)
 {
 if (mFullRegister) 
     {
+        if (pValue!=mValue) 
+        {
+            mHasJustChanged=true;
+        }
+
         mValue=pValue;
+        
     }
     else 
     {

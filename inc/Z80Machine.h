@@ -305,6 +305,10 @@ private:
     /// @param  The line to clean (before/after).
     /// @return Nothing.
     void clean_line(char *);
+
+    void displayRegB();
+
+    void displayRegC();
 };	
 
 #endif

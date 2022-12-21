@@ -17,13 +17,14 @@ public:
     uint16_t getValue();
     void setValue(uint16_t);
     void set16bitsRegisterType(bool);
-    void setHightLowRegister(Register_8bits *, Register_8bits *);
+    void setHighLowRegister(Register_8bits *, Register_8bits *);
 
 private:
     uint16_t mValue;          
     Register_8bits *mValueH;  
     Register_8bits *mValueL;
     bool mFullRegister;
+    bool mHasJustChanged;
 };	
 
 #endif

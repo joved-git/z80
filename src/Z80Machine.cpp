@@ -12,13 +12,13 @@ Z80Machine::Z80Machine()
 
     /* Define the type of the 16-bit registers  */
     mRegisterPack.regBC.set16bitsRegisterType(HALF);
-    mRegisterPack.regBC.setHightLowRegister(&mRegisterPack.regB, &mRegisterPack.regC);
+    mRegisterPack.regBC.setHighLowRegister(&mRegisterPack.regB, &mRegisterPack.regC);
     mRegisterPack.regDE.set16bitsRegisterType(HALF);
-    mRegisterPack.regDE.setHightLowRegister(&mRegisterPack.regD, &mRegisterPack.regE);
+    mRegisterPack.regDE.setHighLowRegister(&mRegisterPack.regD, &mRegisterPack.regE);
     mRegisterPack.regHL.set16bitsRegisterType(HALF);
-    mRegisterPack.regHL.setHightLowRegister(&mRegisterPack.regH, &mRegisterPack.regL);
+    mRegisterPack.regHL.setHighLowRegister(&mRegisterPack.regH, &mRegisterPack.regL);
     mRegisterPack.regAF.set16bitsRegisterType(HALF);
-    mRegisterPack.regAF.setHightLowRegister(&mRegisterPack.regA, &mRegisterPack.regF);
+    mRegisterPack.regAF.setHighLowRegister(&mRegisterPack.regA, &mRegisterPack.regF);
 
     mRegisterPack.regSP.set16bitsRegisterType(FULL);
     mRegisterPack.regPC.set16bitsRegisterType(FULL);
@@ -60,6 +60,10 @@ Z80Machine::Z80Machine()
     mRegisterPack.regHL.setValue(0xFE14);
     mRegisterPack.regIX.setValue(0x1200);
     mRegisterPack.regIY.setValue(0x1400);
+
+    /* Reset the changed of each register   */
+    mRegisterPack.regB.resetChanged();
+    mRegisterPack.regC.resetChanged();
 
     /* Set the default mode     */
     mExecMode=false;
@@ -946,12 +950,45 @@ bool Z80Machine::getExecutionMode()
     return mExecMode;
 }
 
+/* Display Reg B with color changing    */
+void Z80Machine::displayRegB()
+{
+    // printf("bool=%d\n", mRegisterPack.regB.hasJustChanged()?1:0);
+
+    if (mRegisterPack.regB.hasJustChanged())
+    {
+        printf("\033[0mB  [\033[33m%02X\033[0m]      ", mRegisterPack.regB.getValue());
+    }
+    else
+    {
+        printf("B  [%02X]      ", mRegisterPack.regB.getValue());
+    }
+}
+
+/* Display Reg C with color changing    */
+void Z80Machine::displayRegC()
+{
+    // printf("bool=%d\n", mRegisterPack.regB.hasJustChanged()?1:0);
+
+    if (mRegisterPack.regC.hasJustChanged())
+    {
+        printf("\033[0mC  [\033[33m%02X\033[0m]      ", mRegisterPack.regC.getValue());
+    }
+    else
+    {
+        printf("C  [%02X]      ", mRegisterPack.regC.getValue());
+    }
+}
+
 /* Display registers            */
 void Z80Machine::displaySimpleRegisters()
 {
     printf("\n");
-    //printf("[\033[31m31\033[0m][\033[32m32\033[0m][\033[33m33\033[0m][\033[34m34\033[0m][\033[35m35\033[0m]\n"); 
-    printf("B  [%02X]      C  [%02X]\n", mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue());
+    //printf("[\033[31mTA\033[0m][\033[32m32\033[0m][\033[33m33\033[0m][\033[34m34\033[0m][\033[35m35\033[0m]\n"); 
+    displayRegB();
+    displayRegC();
+    printf("\n");
+    // printf("C  [%02X]\n", mRegisterPack.regB.getValue());
     printf("D  [%02X]      E  [%02X]\n", mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue());
     printf("H  [%02X]      L  [%02X]\n", mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue());
     printf("A  [%02X]      F  [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
@@ -974,7 +1011,10 @@ void Z80Machine::displayAllRegisters()
 {
     printf("\n");
     //printf("[\033[31m31\033[0m][\033[32m32\033[0m][\033[33m33\033[0m][\033[34m34\033[0m][\033[35m35\033[0m]\n"); 
-    printf("B  [%02X]      C  [%02X]\n", mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue());
+    displayRegB();
+    displayRegC();
+    printf("\n");
+
     printf("D  [%02X]      E  [%02X]\n", mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue());
     printf("H  [%02X]      L  [%02X]\n", mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue());
     printf("A  [%02X]      F  [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
@@ -1001,8 +1041,10 @@ void Z80Machine::displayAllRegisters()
 void Z80Machine::displayExecRegisters()
 {
     printf("\n");
-    printf("B   [%02X]      C   [%02X]      D   [%02X]      E   [%02X]      H   [%02X]      L   [%02X]      A   [%02X]       F   [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", 
-           mRegisterPack.regB.getValue(), mRegisterPack.regC.getValue(),
+    displayRegB();
+    displayRegC();
+    
+    printf("D   [%02X]      E   [%02X]      H   [%02X]      L   [%02X]      A   [%02X]       F   [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", 
            mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue(),
            mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue(),
            mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
@@ -10365,14 +10407,14 @@ bool Z80Machine::analyse()
 
                         break;
 
-                    case CMD_ASSEMBLYCODE:
+                    case CMD_ASSEMBLYCODE:                                              /* The 'a' command          */
                         mEntry+=2;
-                        codeInHexa=toValue(mEntry, &lenValue, &lenEff);                     /* Transform the instruction into real number  */
+                        codeInHexa=toValue(mEntry, &lenValue, &lenEff);                 /* Transform the instruction into real number  */
                         interpretCode(codeInHexa, lenValue, INTP_DISPLAY);
                         
                         break;
                     
-                    case CMD_MACHINECODE:
+                    case CMD_MACHINECODE:                                               /* The 'c' command          */
                         mEntry+=2;
                         machineCode=findMachineCode(mEntry, &lenValue);
                         interpretCode(machineCode, lenValue, INTP_DISPLAY);
@@ -10434,6 +10476,9 @@ bool Z80Machine::analyse()
                         break;
 
                     case CMD_NEXT_INSTRUCTION:
+                        mRegisterPack.regB.resetChanged();
+                        mRegisterPack.regC.resetChanged();
+
                         if (mExecMode)
                         {
                             /* Retrieve the instruction         */
@@ -10474,11 +10519,17 @@ bool Z80Machine::analyse()
                 break;
 
             case CODE:
+                mRegisterPack.regB.resetChanged();
+                mRegisterPack.regC.resetChanged();
+
                 codeInHexa=toValue(mEntry, &lenValue, &lenEff);                     /* Transform the instruction into real number  */
                 interpretCode(codeInHexa, lenValue, INTP_EXECUTE);
                 break;
 
             case INSTRUCTION:
+                mRegisterPack.regB.resetChanged();
+                mRegisterPack.regC.resetChanged();
+                
                 machineCode=findMachineCode(mEntry, &lenValue);
                 interpretCode(machineCode, lenValue, INTP_EXECUTE);
                 break;
