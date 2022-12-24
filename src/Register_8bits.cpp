@@ -16,6 +16,7 @@ void Register_8bits::setValue(uint8_t pValue)
     if (pValue != mValue)
     {
         mHasJustChanged=true;
+        mRelated16bitsRegister->setHasJustChanged(true);
     }
 
     mValue=pValue;
@@ -26,35 +27,85 @@ uint8_t Register_8bits::getValue()
     return mValue;
 }
 
- /* Set flags    */
+
+/* Set the related 16-bit register  */
+void Register_8bits::setRelated16bitsRegister(Register_16bits *pReg)
+{
+    mRelated16bitsRegister=pReg;
+}
+
+
+/* Set flags    */
 void Register_8bits::setSignFlag(bool pFlagValue)
 {
+    uint8_t oldVal=mValue;
+
     mValue=(pFlagValue?mValue|MASK_FLAG_SIGN:mValue&~MASK_FLAG_SIGN);
+
+    if (oldVal!=mValue)
+    {
+        mHasJustChanged=true;
+    }
 }
 
 void Register_8bits::setZeroFlag(bool pFlagValue)
 {
+    uint8_t oldVal=mValue;
+
     mValue=(pFlagValue?mValue|MASK_FLAG_ZERO:mValue&~MASK_FLAG_ZERO);
+
+    if (oldVal!=mValue)
+    {
+        mHasJustChanged=true;
+    }
 }
 
 void Register_8bits::setHalfCarryFlag(bool pFlagValue)
 {
+    uint8_t oldVal=mValue;
+
     mValue=(pFlagValue?mValue|MASK_FLAG_HALF_CARRY:mValue&~MASK_FLAG_HALF_CARRY);
+
+    if (oldVal!=mValue)
+    {
+        mHasJustChanged=true;
+    }
 }
 
 void Register_8bits::setParityOverflowFlag(bool pFlagValue)
 {
+    uint8_t oldVal=mValue;
+
     mValue=(pFlagValue?mValue|MASK_FLAG_PARITY_OVERFLOW:mValue&~MASK_FLAG_PARITY_OVERFLOW);
+
+    if (oldVal!=mValue)
+    {
+        mHasJustChanged=true;
+    }
 }
 
 void Register_8bits::setAddSubtractFlag(bool pFlagValue)
 {
+    uint8_t oldVal=mValue;
+
     mValue=(pFlagValue?mValue|MASK_FLAG_ADD_SUBTRACT:mValue&~MASK_FLAG_ADD_SUBTRACT);
+
+    if (oldVal!=mValue)
+    {
+        mHasJustChanged=true;
+    }
 }
 
 void Register_8bits::setCarryFlag(bool pFlagValue)
 {
+    uint8_t oldVal=mValue;
+
     mValue=(pFlagValue?mValue|MASK_FLAG_CARRY:mValue&~MASK_FLAG_CARRY);
+
+    if (oldVal!=mValue)
+    {
+        mHasJustChanged=true;
+    }
 }
 
 

@@ -11,6 +11,29 @@
 #include "../inc/RegisterPack.h"
 #include "../inc/Memory.h"
 
+#define REGISTER_B                    &mRegisterPack.regB
+#define REGISTER_C                    &mRegisterPack.regC
+#define REGISTER_D                    &mRegisterPack.regD
+#define REGISTER_E                    &mRegisterPack.regE
+#define REGISTER_H                    &mRegisterPack.regH
+#define REGISTER_L                    &mRegisterPack.regL
+#define REGISTER_A                    &mRegisterPack.regA
+#define REGISTER_F                    &mRegisterPack.regF
+
+#define REGISTER_BC                   &mRegisterPack.regBC
+#define REGISTER_DE                   &mRegisterPack.regDE
+#define REGISTER_HL                   &mRegisterPack.regHL
+#define REGISTER_AF                   &mRegisterPack.regAF
+#define REGISTER_SP                   &mRegisterPack.regSP
+#define REGISTER_PC                   &mRegisterPack.regPC
+#define REGISTER_IX                   &mRegisterPack.regIX
+#define REGISTER_IY                   &mRegisterPack.regIY
+
+#define REGISTER_BCp                  &mRegisterPack.regBCp
+#define REGISTER_DEp                  &mRegisterPack.regDEp
+#define REGISTER_HLp                  &mRegisterPack.regHLp
+#define REGISTER_AFp                  &mRegisterPack.regAFp
+
 /* Some very useful macro   */
 #define S_SET   mRegisterPack.regF.setSignFlag(true);
 #define S_RESET mRegisterPack.regF.setSignFlag(false);
@@ -306,9 +329,47 @@ private:
     /// @return Nothing.
     void clean_line(char *);
 
+    /// @brief  Reset or init all the changed bool onto all registers.
+    /// @param  None.
+    /// @return Nothing.
+    void resetAllChangedRegister();
+
+    /// @brief  Init the Register Pack.
+    /// @param  None.
+    /// @return Nothing.
+    void initRegisterPack();
+
+    /// @brief  Display the value of 8-bit register and change color if needed.
+    /// @param  The reg to display.
+    /// @return Nothing.
+    void displayReg8Bits(Register_8bits *, const char *);
+
+    /// @brief  Display the value of 16-bit register and change color if needed.
+    /// @param  The reg to display.
+    /// @return Nothing.
+    void displayReg16Bits(Register_16bits *, const char *);
+
+/*
+    /// @brief  Display the value of given register and change color if needed.
+    /// @param  None.
+    /// @return Nothing.
     void displayRegB();
 
+    /// @brief  Display the value of register C and change color if needed.
+    /// @param  None.
+    /// @return Nothing.
     void displayRegC();
+
+    /// @brief  Display the value of register D and change color if needed.
+    /// @param  None.
+    /// @return Nothing.
+    void displayRegD();
+
+    /// @brief  Display the value of register E and change color if needed.
+    /// @param  None.
+    /// @return Nothing.
+    void displayRegE();
+    */
 };	
 
 #endif

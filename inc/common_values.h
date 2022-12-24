@@ -57,6 +57,7 @@
 #define STRING_REGC             "C"
 #define STRING_REGD             "D"
 #define STRING_REGE             "E"
+#define STRING_REGF             "F"
 #define STRING_REGH             "H"
 #define STRING_REGL             "L"
 #define STRING_REGBC            "BC"

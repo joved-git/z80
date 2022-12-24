@@ -1,6 +1,11 @@
+# 1.2.5
+The color register is finished but stay the register F to do.
+
 # 1.2.4
 Resolve the issue #2.
 Color changing in Register_8bits and Register_16bits.
+Correct the twice "was executed" on INC (HL).
+Correct the INC r that was not executing anymore.
 
 # 1.2.3
 Add and decode SBC HL,ss.

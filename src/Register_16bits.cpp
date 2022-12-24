@@ -20,6 +20,19 @@ void Register_16bits::setHighLowRegister(Register_8bits *pHighReg, Register_8bit
 {
     mValueH=pHighReg;  
     mValueL=pLowReg;
+
+    pHighReg->setRelated16bitsRegister(this);
+    pLowReg->setRelated16bitsRegister(this);
+}
+
+void Register_16bits::setHasJustChanged(bool pVal)
+{
+    mHasJustChanged=pVal;
+}
+
+void Register_16bits::resetChanged()
+{
+    mHasJustChanged=false;
 }
 
 uint16_t Register_16bits::getValue()
@@ -48,7 +61,18 @@ if (mFullRegister)
     }
     else 
     {
+        /* xxxjoexxx check here if values are changing  */
+        if ((pValue / 0x100) != mValueH->getValue() || (pValue % 0x100) != mValueL->getValue()) 
+        {
+            mHasJustChanged=true;
+        }
+
         mValueH->setValue(pValue / 0x100);
         mValueL->setValue(pValue % 0x100);
     }
+}
+
+bool Register_16bits::hasJustChanged()
+{
+    return mHasJustChanged;
 }

@@ -61,9 +61,8 @@ Z80Machine::Z80Machine()
     mRegisterPack.regIX.setValue(0x1200);
     mRegisterPack.regIY.setValue(0x1400);
 
-    /* Reset the changed of each register   */
-    mRegisterPack.regB.resetChanged();
-    mRegisterPack.regC.resetChanged();
+    /* Reset all the registers (color bool) */
+    resetAllChangedRegister();
 
     /* Set the default mode     */
     mExecMode=false;
@@ -77,6 +76,38 @@ Z80Machine::~Z80Machine()
 {
     /* Destroying the memory    */
     delete(mMemory);
+}
+
+
+
+/* Reset or init all the changed bool onto all registers.   */
+void Z80Machine::resetAllChangedRegister()
+{
+    /* 8-bit registers   */
+    mRegisterPack.regB.resetChanged();
+    mRegisterPack.regC.resetChanged();
+    mRegisterPack.regD.resetChanged();
+    mRegisterPack.regE.resetChanged();
+    mRegisterPack.regH.resetChanged();
+    mRegisterPack.regL.resetChanged();
+    mRegisterPack.regA.resetChanged();
+    mRegisterPack.regF.resetChanged();
+    
+    /* 16-bit registers   */
+    mRegisterPack.regBC.resetChanged();
+    mRegisterPack.regDE.resetChanged();
+    mRegisterPack.regHL.resetChanged();
+    mRegisterPack.regAF.resetChanged();
+    mRegisterPack.regPC.resetChanged();
+    mRegisterPack.regSP.resetChanged();
+    mRegisterPack.regIX.resetChanged();
+    mRegisterPack.regIY.resetChanged();
+
+    /* Alternate 16-bit registers   */
+    mRegisterPack.regBCp.resetChanged();
+    mRegisterPack.regDEp.resetChanged();
+    mRegisterPack.regHLp.resetChanged();
+    mRegisterPack.regAFp.resetChanged();
 }
 
 
@@ -950,7 +981,7 @@ bool Z80Machine::getExecutionMode()
     return mExecMode;
 }
 
-/* Display Reg B with color changing    */
+/*
 void Z80Machine::displayRegB()
 {
     // printf("bool=%d\n", mRegisterPack.regB.hasJustChanged()?1:0);
@@ -965,7 +996,6 @@ void Z80Machine::displayRegB()
     }
 }
 
-/* Display Reg C with color changing    */
 void Z80Machine::displayRegC()
 {
     // printf("bool=%d\n", mRegisterPack.regB.hasJustChanged()?1:0);
@@ -980,30 +1010,108 @@ void Z80Machine::displayRegC()
     }
 }
 
+void Z80Machine::displayRegD()
+{
+    // printf("bool=%d\n", mRegisterPack.regB.hasJustChanged()?1:0);
+
+    if (mRegisterPack.regB.hasJustChanged())
+    {
+        printf("\033[0mB  [\033[33m%02X\033[0m]      ", mRegisterPack.regD.getValue());
+    }
+    else
+    {
+        printf("B  [%02X]      ", mRegisterPack.regD.getValue());
+    }
+}
+
+
+void Z80Machine::displayRegE()
+{
+    // printf("bool=%d\n", mRegisterPack.regB.hasJustChanged()?1:0);
+
+    if (mRegisterPack.regE.hasJustChanged())
+    {
+        printf("\033[0mC  [\033[33m%02X\033[0m]      ", mRegisterPack.regE.getValue());
+    }
+    else
+    {
+        printf("C  [%02X]      ", mRegisterPack.regE.getValue());
+    }
+}*/
+
+
+void Z80Machine::displayReg8Bits(Register_8bits *pReg, const char *pCharReg)
+{
+    // printf("bool=%d\n", pReg->hasJustChanged()?1:0);
+
+    if (pReg->hasJustChanged())
+    {
+        printf("\033[0m%s   [\033[33m%02X\033[0m]      ", pCharReg, pReg->getValue());
+    }
+    else
+    {
+        printf("%s   [%02X]      ", pCharReg, pReg->getValue());
+    }
+}
+
+
+void Z80Machine::displayReg16Bits(Register_16bits *pReg, const char *pCharReg)
+{
+    // printf("bool=%d\n", pReg->hasJustChanged()?1:0);
+    /* xxxjoexxx add BC abd BC' legth handling  */
+
+    if (pReg->hasJustChanged())
+    {
+        printf("\033[0m%s [\033[33m%04X\033[0m]    ", pCharReg, pReg->getValue());
+    }
+    else
+    {
+        printf("%s [%04X]    ", pCharReg, pReg->getValue());
+    }
+}
+
+
 /* Display registers            */
 void Z80Machine::displaySimpleRegisters()
 {
     printf("\n");
     //printf("[\033[31mTA\033[0m][\033[32m32\033[0m][\033[33m33\033[0m][\033[34m34\033[0m][\033[35m35\033[0m]\n"); 
-    displayRegB();
-    displayRegC();
+    displayReg8Bits(REGISTER_B, STRING_REGB);
+    displayReg8Bits(REGISTER_C, STRING_REGC);
     printf("\n");
-    // printf("C  [%02X]\n", mRegisterPack.regB.getValue());
-    printf("D  [%02X]      E  [%02X]\n", mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue());
-    printf("H  [%02X]      L  [%02X]\n", mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue());
-    printf("A  [%02X]      F  [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
+    displayReg8Bits(REGISTER_D, STRING_REGD);
+    displayReg8Bits(REGISTER_E, STRING_REGE);
+    printf("\n");
+    displayReg8Bits(REGISTER_H, STRING_REGH);
+    displayReg8Bits(REGISTER_L, STRING_REGL);
+    printf("\n");
+    displayReg8Bits(REGISTER_A, STRING_REGA);
+    displayReg8Bits(REGISTER_F, STRING_REGF);
+
+    printf("\b\b\b\b\b[%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n",  
         byteToBinary(mRegisterPack.regF.getValue()), 
         mRegisterPack.regF.getSignFlag(), mRegisterPack.regF.getZeroFlag(), 
         mRegisterPack.regF.getHalfCarryFlag(), mRegisterPack.regF.getParityOverflowFlag(),
         mRegisterPack.regF.getAddSubtractFlag(), mRegisterPack.regF.getCarryFlag());
 
     printf("\n");
-    printf("BC [%04X]    DE [%04X]\n", mRegisterPack.regBC.getValue(), mRegisterPack.regDE.getValue());
-    printf("HL [%04X]    AF [%04X]\n", mRegisterPack.regHL.getValue(), mRegisterPack.regAF.getValue());
-    printf("IX [%04X]    IY [%04X]\n", mRegisterPack.regIX.getValue(), mRegisterPack.regIY.getValue());
 
+    displayReg16Bits(REGISTER_BC, "BC ");
+    displayReg16Bits(REGISTER_DE, "DE ");
     printf("\n");
-    printf("PC [%04X]    SP [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());
+
+    displayReg16Bits(REGISTER_HL, "HL ");
+    displayReg16Bits(REGISTER_AF, "AF ");
+    printf("\n");
+
+    displayReg16Bits(REGISTER_IX, "IX ");
+    displayReg16Bits(REGISTER_IY, "IY ");
+    printf("\n");
+    printf("\n");
+
+    displayReg16Bits(REGISTER_PC, "PC ");
+    displayReg16Bits(REGISTER_SP, "SP ");
+    printf("\n");
 }
 
 /* Display registers            */
@@ -1011,29 +1119,46 @@ void Z80Machine::displayAllRegisters()
 {
     printf("\n");
     //printf("[\033[31m31\033[0m][\033[32m32\033[0m][\033[33m33\033[0m][\033[34m34\033[0m][\033[35m35\033[0m]\n"); 
-    displayRegB();
-    displayRegC();
+    displayReg8Bits(REGISTER_B, STRING_REGB);
+    displayReg8Bits(REGISTER_C, STRING_REGC);
     printf("\n");
+    displayReg8Bits(REGISTER_D, STRING_REGD);
+    displayReg8Bits(REGISTER_E, STRING_REGE);
+    printf("\n");
+    displayReg8Bits(REGISTER_H, STRING_REGH);
+    displayReg8Bits(REGISTER_L, STRING_REGL);
+    printf("\n");
+    displayReg8Bits(REGISTER_A, STRING_REGA);
+    displayReg8Bits(REGISTER_F, STRING_REGF);
 
-    printf("D  [%02X]      E  [%02X]\n", mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue());
-    printf("H  [%02X]      L  [%02X]\n", mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue());
-    printf("A  [%02X]      F  [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
+    printf("\b\b\b\b\b[%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", 
         byteToBinary(mRegisterPack.regF.getValue()), 
         mRegisterPack.regF.getSignFlag(), mRegisterPack.regF.getZeroFlag(), 
         mRegisterPack.regF.getHalfCarryFlag(), mRegisterPack.regF.getParityOverflowFlag(),
         mRegisterPack.regF.getAddSubtractFlag(), mRegisterPack.regF.getCarryFlag());
 
     printf("\n");
-    printf("BC [%04X]    DE [%04X]    BC' [%04X]    DE' [%04X]\n", 
-        mRegisterPack.regBC.getValue(), mRegisterPack.regDE.getValue(), 
-        mRegisterPack.regBCp.getValue(), mRegisterPack.regDEp.getValue());
-    printf("HL [%04X]    AF [%04X]    HL' [%04X]    AF' [%04X]\n", 
-        mRegisterPack.regHL.getValue(), mRegisterPack.regAF.getValue(),
-        mRegisterPack.regHLp.getValue(), mRegisterPack.regAFp.getValue());
-    printf("IX [%04X]    IY [%04X]\n", mRegisterPack.regIX.getValue(), mRegisterPack.regIY.getValue());
 
+    displayReg16Bits(REGISTER_BC, "BC ");
+    displayReg16Bits(REGISTER_DE, "DE ");
+    displayReg16Bits(REGISTER_BCp, "BC'");
+    displayReg16Bits(REGISTER_DEp, "DE'");
     printf("\n");
-    printf("PC [%04X]    SP [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());
+
+    displayReg16Bits(REGISTER_HL, "HL ");
+    displayReg16Bits(REGISTER_AF, "AF ");
+    displayReg16Bits(REGISTER_HLp, "HL'");
+    displayReg16Bits(REGISTER_AFp, "AF'");
+    printf("\n");
+
+    displayReg16Bits(REGISTER_IX, "IX ");
+    displayReg16Bits(REGISTER_IY, "IY ");
+    printf("\n");
+    printf("\n");
+
+    displayReg16Bits(REGISTER_PC, "PC ");
+    displayReg16Bits(REGISTER_SP, "SP ");
+    printf("\n");
 }
 
 
@@ -1041,27 +1166,43 @@ void Z80Machine::displayAllRegisters()
 void Z80Machine::displayExecRegisters()
 {
     printf("\n");
-    displayRegB();
-    displayRegC();
+    displayReg8Bits(REGISTER_B, STRING_REGB);
+    displayReg8Bits(REGISTER_C, STRING_REGC);
+    displayReg8Bits(REGISTER_D, STRING_REGD);
+    displayReg8Bits(REGISTER_E, STRING_REGE);
+    displayReg8Bits(REGISTER_H, STRING_REGH);
+    displayReg8Bits(REGISTER_L, STRING_REGL);
+    displayReg8Bits(REGISTER_A, STRING_REGA);
+    displayReg8Bits(REGISTER_F, STRING_REGF);
     
-    printf("D   [%02X]      E   [%02X]      H   [%02X]      L   [%02X]      A   [%02X]       F   [%02X] [%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", 
-           mRegisterPack.regD.getValue(), mRegisterPack.regE.getValue(),
-           mRegisterPack.regH.getValue(), mRegisterPack.regL.getValue(),
-           mRegisterPack.regA.getValue(), mRegisterPack.regF.getValue(), 
+    printf("\b\b\b\b\b[%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", 
             byteToBinary(mRegisterPack.regF.getValue()), mRegisterPack.regF.getSignFlag(), 
             mRegisterPack.regF.getZeroFlag(), mRegisterPack.regF.getHalfCarryFlag(), 
             mRegisterPack.regF.getParityOverflowFlag(), mRegisterPack.regF.getAddSubtractFlag(), 
             mRegisterPack.regF.getCarryFlag());
 
-    printf("BC  [%04X]    DE  [%04X]    HL  [%04X]    AF  [%04X]    IX  [%04X]    IY  [%04X]\n", 
+    displayReg16Bits(REGISTER_BC, "BC ");
+    displayReg16Bits(REGISTER_DE, "DE ");
+    displayReg16Bits(REGISTER_HL, "HL ");
+    displayReg16Bits(REGISTER_AF, "AF ");
+    displayReg16Bits(REGISTER_IX, "IX ");
+    displayReg16Bits(REGISTER_IY, "IY ");
+    printf("\n");
+
+    /*printf("BC  [%04X]    DE  [%04X]    HL  [%04X]    AF  [%04X]    IX  [%04X]    IY  [%04X]\n", 
         mRegisterPack.regBC.getValue(), mRegisterPack.regDE.getValue(),
         mRegisterPack.regHL.getValue(), mRegisterPack.regAF.getValue(),
-        mRegisterPack.regIX.getValue(), mRegisterPack.regIY.getValue());
-    printf("BC' [%04X]    DE' [%04X]    HL' [%04X]    AF' [%04X]\n", 
-        mRegisterPack.regBCp.getValue(), mRegisterPack.regDEp.getValue(),
-        mRegisterPack.regHLp.getValue(), mRegisterPack.regAFp.getValue());
+        mRegisterPack.regIX.getValue(), mRegisterPack.regIY.getValue());*/
 
-    printf("PC  [%04X]    SP  [%04X]\n", mRegisterPack.regPC.getValue(), mRegisterPack.regSP.getValue());
+    displayReg16Bits(REGISTER_BCp, "BC'");
+    displayReg16Bits(REGISTER_DEp, "DE'");
+    displayReg16Bits(REGISTER_HLp, "HL'");
+    displayReg16Bits(REGISTER_AFp, "AF'");
+    printf("\n");
+
+    displayReg16Bits(REGISTER_PC, "PC ");
+    displayReg16Bits(REGISTER_SP, "SP ");
+    printf("\n");
 }
 
 
@@ -1576,7 +1717,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     }
 
     /* This is a INC r */
-    if ((codeInHexa & MASK_INCR)==CODE_INCR && len == (len == NATURAL_CODE_LENGTH(CODE_INCR)))
+    if ((codeInHexa & MASK_INCR)==CODE_INCR && (len == NATURAL_CODE_LENGTH(CODE_INCR)))
     {
         instruction=CODE_INCR;
                
@@ -6527,11 +6668,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 {
                     printf("\n%s was executed\n", mInstruction);
                 }
-
-                if (pMode==INTP_EXECUTE)
-                {
-                    printf("\n%s was executed\n", mInstruction);
-                }
             }
             
             if (pMode==INTP_DISPLAY)
@@ -10476,8 +10612,7 @@ bool Z80Machine::analyse()
                         break;
 
                     case CMD_NEXT_INSTRUCTION:
-                        mRegisterPack.regB.resetChanged();
-                        mRegisterPack.regC.resetChanged();
+                        resetAllChangedRegister();
 
                         if (mExecMode)
                         {
@@ -10519,16 +10654,14 @@ bool Z80Machine::analyse()
                 break;
 
             case CODE:
-                mRegisterPack.regB.resetChanged();
-                mRegisterPack.regC.resetChanged();
+                resetAllChangedRegister();
 
                 codeInHexa=toValue(mEntry, &lenValue, &lenEff);                     /* Transform the instruction into real number  */
                 interpretCode(codeInHexa, lenValue, INTP_EXECUTE);
                 break;
 
             case INSTRUCTION:
-                mRegisterPack.regB.resetChanged();
-                mRegisterPack.regC.resetChanged();
+                resetAllChangedRegister();
                 
                 machineCode=findMachineCode(mEntry, &lenValue);
                 interpretCode(machineCode, lenValue, INTP_EXECUTE);

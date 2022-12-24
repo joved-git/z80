@@ -5,6 +5,9 @@
 #include <stdio.h>
 
 #include "../inc/common_values.h"
+#include "../inc/Register_16bits.h"
+
+class Register_16bits;
 
 class Register_8bits 
 {
@@ -19,6 +22,7 @@ public:
     bool isZero();
     bool hasJustChanged();
     void resetChanged();
+    void setRelated16bitsRegister(Register_16bits *);
 
     /* Set flags    */
     void setSignFlag(bool);
@@ -45,6 +49,7 @@ public:
 private:
     uint8_t mValue;
     bool mHasJustChanged;
+    Register_16bits *mRelated16bitsRegister;
 };	
 
 #endif

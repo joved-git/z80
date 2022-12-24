@@ -7,6 +7,7 @@
 #include "../inc/common_values.h"
 #include "../inc/Register_8bits.h"
 
+class Register_8bits;
 
 class Register_16bits 
 {
@@ -18,6 +19,9 @@ public:
     void setValue(uint16_t);
     void set16bitsRegisterType(bool);
     void setHighLowRegister(Register_8bits *, Register_8bits *);
+    bool hasJustChanged();
+    void resetChanged();
+    void setHasJustChanged(bool);
 
 private:
     uint16_t mValue;          
