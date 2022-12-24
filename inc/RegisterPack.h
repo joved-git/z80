@@ -2,6 +2,7 @@
 #define REGISTER_PACK_H
 
 #include "../inc/Register_8bits.h"
+#include "../inc/Register_F.h"
 #include "../inc/Register_16bits.h"
 
 struct RegisterPack 
@@ -14,7 +15,7 @@ struct RegisterPack
 	Register_8bits regH;
 	Register_8bits regL;
 	Register_8bits regA;
-	Register_8bits regF;
+	Register_F regF;
 
 	/* 16-bit registers  		*/
 	Register_16bits regSP;

@@ -24,22 +24,6 @@ public:
     void resetChanged();
     void setRelated16bitsRegister(Register_16bits *);
 
-    /* Set flags    */
-    void setSignFlag(bool);
-    void setZeroFlag(bool);
-    void setHalfCarryFlag(bool);
-    void setParityOverflowFlag(bool);
-    void setAddSubtractFlag(bool);
-    void setCarryFlag(bool);
-
-    /* Get flags    */
-    bool getSignFlag();
-    bool getZeroFlag();
-    bool getHalfCarryFlag();
-    bool getParityOverflowFlag();
-    bool getAddSubtractFlag();
-    bool getCarryFlag();
-
     /* Get and set bits     */
     uint8_t getBit(uint8_t);
     void setBit(uint8_t);

@@ -34,7 +34,7 @@ void Register_8bits::setRelated16bitsRegister(Register_16bits *pReg)
     mRelated16bitsRegister=pReg;
 }
 
-
+#ifdef SIGN_IS_HERE
 /* Set flags    */
 void Register_8bits::setSignFlag(bool pFlagValue)
 {
@@ -139,6 +139,7 @@ bool Register_8bits::getCarryFlag()
 {
     return ((bool) (mValue & MASK_FLAG_CARRY));
 }
+#endif
 
 /* Is the register to 0 */
 bool Register_8bits::isZero()
