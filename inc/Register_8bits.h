@@ -30,9 +30,11 @@ public:
     void resetBit(uint8_t);
     void setBitValue(uint8_t, uint8_t);
 
-private:
+protected:
     uint8_t mValue;
     bool mHasJustChanged;
+
+private: 
     Register_16bits *mRelated16bitsRegister;
 };	
 
