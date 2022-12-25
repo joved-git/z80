@@ -1,3 +1,7 @@
+# 1.2.6
+Create the Register_F class.
+Resolve the issue #6.
+
 # 1.2.5
 The color register is finished but stay the register F to do.
 
