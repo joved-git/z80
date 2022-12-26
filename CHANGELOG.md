@@ -1,3 +1,6 @@
+# 1.2.7
+The color changing is finished for details flags.
+
 # 1.2.6
 Create the Register_F class.
 Resolve the issue #6.

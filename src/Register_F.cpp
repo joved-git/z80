@@ -2,7 +2,7 @@
 
 Register_F::Register_F(): Register_8bits()
 {
-
+    mColorFlagsChanged=0;
 }
 
 Register_F::~Register_F()
@@ -20,6 +20,8 @@ void Register_F::setSignFlag(bool pFlagValue)
     if (oldVal!=mValue)
     {
         mHasJustChanged=true;
+        PUSHBIT(mColorFlagsChanged, (EXTRACT(mValue, BITPOS_FLAG_SIGN, 1) ^ EXTRACT(oldVal, BITPOS_FLAG_SIGN, 1)), BITPOS_FLAG_SIGN);
+        //mColorFlagsChanged=EXTRACT(mValue, BITPOS_FLAG_SIGN, 1) ^ EXTRACT(oldVal, BITPOS_FLAG_SIGN, 1);
     }
 }
 
@@ -32,6 +34,11 @@ void Register_F::setZeroFlag(bool pFlagValue)
     if (oldVal!=mValue)
     {
         mHasJustChanged=true;
+        // uint8_t b3=EXTRACT(mValue, BITPOS_FLAG_ZERO, 1) ^ EXTRACT(oldVal, BITPOS_FLAG_ZERO, 1);
+        // printf("b1=%d b2=%d b3=%d\n", EXTRACT(mValue, BITPOS_FLAG_ZERO, 1), EXTRACT(oldVal, BITPOS_FLAG_ZERO, 1), b3);
+        // PUSHBIT(mColorFlagsChanged, EXTRACT(mValue, BITPOS_FLAG_ZERO, 1) ^ EXTRACT(oldVal, BITPOS_FLAG_ZERO, 1), BITPOS_FLAG_ZERO);
+        PUSHBIT(mColorFlagsChanged, (EXTRACT(mValue, BITPOS_FLAG_ZERO, 1) ^ EXTRACT(oldVal, BITPOS_FLAG_ZERO, 1)), BITPOS_FLAG_ZERO);
+        // printf("ColorFlagChanged=%02X\n", mColorFlagsChanged);
     }
 }
 
@@ -44,6 +51,8 @@ void Register_F::setHalfCarryFlag(bool pFlagValue)
     if (oldVal!=mValue)
     {
         mHasJustChanged=true;
+        PUSHBIT(mColorFlagsChanged, (EXTRACT(mValue, BITPOS_FLAG_HALF_CARRY, 1) ^ EXTRACT(oldVal, BITPOS_FLAG_HALF_CARRY, 1)), BITPOS_FLAG_HALF_CARRY);
+        //mColorFlagsChanged=EXTRACT(mValue, BITPOS_FLAG_HALF_CARRY, 1) ^ EXTRACT(oldVal, BITPOS_FLAG_HALF_CARRY, 1);
     }
 }
 
@@ -56,6 +65,8 @@ void Register_F::setParityOverflowFlag(bool pFlagValue)
     if (oldVal!=mValue)
     {
         mHasJustChanged=true;
+        PUSHBIT(mColorFlagsChanged, (EXTRACT(mValue, BITPOS_FLAG_PARITY_OVERFLOW, 1) ^ EXTRACT(oldVal, BITPOS_FLAG_PARITY_OVERFLOW, 1)), BITPOS_FLAG_PARITY_OVERFLOW);
+        //mColorFlagsChanged=EXTRACT(mValue, BITPOS_FLAG_PARITY_OVERFLOW, 1) ^ EXTRACT(oldVal, BITPOS_FLAG_PARITY_OVERFLOW, 1);
     }
 }
 
@@ -68,6 +79,8 @@ void Register_F::setAddSubtractFlag(bool pFlagValue)
     if (oldVal!=mValue)
     {
         mHasJustChanged=true;
+        PUSHBIT(mColorFlagsChanged, (EXTRACT(mValue, BITPOS_FLAG_ADD_SUBTRACT, 1) ^ EXTRACT(oldVal, BITPOS_FLAG_ADD_SUBTRACT, 1)), BITPOS_FLAG_ADD_SUBTRACT);
+        //mColorFlagsChanged=EXTRACT(mValue, BITPOS_FLAG_ADD_SUBTRACT, 1) ^ EXTRACT(oldVal, BITPOS_FLAG_ADD_SUBTRACT, 1);
     }
 }
 
@@ -80,6 +93,8 @@ void Register_F::setCarryFlag(bool pFlagValue)
     if (oldVal!=mValue)
     {
         mHasJustChanged=true;
+        PUSHBIT(mColorFlagsChanged, (EXTRACT(mValue, BITPOS_FLAG_CARRY, 1) ^ EXTRACT(oldVal, BITPOS_FLAG_CARRY, 1)), BITPOS_FLAG_CARRY);
+        //mColorFlagsChanged=EXTRACT(mValue, BITPOS_FLAG_CARRY, 1) ^ EXTRACT(oldVal, BITPOS_FLAG_CARRY, 1);
     }
 }
 
@@ -114,3 +129,15 @@ bool Register_F::getCarryFlag()
 {
     return ((bool) (mValue & MASK_FLAG_CARRY));
 }
+
+uint8_t Register_F::getColorChangedFlag()
+{
+    return mColorFlagsChanged;
+}
+
+void Register_F::resetColorChangedFlag()
+{
+    mColorFlagsChanged=0;
+}
+
+

@@ -349,6 +349,10 @@ private:
     /// @return Nothing.
     void displayReg16Bits(Register_16bits *, const char *);
 
+    /// @brief  Display the details of the Register F.
+    /// @param  None.
+    /// @return Nothing.
+    void displayDetailsRegisterF();
 /*
     /// @brief  Display the value of given register and change color if needed.
     /// @param  None.

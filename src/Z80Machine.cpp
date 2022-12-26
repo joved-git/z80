@@ -92,6 +92,7 @@ void Z80Machine::resetAllChangedRegister()
     mRegisterPack.regL.resetChanged();
     mRegisterPack.regA.resetChanged();
     mRegisterPack.regF.resetChanged();
+    mRegisterPack.regF.resetColorChangedFlag();
     
     /* 16-bit registers   */
     mRegisterPack.regBC.resetChanged();
@@ -1058,8 +1059,6 @@ void Z80Machine::displayReg8Bits(Register_8bits *pReg, const char *pCharReg)
 void Z80Machine::displayReg16Bits(Register_16bits *pReg, const char *pCharReg)
 {
     // printf("bool=%d\n", pReg->hasJustChanged()?1:0);
-    /* xxxjoexxx add BC abd BC' legth handling  */
-
     if (pReg->hasJustChanged())
     {
         printf("\033[0m%s [\033[33m%04X\033[0m]    ", pCharReg, pReg->getValue());
@@ -1070,6 +1069,156 @@ void Z80Machine::displayReg16Bits(Register_16bits *pReg, const char *pCharReg)
     }
 }
 
+void Z80Machine::displayDetailsRegisterF()
+{
+    /* xxxjoexxx - continue the display below   */
+    printf("\b\b\b\b\b\033[0m[");
+
+    /* Display colored SIGN flag    */
+    if (mRegisterPack.regF.getColorChangedFlag() & MASK_FLAG_SIGN)
+    {
+        printf("\033[33m%d\033[0m", mRegisterPack.regF.getSignFlag());
+    }
+    else
+    {
+        printf("%d", mRegisterPack.regF.getSignFlag());
+    }
+
+    /* Display colored ZERO flag    */
+    if (mRegisterPack.regF.getColorChangedFlag() & MASK_FLAG_ZERO)
+    {
+        printf("\033[33m%d\033[0m", mRegisterPack.regF.getZeroFlag());
+    }
+    else
+    {
+        printf("%d", mRegisterPack.regF.getZeroFlag());
+    }
+
+    /* Display void flag    */
+    printf("\033[0m0");
+
+    /* Display colored HALF CARRY flag    */
+    if (mRegisterPack.regF.getColorChangedFlag() & MASK_FLAG_HALF_CARRY)
+    {
+        printf("\033[33m%d\033[0m", mRegisterPack.regF.getHalfCarryFlag());
+    }
+    else
+    {
+        printf("%d", mRegisterPack.regF.getHalfCarryFlag());
+    }
+
+    /* Display void flag    */
+    printf("\033[0m0");
+
+    /* Display colored PARITY/OVERFLOW flag    */
+    if (mRegisterPack.regF.getColorChangedFlag() & MASK_FLAG_PARITY_OVERFLOW)
+    {
+        printf("\033[33m%d\033[0m", mRegisterPack.regF.getParityOverflowFlag());
+    }
+    else
+    {
+        printf("%d", mRegisterPack.regF.getParityOverflowFlag());
+    }
+
+    /* Display void flag    */
+    printf("\033[0m0");
+
+    /* Display colored ADD/SUBTRACT flag    */
+    if (mRegisterPack.regF.getColorChangedFlag() & MASK_FLAG_ADD_SUBTRACT)
+    {
+        printf("\033[33m%d\033[0m", mRegisterPack.regF.getAddSubtractFlag());
+    }
+    else
+    {
+        printf("%d", mRegisterPack.regF.getAddSubtractFlag());
+    }
+
+    /* Display colored CARRY flag    */
+    if (mRegisterPack.regF.getColorChangedFlag() & MASK_FLAG_CARRY)
+    {
+        printf("\033[33m%d\033[0m", mRegisterPack.regF.getCarryFlag());
+    }
+    else
+    {
+        printf("%d", mRegisterPack.regF.getCarryFlag());
+    }
+
+    printf("\033[0m]");
+
+    /* Display colored SIGN flag    */
+    printf(" [S:");
+
+    if (mRegisterPack.regF.getColorChangedFlag() & MASK_FLAG_SIGN)
+    {
+        printf("\033[33m%d\033[0m", mRegisterPack.regF.getSignFlag());
+    }
+    else
+    {
+        printf("%d", mRegisterPack.regF.getSignFlag());
+    }
+
+    /* Display colored ZERO flag    */
+    printf(" Z:");
+
+    if (mRegisterPack.regF.getColorChangedFlag() & MASK_FLAG_ZERO)
+    {
+        printf("\033[33m%d\033[0m", mRegisterPack.regF.getZeroFlag());
+    }
+    else
+    {
+        printf("%d", mRegisterPack.regF.getZeroFlag());
+    }
+
+    /* Display colored HALF CARRY flag    */
+    printf(" H:");
+
+    if (mRegisterPack.regF.getColorChangedFlag() & MASK_FLAG_HALF_CARRY)
+    {
+        printf("\033[33m%d\033[0m", mRegisterPack.regF.getHalfCarryFlag());
+    }
+    else
+    {
+        printf("%d", mRegisterPack.regF.getHalfCarryFlag());
+    }
+
+    /* Display colored PARITY/OVERFLOW flag    */
+    printf(" PV:");
+
+    if (mRegisterPack.regF.getColorChangedFlag() & MASK_FLAG_PARITY_OVERFLOW)
+    {
+        printf("\033[33m%d\033[0m", mRegisterPack.regF.getParityOverflowFlag());
+    }
+    else
+    {
+        printf("%d", mRegisterPack.regF.getParityOverflowFlag());
+    }
+
+    /* Display colored ADD/SUBTRACT flag    */
+    printf(" N:");
+
+    if (mRegisterPack.regF.getColorChangedFlag() & MASK_FLAG_ADD_SUBTRACT)
+    {
+        printf("\033[33m%d\033[0m", mRegisterPack.regF.getAddSubtractFlag());
+    }
+    else
+    {
+        printf("%d", mRegisterPack.regF.getAddSubtractFlag());
+    }
+
+    /* Display colored CARRY flag    */
+    printf(" C:");
+
+    if (mRegisterPack.regF.getColorChangedFlag() & MASK_FLAG_CARRY)
+    {
+        printf("\033[33m%d\033[0m", mRegisterPack.regF.getCarryFlag());
+    }
+    else
+    {
+        printf("%d", mRegisterPack.regF.getCarryFlag());
+    }
+
+    printf("\033[0m]\n");
+}
 
 /* Display registers            */
 void Z80Machine::displaySimpleRegisters()
@@ -1088,11 +1237,7 @@ void Z80Machine::displaySimpleRegisters()
     displayReg8Bits(REGISTER_A, STRING_REGA);
     displayReg8Bits(REGISTER_F, STRING_REGF);
 
-    printf("\b\b\b\b\b[%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n",  
-        byteToBinary(mRegisterPack.regF.getValue()), 
-        mRegisterPack.regF.getSignFlag(), mRegisterPack.regF.getZeroFlag(), 
-        mRegisterPack.regF.getHalfCarryFlag(), mRegisterPack.regF.getParityOverflowFlag(),
-        mRegisterPack.regF.getAddSubtractFlag(), mRegisterPack.regF.getCarryFlag());
+    displayDetailsRegisterF();
 
     printf("\n");
 
@@ -1114,7 +1259,7 @@ void Z80Machine::displaySimpleRegisters()
     printf("\n");
 }
 
-/* Display registers            */
+/* Display details registers            */
 void Z80Machine::displayAllRegisters()
 {
     printf("\n");
@@ -1131,11 +1276,16 @@ void Z80Machine::displayAllRegisters()
     displayReg8Bits(REGISTER_A, STRING_REGA);
     displayReg8Bits(REGISTER_F, STRING_REGF);
 
+    /* Display details registers            */
+    displayDetailsRegisterF();
+
+    /*
     printf("\b\b\b\b\b[%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", 
         byteToBinary(mRegisterPack.regF.getValue()), 
         mRegisterPack.regF.getSignFlag(), mRegisterPack.regF.getZeroFlag(), 
         mRegisterPack.regF.getHalfCarryFlag(), mRegisterPack.regF.getParityOverflowFlag(),
         mRegisterPack.regF.getAddSubtractFlag(), mRegisterPack.regF.getCarryFlag());
+    */
 
     printf("\n");
 
@@ -1175,11 +1325,16 @@ void Z80Machine::displayExecRegisters()
     displayReg8Bits(REGISTER_A, STRING_REGA);
     displayReg8Bits(REGISTER_F, STRING_REGF);
     
+    /* Display details registers            */
+    displayDetailsRegisterF();
+
+    /*
     printf("\b\b\b\b\b[%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", 
             byteToBinary(mRegisterPack.regF.getValue()), mRegisterPack.regF.getSignFlag(), 
             mRegisterPack.regF.getZeroFlag(), mRegisterPack.regF.getHalfCarryFlag(), 
             mRegisterPack.regF.getParityOverflowFlag(), mRegisterPack.regF.getAddSubtractFlag(), 
             mRegisterPack.regF.getCarryFlag());
+    */
 
     displayReg16Bits(REGISTER_BC, "BC ");
     displayReg16Bits(REGISTER_DE, "DE ");
@@ -1500,6 +1655,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
 
 #ifdef DEBUG_DISPLAY_INSTR_DATA 
     printf("code=<%08X> / len=%d\n", codeInHexa, len);
+    //printf("ColorFlagChanged=%s\n", byteToBinary(mRegisterPack.regF.getColorChangedFlag()));
 #endif
     
     /* bottom 0 */
@@ -8365,6 +8521,9 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             break;
     }
 
+#ifdef DEBUG_DISPLAY_COLOR_CHANGED 
+    printf("ColorFlagChanged=%s\n", byteToBinary(mRegisterPack.regF.getColorChangedFlag()));
+#endif
 
     /* bottom 2*/
     /*************************************************************************************************************************/

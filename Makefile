@@ -5,6 +5,7 @@ BUILD_DIR=.\build
 SRC_DIR=.\src
 SRC_FILES=	$(SRC_DIR)\z80.cpp \
 		$(SRC_DIR)\Register_8bits.cpp \
+		$(SRC_DIR)\Register_F.cpp \
 		$(SRC_DIR)\Register_16bits.cpp \
 		$(SRC_DIR)\Memory.cpp \
 		$(SRC_DIR)\Label.cpp \

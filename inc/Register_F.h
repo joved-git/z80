@@ -27,7 +27,11 @@ public:
     bool getParityOverflowFlag();
     bool getAddSubtractFlag();
     bool getCarryFlag();
-private:
 
+    uint8_t getColorChangedFlag();
+    void resetColorChangedFlag();
+
+private:
+    uint8_t mColorFlagsChanged;
 };
 #endif
