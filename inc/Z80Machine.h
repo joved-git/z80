@@ -35,29 +35,35 @@
 #define REGISTER_AFp                  &mRegisterPack.regAFp
 
 /* Some very useful macro   */
-#define S_SET   mRegisterPack.regF.setSignFlag(true);
-#define S_RESET mRegisterPack.regF.setSignFlag(false);
-#define S_IS(s) mRegisterPack.regF.setSignFlag(s);
+#define S_SET   mRegisterPack.regF.setSignFlag(true)
+#define S_RESET mRegisterPack.regF.setSignFlag(false)
+#define S_IS(s) mRegisterPack.regF.setSignFlag(s)
+#define S_GET   mRegisterPack.regF.getSignFlag()
 
-#define Z_SET   mRegisterPack.regF.setZeroFlag(true);
-#define Z_RESET mRegisterPack.regF.setZeroFlag(false);
-#define Z_IS(s) mRegisterPack.regF.setZeroFlag(s);
+#define Z_SET   mRegisterPack.regF.setZeroFlag(true)
+#define Z_RESET mRegisterPack.regF.setZeroFlag(false)
+#define Z_IS(s) mRegisterPack.regF.setZeroFlag(s)
+#define Z_GET   mRegisterPack.regF.getZeroFlag()
 
-#define H_SET   mRegisterPack.regF.setHalfCarryFlag(true);
-#define H_RESET mRegisterPack.regF.setHalfCarryFlag(false);
-#define H_IS(s) mRegisterPack.regF.setHalfCarryFlag(s);
+#define H_SET   mRegisterPack.regF.setHalfCarryFlag(true)
+#define H_RESET mRegisterPack.regF.setHalfCarryFlag(false)
+#define H_IS(s) mRegisterPack.regF.setHalfCarryFlag(s)
+#define H_GET   mRegisterPack.regF.getHalfCarryFlag()
 
-#define PV_SET   mRegisterPack.regF.setParityOverflowFlag(true);
-#define PV_RESET mRegisterPack.regF.setParityOverflowFlag(false);
-#define PV_IS(s) mRegisterPack.regF.setParityOverflowFlag(s);
+#define PV_SET   mRegisterPack.regF.setParityOverflowFlag(true)
+#define PV_RESET mRegisterPack.regF.setParityOverflowFlag(false)
+#define PV_IS(s) mRegisterPack.regF.setParityOverflowFlag(s)
+#define PV_GET   mRegisterPack.regF.getParityOverflowFlag()
 
-#define N_SET   mRegisterPack.regF.setAddSubtractFlag(true);
-#define N_RESET mRegisterPack.regF.setAddSubtractFlag(false);
-#define N_IS(s) mRegisterPack.regF.setAddSubtractFlag(s);
+#define N_SET   mRegisterPack.regF.setAddSubtractFlag(true)
+#define N_RESET mRegisterPack.regF.setAddSubtractFlag(false)
+#define N_IS(s) mRegisterPack.regF.setAddSubtractFlag(s)
+#define N_GET   mRegisterPack.regF.getAddSubtractFlag()
 
-#define C_SET   mRegisterPack.regF.setCarryFlag(true);
-#define C_RESET mRegisterPack.regF.setCarryFlag(false);
-#define C_IS(s) mRegisterPack.regF.setCarryFlag(s);
+#define C_SET   mRegisterPack.regF.setCarryFlag(true)
+#define C_RESET mRegisterPack.regF.setCarryFlag(false)
+#define C_IS(s) mRegisterPack.regF.setCarryFlag(s)
+#define C_GET   mRegisterPack.regF.getCarryFlag()
 
 class Z80Machine 
 {

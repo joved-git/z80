@@ -483,6 +483,12 @@ bool Z80Machine::isACode()
         code=false;
     }
 
+    if (!strcmp(mEntry, "CCF") || !strcmp(mEntry, "DAA"))
+    {
+        code=false;
+    }
+
+
     return code;
 }
 
@@ -1660,8 +1666,6 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     
     /* bottom 0 */
 
-    /* xxxjoexxx revoir les len== ci-dessus ^ */
-    
     sprintf(mInstruction, "not yet decoded ");
 
     /* This is a NOP    */
@@ -2119,7 +2123,16 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op16=EXTRACT(codeInHexa, 0, 16); 
     }
 
-    /* This is a CALL cc,nn */
+    /* This is a RET cc */
+    if ((codeInHexa & MASK_RETCC)==CODE_RETCC && len == NATURAL_CODE_LENGTH(CODE_RETCC))
+    {
+        instruction=CODE_RETCC;
+        retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+
+        op1=EXTRACT(codeInHexa, 3, 3);
+    }
+
+    /* This is a RET cc,nn */
     if ((codeInHexa>>SIZE_2_BYTES & MASK_CALLCCNN)==CODE_CALLCCNN && len == NATURAL_CODE_LENGTH(CODE_CALLCCNN))
     {
         instruction=CODE_CALLCCNN;
@@ -2961,6 +2974,31 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     {
         instruction=CODE_FD_JPIY;
         retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+    }
+
+    /* This is a CCF */
+    if ((codeInHexa & MASK_CCF)==CODE_CCF && len == NATURAL_CODE_LENGTH(CODE_CCF))
+    {
+        instruction=CODE_CCF;
+    }
+
+    /* This is a SCF */
+    if ((codeInHexa & MASK_SCF)==CODE_SCF && len == NATURAL_CODE_LENGTH(CODE_SCF))
+    {
+        instruction=CODE_SCF;
+    }
+
+    /* This is a RET */
+    if ((codeInHexa & MASK_RET)==CODE_RET && len == NATURAL_CODE_LENGTH(CODE_RET))
+    {
+        instruction=CODE_RET;
+        retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+    }
+
+    /* This is a DAA */
+    if ((codeInHexa & MASK_DAA)==CODE_DAA && len == NATURAL_CODE_LENGTH(CODE_DAA))
+    {
+        instruction=CODE_DAA;
     }
 
     // bottom 1
@@ -4434,7 +4472,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), reg8_2->getValue()));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), reg8_2->getValue()))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), reg8_2->getValue()));
 
                 reg8_1->setValue(reg8_1->getValue() + reg8_2->getValue());
 
@@ -4472,7 +4510,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), val));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val));
 
                 reg8_1->setValue(reg8_1->getValue() + val);
 
@@ -4519,7 +4557,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), val));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val));
 
                 reg8_1->setValue(reg8_1->getValue() + val);
 
@@ -5235,7 +5273,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 H_IS(checkHalfCarryOnAdd8(val, 1));
                                
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd8(val, 1))
+                PV_IS(checkOverflowOnAdd8(val, 1));
 
                 mMemory->set8bitsValue(address, val+1);
 
@@ -5278,7 +5316,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 H_IS(checkHalfCarryOnAdd8(val, 1));
                                
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd8(val, 1))
+                PV_IS(checkOverflowOnAdd8(val, 1));
 
                 mMemory->set8bitsValue(address, val+1);
 
@@ -5439,7 +5477,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), val));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val));
 
                 reg8_1->setValue(reg8_1->getValue() + val);
 
@@ -5487,7 +5525,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), val+carry));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val+carry))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val+carry));
 
                 reg8_1->setValue(reg8_1->getValue() + val+carry);
 
@@ -5535,7 +5573,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), val+carry));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val+carry))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val+carry));
 
                 reg8_1->setValue(reg8_1->getValue() + val+carry);
 
@@ -5575,7 +5613,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), reg8_2->getValue()+carry));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), reg8_2->getValue()+carry))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), reg8_2->getValue()+carry));
 
                 reg8_1->setValue(reg8_1->getValue() + reg8_2->getValue()+carry);
 
@@ -5616,7 +5654,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), val + carry));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val + carry))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), val + carry));
 
                 reg8_1->setValue(reg8_1->getValue() + val + carry);
 
@@ -6176,10 +6214,10 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
 
             if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
             {
-                mRegisterPack.regSP.setValue(mRegisterPack.regSP.getValue()-2);             /* The SP is changing       */
+                mRegisterPack.regSP.setValue(mRegisterPack.regSP.getValue()-2);                 /* The SP is changing   */
                 reg16_1=get16bitsRegisterAddress(REGPC);
-                mMemory->setAddress(mRegisterPack.regSP.getValue(), reg16_1->getValue());   /* Save the PC              */
-                reg16_1->setValue(op16);                                                    /* The PC is changing       */
+                mMemory->setAddress(mRegisterPack.regSP.getValue(), reg16_1->getValue()+3);     /* Save the (PC+3)      */
+                reg16_1->setValue(op16);                                                        /* The PC is changing   */
 
                 if (pMode==INTP_EXECUTE)
                 {
@@ -6190,6 +6228,55 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             if (pMode==INTP_DISPLAY)
             {
                 printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_RET:                                                  /* This is a RET                    */
+            sprintf(mInstruction, "RET");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                                                               /* The PC is changing       */
+                mRegisterPack.regPC.setValue(mMemory->getAddress(mRegisterPack.regSP.getValue()));
+                mRegisterPack.regSP.setValue(mRegisterPack.regSP.getValue()+2);             /* The SP is changing       */
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+            case CODE_RETCC:                                                  /* This is a RET cc                   */
+            ret=bitToCondition(op1, sop1);
+            sprintf(mInstruction, "RET %s", sop1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                if (isConditionTrue(op1))
+                {
+                    mRegisterPack.regPC.setValue(mMemory->getAddress(mRegisterPack.regSP.getValue()));
+                    mRegisterPack.regSP.setValue(mRegisterPack.regSP.getValue()+2);             /* The SP is changing       */
+                }                
+                else
+                {
+                    retInterpret=NOTHING_SPECIAL;                         /* Go to next instruction   */
+                }                
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
             break;
 
@@ -6508,10 +6595,10 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             {
                 if (isConditionTrue(op1))
                 {
-                    mRegisterPack.regSP.setValue(mRegisterPack.regSP.getValue()-2);             /* The SP is changing       */
+                    mRegisterPack.regSP.setValue(mRegisterPack.regSP.getValue()-2);             /* The SP is changing   */
                     reg16_1=get16bitsRegisterAddress(REGPC);
-                    mMemory->setAddress(mRegisterPack.regSP.getValue(), reg16_1->getValue());   /* Save the PC              */
-                    reg16_1->setValue(op16);                                                    /* The PC is changing       */
+                    mMemory->setAddress(mRegisterPack.regSP.getValue(), reg16_1->getValue()+3);  /* Save the (PC+3)      */
+                    reg16_1->setValue(op16);                                                    /* The PC is changing   */
                 }                
                 else
                 {
@@ -8043,7 +8130,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), op1));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), op1))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), op1));
 
                 reg8_1->setValue(reg8_1->getValue() + op1);
 
@@ -8080,7 +8167,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 C_IS(checkCarryOnAdd8(reg8_1->getValue(), op1+val));
                 
                 /* IS there an overflow ?               */
-                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), op1+val))
+                PV_IS(checkOverflowOnAdd8(reg8_1->getValue(), op1+val));
 
                 reg8_1->setValue(reg8_1->getValue() + op1+val);
 
@@ -8519,6 +8606,199 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%06X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+        case CODE_CCF:                                              /* This is a CCF  */
+            sprintf(mInstruction, "CCF");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Modify flags here    */
+                H_IS(mRegisterPack.regF.getCarryFlag());
+                N_RESET;
+                C_IS(!mRegisterPack.regF.getCarryFlag());
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_SCF:                                              /* This is a SCF  */
+            sprintf(mInstruction, "SCF");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Modify flags here    */
+                H_RESET;
+                N_RESET;
+                C_SET;
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_DAA:                                              /* This is a DAA  */
+            sprintf(mInstruction, "DAA");
+
+            val=mRegisterPack.regA.getValue();
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                if (N_GET)                  /* Check if the last operation was an addition or a subtraction */
+                {
+                                            /* This was a subtraction           */
+                    if (C_GET)              
+                    {                       /* Carry is set                             */
+                        if (H_GET)
+                        {                   /* Carry is set, Half Carry is set          */
+                             /* case 12          */
+                            if ((UPPER(val)>=VAL_6) && (LOWER(val)>=VAL_6))                                 
+                            {
+                                mRegisterPack.regA.setValue(val+0x9A);
+                                C_SET;
+                            }
+                        }
+                        else                /* Carry is set, Half Carry is not set      */
+                        {
+                             /* case 11          */
+                            if ((UPPER(val)>=VAL_7) && (LOWER(val)<=VAL_9))                                 
+                            {
+                                mRegisterPack.regA.setValue(val+0xA0);
+                                C_SET;
+                            }
+                        }
+                    }
+                    else                    /* Carry is not set                         */
+                    {
+                        if (H_GET)
+                        {                   /* Carry is not set, Half Carry is set      */
+                            /* case 10          */
+                            if ((UPPER(val)<=VAL_8) && (LOWER(val)>=VAL_6))                                 
+                            {
+                                mRegisterPack.regA.setValue(val+0xFA);
+                                C_RESET;
+                            }
+                        }
+                        else                /* Carry is not set, Half Carry is not set  */
+                        {
+                            /* case 9           */
+                            /* nothing to do    */
+                            C_RESET;
+                        }
+                    }
+                }
+                else
+                {
+                                            /* This was an addition                     */
+                    if (C_GET)              
+                    {                       /* Carry is set                             */
+                        if (H_GET)
+                        {                   /* Carry is set, Half Carry is set          */
+                            /* case 8           */
+                            if ((UPPER(val)<=VAL_3) && (LOWER(val)<=VAL_3))                                 
+                            {
+                                mRegisterPack.regA.setValue(val+0x66);
+                                C_SET;
+                            }
+                        }
+                        else                /* Carry is set, Half Carry is not set      */
+                        {
+                            /* case 6           */
+                            if ((UPPER(val)<=VAL_2) && (LOWER(val)<=VAL_9))                                 
+                            {
+                                mRegisterPack.regA.setValue(val+0x60);
+                                C_SET;
+                            }
+
+                            /* case 7           */
+                            if ((UPPER(val)<=VAL_2) && (LOWER(val)>=VAL_A))                                 
+                            {
+                                mRegisterPack.regA.setValue(val+0x66);
+                                C_SET;
+                            }
+                        }
+                    }
+                    else                    /* Carry is not set                         */
+                    {
+                        if (H_GET)
+                        {                   /* Carry is not set, Half Carry is set      */
+                            /* case 2           */
+                            if ((UPPER(val)<=VAL_9) && (LOWER(val)<=VAL_3))                                 
+                            {
+                                mRegisterPack.regA.setValue(val+0x6);
+                                C_RESET;
+                            }
+
+                            /* case 5           */
+                            if ((UPPER(val)>=VAL_A) && (LOWER(val)<=VAL_3))                                 
+                            {
+                                mRegisterPack.regA.setValue(val+0x66);
+                                C_SET;
+                            }
+                        }
+                        else                /* Carry is not set, Half Carry is not set  */
+                        {
+                            /* case 0           */
+                            /* nothing to do    */
+                            C_RESET;
+
+                            /* case 1           */
+                            if ((UPPER(val)<=VAL_8) && (LOWER(val)>=VAL_A))     
+                            {
+                                mRegisterPack.regA.setValue(val+0x6);
+                                C_RESET;
+                            }
+
+                            /* case 3           */
+                            if ((UPPER(val)>=VAL_A) && (LOWER(val)<=VAL_9))     
+                            {
+                                mRegisterPack.regA.setValue(val+0x60);
+                                C_SET;
+                            }
+
+                            /* case 4           */
+                            if ((UPPER(val)>=VAL_9) && (LOWER(val)>=VAL_A))     
+                            {
+                                mRegisterPack.regA.setValue(val+0x66);
+                                C_SET;
+                            }
+                        }
+                    }
+                }
+
+                val=mRegisterPack.regA.getValue();
+
+                /* Modify flags here    */
+                /* To be done           */
+                S_IS(SIGN(val));
+                Z_IS(ZERO(val));
+                PV_IS(EVEN(newVal));
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
     }
 
 #ifdef DEBUG_DISPLAY_COLOR_CHANGED 
@@ -8772,6 +9052,24 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 *pLen=TWO_BYTES;
             }
 
+            if (!strcmp(str_inst, "CCF"))                          /* A CCF is present     */
+            {
+                retCode=CODE_CCF;
+                *pLen=ONE_BYTE;
+            }
+
+            if (!strcmp(str_inst, "RET"))                          /* A RET is present     */
+            {
+                retCode=CODE_RET;
+                *pLen=ONE_BYTE;
+            }
+
+            if (!strcmp(str_inst, "SCF"))                          /* A SCF is present     */
+            {
+                retCode=CODE_SCF;
+                *pLen=ONE_BYTE;
+            }
+
             if (!strcmp(str_inst, "RLCA"))                          /* A RLCA is present     */
             {
                 retCode=CODE_RLCA;
@@ -8861,6 +9159,13 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 retCode=CODE_ED_CPDR;
                 *pLen=TWO_BYTES;
             }
+
+            if (!strcmp(str_inst, "DAA"))                           /* A DAA is present     */
+            {
+                retCode=CODE_DAA;
+                *pLen=ONE_BYTE;
+            }
+
             break;
 
         case 2:
@@ -9558,6 +9863,21 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);     /* Add the nn into the code */      
 
                     *pLen=THREE_BYTES;
+                }
+            }
+
+            if (!strcmp(str_inst, "RET"))                              /* A RET instruction is present         */
+            {
+                /* Check if it is a RET cc instruction   */
+                if ((strlen(str_op1)==1 || strlen(str_op1)==2))
+                {
+                    retCode=CODE_RETCC;                                 /* Prepare the RET cc                    */
+                    
+                    // To be done.
+                    retCheck=clean_cc(str_op1);                         /* Clean the cc operand     */
+
+                    PUSHBIT(retCode, conditionToBit(str_op1), 3);
+                    *pLen=ONE_BYTE;
                 }
             }
 
@@ -10607,7 +10927,7 @@ bool Z80Machine::analyse()
 
     if (mCommandIsEntered)
     {
-        //printf(">>> analyse [%s] <<<\n", mEntry);
+        // printf(">>> analyse [%s] <<<\n", mEntry);
 
         switch(findEntryType())
         {

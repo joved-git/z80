@@ -19,7 +19,7 @@
 #define ASM_FILE_LOCATION       "../codefile/"
 #endif
 
-// #define DEBUG_DISPLAY_INSTR_DATA              /* Display data that will be executed   */
+// #define DEBUG_DISPLAY_INSTR_DATA              /* Display data that will be executed   mEntry*/
 // #define DEBUG_DISPLAY_COLOR_CHANGED           /* Display data about color changing    */
 // #define DEBUG_DISPLAY_CUTI_DATA               /* Display data after cutting it        */ 
 // #define DEBUG_DISPLAY_FINDCODE_DATA           /* Display data after decoding it       */
@@ -51,6 +51,22 @@
 #define BIT_6                   6
 #define BIT_7                   7
 
+#define VAL_0                   0
+#define VAL_1                   1
+#define VAL_2                   2
+#define VAL_3                   3
+#define VAL_4                   4
+#define VAL_5                   5
+#define VAL_6                   6
+#define VAL_7                   7
+#define VAL_8                   8
+#define VAL_9                   9
+#define VAL_A                   10
+#define VAL_B                   11
+#define VAL_C                   12
+#define VAL_D                   13
+#define VAL_E                   14
+#define VAL_F                   15
 
 #define STRING_REG_UNDEFINED    "?"
 #define STRING_REGA             "A"

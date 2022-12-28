@@ -28,6 +28,7 @@ public:
     bool getAddSubtractFlag();
     bool getCarryFlag();
 
+    /* Get and set for color changing   */
     uint8_t getColorChangedFlag();
     void resetColorChangedFlag();
 

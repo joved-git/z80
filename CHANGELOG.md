@@ -1,3 +1,14 @@
+# 1.2.8
+Add and decode CCF and SCF.
+Correct the isACode() function that returns true for the CCF or DAA instruction (CCF is interpreted like the hexa number 0xCCF and DAA like 0xDAA). It must return false for that instruction.
+Add and decode RET.
+Correct the CALL and the CALL cc (add 3 to the saved PC).
+Add and decode RET cc.
+Add and decode DAA.
+Remove all the ";" at the en,d of the flag macro (like H_SET or PV_IS() for example, see Z80Machine.h).
+Add X_GET with all flags to retrieve flag values.
+Add VAL_x (from 0 to F) to easly convert hexa to decimal values.
+
 # 1.2.7
 The color changing is finished for details flags.
 

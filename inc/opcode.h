@@ -26,7 +26,9 @@
 #define EVEN(a)                 (calcParity(a)) 
 #define ODD (a)                 (!EVEN(a))
 #define BIT(a, n)               EXTRACT (a, n, 1)
-#define REVERT(a)               a=((a&FIRST_LOWEST_BYTE)<<8) | ((a&SECOND_LOWEST_BYTE)>>8);
+#define REVERT(a)               a=((a & FIRST_LOWEST_BYTE)<<8) | ((a & SECOND_LOWEST_BYTE)>>8);
+#define UPPER(a)                (a>>4)
+#define LOWER(a)                (a & 0x0F)
 
 #define NATURAL_CODE_LENGTH(c)  natural_code_length[c]
 #define CB_CODE_LENGTH(c)       (cb_code_length[c & FIRST_LOWEST_BYTE]+ONE_BYTE)
@@ -57,6 +59,7 @@
 #define CODE_RRA            (0b00011111)                // 0x1F     // RRA
 #define CODE_JRNZE          (0b00100000)                // 0x20     // JRNZE
 #define CODE_LDNNHL         (0b00100010)                // 0x22     // LD (nn),HL
+#define CODE_DAA            (0b00100111)                // 0x27     // DAA
 #define CODE_JRZE           (0b00101000)                // 0x28     // JRZE
 #define CODE_LDHLNN         (0b00101010)                // 0x2A     // LD HL,(nn)
 #define CODE_CPL            (0b00101111)                // 0x2F     // CPL
@@ -65,8 +68,10 @@
 #define CODE_INCHL          (0b00110100)                // 0x34     // INC (HL)
 #define CODE_DECHL          (0b00110101)                // 0x35     // DEC (HL)
 #define CODE_LDHLN          (0b00110110)                // 0x36     // LD (HL),n
+#define CODE_SCF            (0b00110111)                // 0x37     // SCF
 #define CODE_JRCE           (0b00111000)                // 0x38     // JRCE
 #define CODE_LDANN          (0b00111010)                // 0x3A     // LD A,(nn)
+#define CODE_CCF            (0b00111111)                // 0x3F     // CCF
 #define CODE_ADDAHL         (0b10000110)                // 0x86     // ADD A,(HL)
 #define CODE_ADCAHL         (0b10001110)                // 0x8E     // ADC A,(HL)
 #define CODE_SUBAHL         (0b10010110)                // 0x96     // SUB A,(HL)
@@ -77,6 +82,7 @@
 #define CODE_CPHL           (0b10111110)                // 0xBE     // CP (HL)
 #define CODE_JPNN           (0b11000011)                // 0xC3     // JP nn
 #define CODE_ADDAN          (0b11000110)                // 0xC6     // ADD A,n
+#define CODE_RET            (0b11001001)                // 0xC9     // RET
 #define CODE_CALLNN         (0b11001101)                // 0xCD     // CALL nn
 #define CODE_ADCAN          (0b11001110)                // 0xCE     // ADC A,n
 #define CODE_SUBAN          (0b11010110)                // 0xD6     // SUB A,n
@@ -112,6 +118,7 @@
 #define CODE_JPCCNN         (0b11000010)                            // JP cc,nn
 #define CODE_SUBAR          (0b10010000)                            // SUB A,r
 #define CODE_SBCAR          (0b10011000)                            // SBC A,r
+#define CODE_RETCC          (0b11000000)                            // RET cc
 
 /* CB instructions codes    */
 #define CODE_CB_RLCR        (0b1100101100000000)                    // RLC r
@@ -266,6 +273,7 @@
 #define MASK_ADDHLRR        (0b11001111)
 #define MASK_CALLNN         (0b11111111)
 #define MASK_CALLCCNN       (0b11000111)
+#define MASK_RETCC          (0b11000111)
 #define MASK_JPCCNN         (0b11000111)
 #define MASK_DECRR          (0b11001111)
 #define MASK_DECHL          (0b11111111)
@@ -299,6 +307,10 @@
 #define MASK_SBCAN          (0b11111111)
 #define MASK_SBCAHL         (0b11111111)
 #define MASK_JPHL           (0b11111111)
+#define MASK_CCF            (0b11111111)
+#define MASK_SCF            (0b11111111)
+#define MASK_RET            (0b11111111)
+#define MASK_DAA            (0b11111111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)
