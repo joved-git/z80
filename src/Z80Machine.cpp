@@ -2132,6 +2132,15 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
         op1=EXTRACT(codeInHexa, 3, 3);
     }
 
+    /* This is a RST p */
+    if ((codeInHexa & MASK_RSTP)==CODE_RSTP && len == NATURAL_CODE_LENGTH(CODE_RSTP))
+    {
+        instruction=CODE_RSTP;
+        retInterpret=NO_PC_CHANGE;                       /* Don't change the PC value after execution    */
+
+        op1=EXTRACT(codeInHexa, 3, 3);
+    }
+
     /* This is a RET cc,nn */
     if ((codeInHexa>>SIZE_2_BYTES & MASK_CALLCCNN)==CODE_CALLCCNN && len == NATURAL_CODE_LENGTH(CODE_CALLCCNN))
     {
@@ -6280,6 +6289,32 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
+        case CODE_RSTP:                                                 /* This is a RST p                  */
+            op1=op1*0x8;                                                /* Calc the p                       */          
+            sprintf(mInstruction, "RST #%02X", op1);
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                /* Push the PC  */
+                mRegisterPack.regSP.setValue(mRegisterPack.regSP.getValue()-2);             /* Change the SP    */
+                reg16_1=get16bitsRegisterAddress(REGPC);
+                mMemory->setAddress(mRegisterPack.regSP.getValue(), reg16_1->getValue());
+
+                /* Change the PC    */
+                reg16_1->setValue((uint16_t) op1);
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
         case CODE_JPNN:                                                     /* This is a JP nn                    */
             REVERT(op16);
             sprintf(mInstruction, "JP #%04X", op16);
@@ -9009,6 +9044,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
     char str_op2[MAX_OP_LENGTH];
     char *str_ptr=NULL;
     uint8_t nbOfComponents=0;
+    uint8_t val;
     uint8_t lenEff=0;
     int8_t retCheck=0;
     uint16_t word=0;
@@ -9845,6 +9881,20 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 {
                     retCode=CODE_FD_PUSHIY;                              /* Prepare the PUSH IY                    */
                     *pLen=TWO_BYTES;
+                }
+            }
+
+            if (!strcmp(str_inst, "RST"))                           /* A RST instruction is present         */
+            {
+                /* Check if it is a RST p instruction   */
+                if (!strcmp(str_op1, "#00") || !strcmp(str_op1, "#08") || !strcmp(str_op1, "#10") || !strcmp(str_op1, "#18") || !strcmp(str_op1, "#20") || !strcmp(str_op1, "#28") || !strcmp(str_op1, "#30") || !strcmp(str_op1, "#38"))     
+                {
+                    retCode=CODE_RSTP;                              /* Prepare the RST p                    */
+                    *pLen=ONE_BYTE;
+
+                    /* Extract the p and push it    */
+                    val=((str_op1[1]-'0')*0x10 + (str_op1[2]-'0'))/7;
+                    PUSHBIT(retCode, val, 3);    /* Add the p-value as bits             */                
                 }
             }
 

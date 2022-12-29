@@ -1,3 +1,6 @@
+# 1.2.9
+Add and decode RST p.
+
 # 1.2.8
 Add and decode CCF and SCF.
 Correct the isACode() function that returns true for the CCF or DAA instruction (CCF is interpreted like the hexa number 0xCCF and DAA like 0xDAA). It must return false for that instruction.

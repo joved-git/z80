@@ -119,6 +119,7 @@
 #define CODE_SUBAR          (0b10010000)                            // SUB A,r
 #define CODE_SBCAR          (0b10011000)                            // SBC A,r
 #define CODE_RETCC          (0b11000000)                            // RET cc
+#define CODE_RSTP           (0b11000111)                            // RST p
 
 /* CB instructions codes    */
 #define CODE_CB_RLCR        (0b1100101100000000)                    // RLC r
@@ -311,6 +312,7 @@
 #define MASK_SCF            (0b11111111)
 #define MASK_RET            (0b11111111)
 #define MASK_DAA            (0b11111111)
+#define MASK_RSTP           (0b11000111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)
