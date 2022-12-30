@@ -51,6 +51,10 @@ Z80Machine::Z80Machine()
     mRegisterPack.regDEp.setValue(0x0000);
     mRegisterPack.regHLp.setValue(0x0000);
 
+    /* Reset the interrupt flip-flops   */
+    mRegisterPack.iff1=false;
+    mRegisterPack.iff2=false;
+
      /* Initialize some registers (for test)   */
     mRegisterPack.regB.setValue(0x01);
 	mRegisterPack.regC.setValue(0xAA);
@@ -3041,6 +3045,18 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if ((codeInHexa & MASK_LDRA)==CODE_ED_LDRA && len == ED_CODE_LENGTH(CODE_ED_LDRA))
     {
         instruction=CODE_ED_LDRA;
+    }
+
+    /* This is a DI */
+    if ((codeInHexa & MASK_DI)==CODE_DI && len == NATURAL_CODE_LENGTH(CODE_DI))
+    {
+        instruction=CODE_DI;
+    }
+
+    /* This is a EI */
+    if ((codeInHexa & MASK_EI)==CODE_EI && len == NATURAL_CODE_LENGTH(CODE_EI))
+    {
+        instruction=CODE_EI;
     }
 
     // bottom 1
@@ -8973,6 +8989,54 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+        case CODE_DI:                             /* This is a DI    */
+            sprintf(mInstruction, "DI");
+            
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)
+            {
+                /* Load I register  */
+                mRegisterPack.iff1=false;
+                mRegisterPack.iff2=false;
+
+                /* Modify flags here after operation    */
+                /* Nothing here                         */
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_EI:                             /* This is a EI    */
+            sprintf(mInstruction, "EI");
+            
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)
+            {
+                /* Load I register  */
+                mRegisterPack.iff1=true;
+                mRegisterPack.iff2=true;
+
+                /* Modify flags here after operation    */
+                /* Nothing here                         */
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
     }
 
 #ifdef DEBUG_DISPLAY_COLOR_CHANGED 
@@ -9212,6 +9276,18 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
             if (!strcmp(str_inst, "HALT"))                          /* A HALT is present     */
             {
                 retCode=CODE_HALT;
+                *pLen=ONE_BYTE;
+            }
+
+            if (!strcmp(str_inst, "EI"))                          /* A EI is present     */
+            {
+                retCode=CODE_EI;
+                *pLen=ONE_BYTE;
+            }
+            
+            if (!strcmp(str_inst, "DI"))                          /* A DI is present     */
+            {
+                retCode=CODE_DI;
                 *pLen=ONE_BYTE;
             }
 

@@ -1,3 +1,7 @@
+# 1.2.11
+Add interrupt flip-flops (IFF1 and IFF2).
+Add and decode DI and EI.
+
 # 1.2.10
 Add I and R registers.
 Add and decode LD A,I, LD I,A, LD A,R and LD R,A.

@@ -34,6 +34,10 @@ struct RegisterPack
 	Register_16bits regBCp;
 	Register_16bits regDEp;
 	Register_16bits regHLp;
+
+	/* Flip-flop	*/
+	bool iff1;
+	bool iff2;
 };
 
 #endif

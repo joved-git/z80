@@ -92,7 +92,9 @@
 #define CODE_JPHL           (0b11101001)                // 0xE9     // JP (HL)
 #define CODE_XORN           (0b11101110)                // 0xEE     // XOR n
 #define CODE_EXX            (0b11011001)                // 0xD9     // EXX
+#define CODE_DI             (0b11110011)                // 0xF3     // DI
 #define CODE_ORN            (0b11110110)                // 0xF6     // OR n
+#define CODE_EI             (0b11111011)                // 0xFB     // EI
 #define CODE_CPN            (0b11111110)                // 0xFE     // CP n
 #define CODE_LDSPHL         (0b11111001)                // 0xF9     // LD SP,HL
 #define CODE_CALLCCNN       (0b11000100)                            // CALL cc,nn
@@ -315,8 +317,10 @@
 #define MASK_CCF            (0b11111111)
 #define MASK_SCF            (0b11111111)
 #define MASK_RET            (0b11111111)
-#define MASK_DAA            (0b11111111)
 #define MASK_RSTP           (0b11000111)
+#define MASK_DAA            (0b11111111)
+#define MASK_EI             (0b11111111)
+#define MASK_DI             (0b11111111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)
