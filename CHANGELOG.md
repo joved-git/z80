@@ -1,3 +1,9 @@
+# 1.2.10
+Add I and R registers.
+Add and decode LD A,I, LD I,A, LD A,R and LD R,A.
+The PV flags is not yet handled into LD A,I and LD A,R (see issue #16).
+
+
 # 1.2.9
 Add and decode RST p.
 

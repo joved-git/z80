@@ -147,6 +147,10 @@
 #define CODE_ED_LDNNRR      (0b1110110101000011)        //          // LD (nn),rr
 #define CODE_ED_LDDDNN      (0b1110110101001011)        //          // LD rr,(nn)
 #define CODE_ED_NEG         (0b1110110101000100)        // 0xED44   // NEG
+#define CODE_ED_LDIA        (0b1110110101000111)        // 0xED47   // LD I,A
+#define CODE_ED_LDRA        (0b1110110101001111)        // 0xED4F   // LD R,A
+#define CODE_ED_LDAI        (0b1110110101010111)        // 0xED57   // LD A,I
+#define CODE_ED_LDAR        (0b1110110101011111)        // 0xED5F   // LD A,R
 #define CODE_ED_RLD         (0b1110110101101111)        // 0xED6F   // RLD
 #define CODE_ED_RRD         (0b1110110101100111)        // 0xED67   // RRD
 #define CODE_ED_LDI         (0b1110110110100000)        // 0xEDA0   // LDI
@@ -398,6 +402,10 @@
 #define MASK_SBCAIYD        (0b1111111111111111)
 #define MASK_JPIX           (0b1111111111111111)
 #define MASK_JPIY           (0b1111111111111111)
+#define MASK_LDAI           (0b1111111111111111)
+#define MASK_LDIA           (0b1111111111111111)
+#define MASK_LDAR           (0b1111111111111111)
+#define MASK_LDRA           (0b1111111111111111)
 
 /* 32-bit mask  */
 #define MASK_RLCIXD         (0b11111111111111110000000011111111)

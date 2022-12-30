@@ -77,6 +77,8 @@
 #define STRING_REGF             "F"
 #define STRING_REGH             "H"
 #define STRING_REGL             "L"
+#define STRING_REGI             "I"
+#define STRING_REGR             "R"
 #define STRING_REGBC            "BC"
 #define STRING_REGIBC           "(BC)"
 #define STRING_REGDE            "DE"
