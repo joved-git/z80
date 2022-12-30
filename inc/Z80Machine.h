@@ -20,6 +20,9 @@
 #define REGISTER_A                    &mRegisterPack.regA
 #define REGISTER_F                    &mRegisterPack.regF
 
+#define REGISTER_I                    &mRegisterPack.regI
+#define REGISTER_R                    &mRegisterPack.regR
+
 #define REGISTER_BC                   &mRegisterPack.regBC
 #define REGISTER_DE                   &mRegisterPack.regDE
 #define REGISTER_HL                   &mRegisterPack.regHL

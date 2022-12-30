@@ -30,7 +30,7 @@ Z80Machine::Z80Machine()
     mRegisterPack.regDEp.set16bitsRegisterType(FULL);
     mRegisterPack.regHLp.set16bitsRegisterType(FULL);
 
-    /* Initialize registers to 0 exept SP  */
+    /* Initialize registers to 0 except SP  */
     mRegisterPack.regA.setValue(0x00);
     mRegisterPack.regB.setValue(0x00);
 	mRegisterPack.regC.setValue(0x00);
@@ -38,6 +38,8 @@ Z80Machine::Z80Machine()
 	mRegisterPack.regE.setValue(0x00);
 	mRegisterPack.regL.setValue(0x00);
 	mRegisterPack.regF.setValue(0b00000000);
+    mRegisterPack.regI.setValue(0x00);
+	mRegisterPack.regR.setValue(0x00);
 
     mRegisterPack.regPC.setValue(0x0000);
     mRegisterPack.regIX.setValue(0x0000);
@@ -55,7 +57,8 @@ Z80Machine::Z80Machine()
 	mRegisterPack.regD.setValue(0x0C);
 	mRegisterPack.regE.setValue(0x10);
 	mRegisterPack.regL.setValue(0xC8);
-	//mRegisterPack.regF.setValue(0b01101111);
+	mRegisterPack.regI.setValue(0xAA);
+    mRegisterPack.regR.setValue(0x12);
     mRegisterPack.regPC.setValue(0x1234);
     mRegisterPack.regHL.setValue(0xFE14);
     mRegisterPack.regIX.setValue(0x1200);
@@ -93,6 +96,8 @@ void Z80Machine::resetAllChangedRegister()
     mRegisterPack.regA.resetChanged();
     mRegisterPack.regF.resetChanged();
     mRegisterPack.regF.resetColorChangedFlag();
+    mRegisterPack.regI.resetChanged();
+    mRegisterPack.regR.resetChanged();
     
     /* 16-bit registers   */
     mRegisterPack.regBC.resetChanged();
@@ -1284,6 +1289,10 @@ void Z80Machine::displayAllRegisters()
 
     /* Display details registers            */
     displayDetailsRegisterF();
+    
+    displayReg8Bits(REGISTER_I, STRING_REGI);
+    displayReg8Bits(REGISTER_R, STRING_REGR);
+    printf("\n");
 
     /*
     printf("\b\b\b\b\b[%s] [S:%d Z:%d H:%d PV:%d N:%d C:%d]\n", 
@@ -3008,6 +3017,30 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if ((codeInHexa & MASK_DAA)==CODE_DAA && len == NATURAL_CODE_LENGTH(CODE_DAA))
     {
         instruction=CODE_DAA;
+    }
+
+    /* This is a LD A,I */
+    if ((codeInHexa & MASK_LDAI)==CODE_ED_LDAI && len == ED_CODE_LENGTH(CODE_ED_LDAI))
+    {
+        instruction=CODE_ED_LDAI;
+    }
+
+    /* This is a LD A,R */
+    if ((codeInHexa & MASK_LDAR)==CODE_ED_LDAR && len == ED_CODE_LENGTH(CODE_ED_LDAR))
+    {
+        instruction=CODE_ED_LDAR;
+    }
+
+        /* This is a LD I,A */
+    if ((codeInHexa & MASK_LDIA)==CODE_ED_LDIA && len == ED_CODE_LENGTH(CODE_ED_LDIR))
+    {
+        instruction=CODE_ED_LDIA;
+    }
+
+    /* This is a LD R,A */
+    if ((codeInHexa & MASK_LDRA)==CODE_ED_LDRA && len == ED_CODE_LENGTH(CODE_ED_LDRA))
+    {
+        instruction=CODE_ED_LDRA;
     }
 
     // bottom 1
@@ -8834,6 +8867,112 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
             }
             break;
+
+        case CODE_ED_LDAI:                             /* This is a LD A,I    */
+            sprintf(mInstruction, "LD A,I");
+            
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)
+            {
+                /* Load I register  */
+                mRegisterPack.regA.setValue(mRegisterPack.regI.getValue());
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(mRegisterPack.regI.getValue()));
+                Z_IS(ZERO(mRegisterPack.regI.getValue()));
+                H_RESET;
+                N_RESET;
+
+                /* To do, special affectation   */
+                // PV_IS()  -> P/V contains contents of IFF2
+                //          -> If an interrupt occurs during execution of this instruction, the Parity flag contains a 0
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ED_LDAR:                             /* This is a LD A,R    */
+            sprintf(mInstruction, "LD A,R");
+            
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)
+            {
+                /* Load I register  */
+                mRegisterPack.regA.setValue(mRegisterPack.regR.getValue());
+
+                /* Modify flags here after operation    */
+                S_IS(SIGN(mRegisterPack.regR.getValue()));
+                Z_IS(ZERO(mRegisterPack.regR.getValue()));
+                H_RESET;
+                N_RESET;
+
+                /* To do, special affectation   */
+                // PV_IS()  -> P/V contains contents of IFF2
+                //          -> If an interrupt occurs during execution of this instruction, the Parity flag contains a 0
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+        
+        case CODE_ED_LDIA:                             /* This is a LD I,A    */
+            sprintf(mInstruction, "LD I,A");
+            
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)
+            {
+                /* Load I register  */
+                mRegisterPack.regI.setValue(mRegisterPack.regA.getValue());
+
+                /* Modify flags here after operation    */
+                /* Nothing here                         */
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
+        case CODE_ED_LDRA:                             /* This is a LD R,A    */
+            sprintf(mInstruction, "LD R,A");
+            
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)
+            {
+                /* Load I register  */
+                mRegisterPack.regR.setValue(mRegisterPack.regA.getValue());
+
+                /* Modify flags here after operation    */
+                /* Nothing here                         */
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%04X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
     }
 
 #ifdef DEBUG_DISPLAY_COLOR_CHANGED 
@@ -10032,8 +10171,8 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
         case 3:
             if (!strcmp(str_inst, "LD"))                            /* A LD instruction is present  */
             {
-                /* Check if it is a LD, r,r' instruction    */
-                if (strlen(str_op1)==1 && strlen(str_op2)==1)       
+                /* Check if it is a LD, r,r' instruction but not LD with R or I register    */
+                if (strlen(str_op1)==1 && strlen(str_op2)==1 && strcmp(str_op1, "I") && strcmp(str_op1, "R")&& strcmp(str_op2, "I") && strcmp(str_op2, "R"))       
                 {
                     retCode=CODE_LDRR;                              /* Prepare the LD r,r'  */
                     *pLen=ONE_BYTE;
@@ -10109,6 +10248,34 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 if (!strcmp(str_op1, "SP") && !strcmp(str_op2, "IY"))
                 {
                     retCode=CODE_FD_LDSPIY;
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a LD A,I    */
+                if (!strcmp(str_op1, "A") && !strcmp(str_op2, "I"))
+                {
+                    retCode=CODE_ED_LDAI;
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a LD A,R    */
+                if (!strcmp(str_op1, "A") && !strcmp(str_op2, "R"))
+                {
+                    retCode=CODE_ED_LDAR;
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a LD I,A    */
+                if (!strcmp(str_op1, "I") && !strcmp(str_op2, "A"))
+                {
+                    retCode=CODE_ED_LDIA;
+                    *pLen=TWO_BYTES;
+                }
+
+                /* Check if it is a LD R,A    */
+                if (!strcmp(str_op1, "R") && !strcmp(str_op2, "A"))
+                {
+                    retCode=CODE_ED_LDRA;
                     *pLen=TWO_BYTES;
                 }
 
