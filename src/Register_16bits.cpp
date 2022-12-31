@@ -8,7 +8,7 @@ Register_16bits::Register_16bits()
 
 Register_16bits::~Register_16bits()
 {
-    
+
 }
 
 void Register_16bits::set16bitsRegisterType(bool mType)

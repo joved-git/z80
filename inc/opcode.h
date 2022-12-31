@@ -90,6 +90,7 @@
 #define CODE_EXSPHL         (0b11100011)                // 0xE3     // EX (SP),HL
 #define CODE_ANDN           (0b11100110)                // 0xE6     // AND n 
 #define CODE_JPHL           (0b11101001)                // 0xE9     // JP (HL)
+#define CODE_EXDEHL         (0b11101011)                // 0xEB     // EX DE,HL
 #define CODE_XORN           (0b11101110)                // 0xEE     // XOR n
 #define CODE_EXX            (0b11011001)                // 0xD9     // EXX
 #define CODE_DI             (0b11110011)                // 0xF3     // DI
@@ -321,6 +322,7 @@
 #define MASK_DAA            (0b11111111)
 #define MASK_EI             (0b11111111)
 #define MASK_DI             (0b11111111)
+#define MASK_EXDEHL         (0b11111111)
 
 /* 16-bit masks */
 #define MASK_RLCR           (0b1111111111111000)

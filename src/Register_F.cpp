@@ -7,7 +7,7 @@ Register_F::Register_F(): Register_8bits()
 
 Register_F::~Register_F()
 {
-    
+
 }
 
 /* Set flags    */

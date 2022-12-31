@@ -37,10 +37,10 @@ Z80Machine::Z80Machine()
 	mRegisterPack.regD.setValue(0x00);
 	mRegisterPack.regE.setValue(0x00);
 	mRegisterPack.regL.setValue(0x00);
-	mRegisterPack.regF.setValue(0b00000000);
     mRegisterPack.regI.setValue(0x00);
 	mRegisterPack.regR.setValue(0x00);
-
+	mRegisterPack.regF.setValue(0b00000000);
+    
     mRegisterPack.regPC.setValue(0x0000);
     mRegisterPack.regIX.setValue(0x0000);
     mRegisterPack.regIY.setValue(0x0000);
@@ -61,8 +61,12 @@ Z80Machine::Z80Machine()
 	mRegisterPack.regD.setValue(0x0C);
 	mRegisterPack.regE.setValue(0x10);
 	mRegisterPack.regL.setValue(0xC8);
-	mRegisterPack.regI.setValue(0xAA);
-    mRegisterPack.regR.setValue(0x12);
+    /* Strange behaviour here (see issue #17).                                  */
+    /* Seems to work but the position od regI and regR into the Register_Pack   */
+    /* seems to be important. why ??                                            */
+    /* Keep an eye on this.                                                     */
+    mRegisterPack.regR.setValue(0xFE);
+    mRegisterPack.regI.setValue(0x33);
     mRegisterPack.regPC.setValue(0x1234);
     mRegisterPack.regHL.setValue(0xFE14);
     mRegisterPack.regIX.setValue(0x1200);
@@ -3057,6 +3061,12 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
     if ((codeInHexa & MASK_EI)==CODE_EI && len == NATURAL_CODE_LENGTH(CODE_EI))
     {
         instruction=CODE_EI;
+    }
+
+    /* This is a EX DE,HL */
+    if ((codeInHexa & MASK_EXDEHL)==CODE_EXDEHL && len == NATURAL_CODE_LENGTH(CODE_EXDEHL))
+    {
+        instruction=CODE_EXDEHL;
     }
 
     // bottom 1
@@ -8157,6 +8167,29 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
+        case CODE_EXDEHL:                                         /* This is a EX DE,HL  */
+            sprintf(mInstruction, "EX DE,HL");
+
+            if (pMode==INTP_EXECUTE || pMode==INTP_EXECUTE_BLIND)                            
+            {
+                op16=mRegisterPack.regDE.getValue();
+                mRegisterPack.regDE.setValue(mRegisterPack.regHL.getValue());
+                mRegisterPack.regHL.setValue(op16);
+
+                /* No flag changing here    */
+
+                if (pMode==INTP_EXECUTE)
+                {
+                    printf("\n%s was executed\n", mInstruction);
+                }
+            }
+            
+            if (pMode==INTP_DISPLAY)
+            {
+                printf("\n[%02X] is %s\n", codeInHexa, mInstruction);
+            }
+            break;
+
         case CODE_DD_EXSPIX:                                         /* This is a EX (SP),IX  */
             sprintf(mInstruction, "EX (SP),IX");
 
@@ -10872,7 +10905,11 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     *pLen=TWO_BYTES;
                 }
 
-
+                if (!strcmp(str_op1, "DE") && !strcmp(str_op2,"HL"))           /* A EX DE,HL is present     */
+                {
+                    retCode=CODE_EXDEHL;
+                    *pLen=ONE_BYTE;
+                }
             }
            
             if (!strcmp(str_inst, "BIT"))                               /* A BIT instruction is present  */

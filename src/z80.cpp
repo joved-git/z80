@@ -88,15 +88,12 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				std::cout << std::endl
-						  << "z> ";
+				std::cout << std::endl << "z> ";
 			}
 		}
 	}
 
-	std::cout << std::endl
-			  << "Bye, see you next time !!" << std::endl
-			  << std::endl;
+	std::cout << std::endl << "Bye, see you next time !!" << std::endl << std::endl;
 
 	return 0;
 }

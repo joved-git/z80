@@ -287,7 +287,6 @@ private:
     /// @return true if it will be a half carry.
     bool checkHalfCarryOnAdd16(uint16_t, uint16_t);
 
-
     /// @brief  Check if it will be an half borrow on an 16-bit substrction.
     /// @param  The 2 bytes to add.
     /// @return true if it will be a half borrow.
