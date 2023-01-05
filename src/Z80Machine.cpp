@@ -37,7 +37,7 @@ Z80Machine::Z80Machine()
 	mRegisterPack.regD.setValue(0x00);
 	mRegisterPack.regE.setValue(0x00);
 	mRegisterPack.regL.setValue(0x00);
-    mRegisterPack.regI.setValue(0x00);
+    mRegisterPack.regI.setValue(0x00);  
 	mRegisterPack.regR.setValue(0x00);
 	mRegisterPack.regF.setValue(0b00000000);
     
@@ -61,10 +61,6 @@ Z80Machine::Z80Machine()
 	mRegisterPack.regD.setValue(0x0C);
 	mRegisterPack.regE.setValue(0x10);
 	mRegisterPack.regL.setValue(0xC8);
-    /* Strange behaviour here (see issue #17).                                  */
-    /* Seems to work but the position od regI and regR into the Register_Pack   */
-    /* seems to be important. why ??                                            */
-    /* Keep an eye on this.                                                     */
     mRegisterPack.regR.setValue(0xFE);
     mRegisterPack.regI.setValue(0x33);
     mRegisterPack.regPC.setValue(0x1234);
@@ -8925,7 +8921,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 /* Load I register  */
                 mRegisterPack.regA.setValue(mRegisterPack.regI.getValue());
 
-                /* Modify flags here after operation    */
+                // /* Modify flags here after operation    */
                 S_IS(SIGN(mRegisterPack.regI.getValue()));
                 Z_IS(ZERO(mRegisterPack.regI.getValue()));
                 H_RESET;
@@ -8962,7 +8958,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
                 N_RESET;
 
                 /* To do, special affectation   */
-                // PV_IS()  -> P/V contains contents of IFF2
+                // PV_IS()  -> P/V contains content of IFF2
                 //          -> If an interrupt occurs during execution of this instruction, the Parity flag contains a 0
 
                 if (pMode==INTP_EXECUTE)

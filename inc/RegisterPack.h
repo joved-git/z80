@@ -8,7 +8,6 @@
 struct RegisterPack 
 {
 	/* 8-bit registers  		*/
-	Register_8bits regI;
 	Register_8bits regB;
 	Register_8bits regC;
 	Register_8bits regD;
@@ -17,6 +16,7 @@ struct RegisterPack
 	Register_8bits regL;
 	Register_8bits regA;
 	Register_F regF;
+	Register_8bits regI;
 	Register_8bits regR;
 	
 	/* 16-bit registers  		*/

@@ -1,3 +1,6 @@
+# 1.2.12
+Correct the Issue #17: problem with affectation of a void mRelated16bitsRegister into Register_8bits::setValue().
+
 # 1.2.11
 Add interrupt flip-flops (IFF1 and IFF2).
 Add and decode DI and EI.
@@ -7,7 +10,6 @@ Add and decode EX DE,HL.
 Add I and R registers.
 Add and decode LD A,I, LD I,A, LD A,R and LD R,A.
 The PV flags is not yet handled into LD A,I and LD A,R (see issue #16).
-
 
 # 1.2.9
 Add and decode RST p.

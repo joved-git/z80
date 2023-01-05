@@ -361,27 +361,6 @@ private:
     /// @param  None.
     /// @return Nothing.
     void displayDetailsRegisterF();
-/*
-    /// @brief  Display the value of given register and change color if needed.
-    /// @param  None.
-    /// @return Nothing.
-    void displayRegB();
-
-    /// @brief  Display the value of register C and change color if needed.
-    /// @param  None.
-    /// @return Nothing.
-    void displayRegC();
-
-    /// @brief  Display the value of register D and change color if needed.
-    /// @param  None.
-    /// @return Nothing.
-    void displayRegD();
-
-    /// @brief  Display the value of register E and change color if needed.
-    /// @param  None.
-    /// @return Nothing.
-    void displayRegE();
-    */
 };	
 
 #endif
