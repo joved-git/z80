@@ -262,6 +262,11 @@ private:
     /// @return OK or error code (bad operand).
     int8_t clean_r(char *);
 
+    /// @brief  Clean a r operand.
+    /// @param  The operand as a string.
+    /// @return OK or error code (bad operand).
+    int8_t clean_rr(char *);
+
     /// @brief  Clean a e operand.
     /// @param  The operand as a string.
     /// @return OK or error code (bad operand).

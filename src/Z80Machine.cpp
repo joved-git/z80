@@ -977,17 +977,91 @@ int8_t Z80Machine::clean_ixn(char *pOp)
 }
 
 
-/* Clean the r operand  (IX+#00)  */
+/* Clean the r operand  */
 int8_t Z80Machine::clean_r(char *pOp)
 {
-    return 0;
+    uint8_t retCode=ERR_NO_ERROR;
+
+    if (strlen(pOp)>1)
+    {
+        retCode=ERR_BAD_OPERAND;
+    }
+    else 
+    {
+        if (pOp[0]!='A' && pOp[0]!='B' && pOp[0]!='C' && pOp[0]!='D' && pOp[0]!='E' && pOp[0]!='F' && pOp[0]!='H' && pOp[0]!='L')
+        {
+            retCode=ERR_BAD_OPERAND;
+        }
+    }
+
+    return retCode;
 }
 
 
-/* Clean the r operand  (IX+#00)  */
+/* Clean the rr operand  */
+int8_t Z80Machine::clean_rr(char *pOp)
+{
+    uint8_t retCode=ERR_NO_ERROR;
+
+        if (strlen(pOp)!=2)
+    {
+        retCode=ERR_BAD_OPERAND;
+    }
+    else 
+    {
+        if (strcmp(pOp, "BC") && strcmp(pOp, "DE") && strcmp(pOp, "HL") && strcmp(pOp, "AF") && strcmp(pOp, "IX") && strcmp(pOp, "IY"))
+        {
+            retCode=ERR_BAD_OPERAND;
+        }
+    }
+    return retCode;
+}
+
+
+/* Clean the e operand  */
 int8_t Z80Machine::clean_e(char *pOp)
 {
-    return 0;
+    uint8_t retCode=ERR_NO_ERROR;
+    bool cont=true;
+    uint8_t i=0;
+    uint16_t e=0;
+
+    if (pOp[0]!='$' || (pOp[1]!='+' && pOp[1]!='-') || strlen(pOp)<3 || strlen(pOp)>5)
+    {
+        retCode=ERR_BAD_OPERAND;
+        cont=false;
+    }
+
+    i=2;
+    
+    /* Remove all the non-decimal digits   */
+    while (cont)
+    {
+        if (pOp[i]>'9' || pOp[i]<'0')
+        {
+            cont=false;
+            pOp[i]='\0';
+        }
+        
+        if (i>strlen(pOp))
+        {
+            cont=false;
+        } 
+
+        i++;
+    }
+
+    for (i=2; i<strlen(pOp); i++)
+    {
+        e=e*10+(pOp[i]-'0');
+    }
+
+    if (strlen(pOp)<3 || (pOp[1]=='-' && e>126) || (pOp[1]=='+' && e>129))
+    {
+        retCode=ERR_BAD_OPERAND;
+    }
+
+    return retCode;
 }
 
 
@@ -9911,7 +9985,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 /* Check if it is a OR r instruction    */
                 if (strlen(str_op1)==1)       
                 {
-                    retCode=CODE_ORR;                              /* Prepare the AND r  */
+                    retCode=CODE_ORR;                              /* Prepare the OR r  */
                     *pLen=ONE_BYTE;
 
                     retCheck=clean_r(str_op1);
@@ -10070,7 +10144,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCode=CODE_POPQQ;                              /* Prepare the POP qq                    */
                     *pLen=ONE_BYTE;
 
-                    retCheck=clean_r(str_op1);
+                    retCheck=clean_rr(str_op1);
 
                     if (!strcmp(str_op1, "AF"))
                     {
@@ -10103,7 +10177,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCode=CODE_PUSHQQ;                              /* Prepare the PUSH qq                    */
                     *pLen=ONE_BYTE;
 
-                    retCheck=clean_r(str_op1);
+                    retCheck=clean_rr(str_op1);
 
                     if (!strcmp(str_op1, "AF"))
                     {
@@ -10388,7 +10462,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                 if (strlen(str_op1)==2 && (strlen(str_op2)>=4 && strlen(str_op2)<=7) && strchr(str_op2, '(') && strchr(str_op2, ')') && strchr(str_op2, '#'))
                 {
                     /* Clean the n for Op2 and r for Op1 */
-                    //retCheck=clean_r(str_op1);
+                    retCheck=clean_rr(str_op1);
                     retCheck=clean_inn(str_op2);                /* Clean the (nn) operand ande remove '(' and ')'  */
                     word=toValue(str_op2+1, pLen, &lenEff);
 
@@ -10707,7 +10781,6 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCode=CODE_ADCAR;                              /* Prepare the ADC A,r  */
                     *pLen=ONE_BYTE;
 
-                    retCheck=clean_r(str_op1);
                     retCheck=clean_r(str_op2);
                     
                     PUSHBIT(retCode, registerToBit(str_op2), 0);    /* Add the second register as bits   */

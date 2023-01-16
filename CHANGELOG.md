@@ -1,3 +1,6 @@
+# 1.2.13
+Code the check_r(), clean_rr() and clean_e() functions (Issue #12).
+
 # 1.2.12
 Correct the Issue #17: problem with affectation of a void mRelated16bitsRegister into Register_8bits::setValue().
 
