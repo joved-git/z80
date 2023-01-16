@@ -1,5 +1,5 @@
 # 1.2.13
-Code the check_r(), clean_rr() and clean_e() functions (Issue #12).
+Code the check_r(), clean_rr() and clean_e() functions (close Issue #12).
 
 # 1.2.12
 Correct the Issue #17: problem with affectation of a void mRelated16bitsRegister into Register_8bits::setValue().
@@ -24,7 +24,7 @@ Add and decode RET.
 Correct the CALL and the CALL cc (add 3 to the saved PC).
 Add and decode RET cc.
 Add and decode DAA.
-Remove all the ";" at the en,d of the flag macro (like H_SET or PV_IS() for example, see Z80Machine.h).
+Remove all the ";" at the end of the flag macro (like H_SET or PV_IS() for example, see Z80Machine.h).
 Add X_GET with all flags to retrieve flag values.
 Add VAL_x (from 0 to F) to easly convert hexa to decimal values.
 
@@ -59,7 +59,7 @@ Add and decode SBC r, SBC n, SBC (HL), SBC (IX+d) and SBC (IX+d).
 Add JR C,e, JR NC,e, JE Z,e and JR NZ,e.
 Correct many printf '02X' in BIT, SET, RES instructions.
 Correct the label decoding: some instruction lengths were bad.
-Add JRCOND asm files (with and without opcodes).
+Add JRCOND.asm files (with and without opcodes).
 
 # 1.1.20
 Add and decode JP cc,nn.
@@ -78,7 +78,7 @@ Add and decode OR r, OR n, OR (HL), OR (IX+d) and OR (IY+d).
 Add and decode XOR r, XOR n, XOR (HL), XOR (IX+d) and XOR (IY+d).
 Add and decode CP r, CP n, CP (HL), CP (IX+d) and CP (IY+d).
 Change the name of checkOverflowOnAdd() to checkOverflowOnAdd8();
-Create the checkOverflowOnSub8() fucntion.
+Create the checkOverflowOnSub8() function.
 
 # 1.1.16
 Add and decode DEC (IX+d) and DEC (IY+D).
@@ -118,7 +118,7 @@ Correct the RR r. Always use REGA. Prepare SRA and SRL instructions.
 
 # 1.1.8
 Add and decode PUSH IX, PUSH IY, POP qq, POP IX and POP IY.
-Correct the PUSH IX/IyY(bad length).
+Correct the PUSH IX/IyY (bad length).
 
 # 1.1.7
 Correct LD rr,nn. Add presence of '#' into the 'nn' string.
@@ -132,7 +132,7 @@ Integrate the complete 'JR e' into asm file and load function.
 
 # 1.1.4
 Add the loop detection process (see issue #14).
-Add ".asm" is not prese,t during a load 'l' command.
+Add ".asm" is not present during a load 'l' command.
 
 # 1.1.3
 Correct bug: jp #0 was not understood.
@@ -276,7 +276,7 @@ Change interpretCode() to be able to execute instruction without displaying mess
 Execute next instruction.
 
 # 0.8.3
-interpretCode() refactoring is finished. The function is able to display next instruction in exec mode. Yeah !!
+The refactoring of interpretCode() is finished. The function is able to display next instruction in exec mode. Yeah !!
 
 # 0.8.2
 Display next instruction in exec mode.
@@ -402,7 +402,7 @@ Cut instruction method is terminted (cutInstruction()).
 Decode LD r,r' instruction.
 
 # 0.5.4
-Add LD A,(DE) and LD A,(nn) instruction.
+Add LD A,(DE) and LD A,(nn) instructions.
 
 # 0.5.3
 Add the memory dump (16 bytes).
@@ -463,12 +463,12 @@ Add the AF register (HALF).
 Invert 'a' and 'm' command.
 Change the help message ('a' and 'm' had bad inverted example).
 Add the entry (HL) as a register.
-Add the LD r,(HL) and LD (HL), r instructions.
+Add the LD r,(HL) and LD (HL),r instructions.
 Correct a bug. The command should be translat in uppercase but not the first character. Example: 'a 4e' must be turn into 'a 4E' and 'x' must stay 'x'.
 
 # 0.3.0
 Add the 'a' command.
-Full encoding of the LD r,r' instrcution.
+Full encoding of the LD r,r' instruction.
 
 # 0.2.3
 Decode the LD r,r' instruction.
@@ -492,7 +492,7 @@ Add Command class. Code refactoring.
 
 # 0.0.9
 Change the way to display register.
-Add A and F and binary representation for F.
+Add A, F and binary representation for F.
 Add examples into help screen.
 
 # 0.0.8
