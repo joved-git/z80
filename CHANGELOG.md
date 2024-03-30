@@ -1,3 +1,6 @@
+# 1.2.14
+Change the prompt in exec mode, put the 'zee' at he end of the line.
+
 # 1.2.13
 Code the check_r(), clean_rr() and clean_e() functions (close Issue #12).
 

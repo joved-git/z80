@@ -1,4 +1,5 @@
 *.exe
 build/*
+build.old/*
 .vscode/*
 .~lock*
