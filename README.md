@@ -9,7 +9,7 @@ See ya !
 
 ```
 $ cd <bla>
-$ git clone ...
+$ git clone git@github.com:joved-git/z80.git
 ```
 
 2. Go to inside the directory and create the build directory.
@@ -35,6 +35,11 @@ $ ./z80
 
 # Compilation under Windows
 1. Clone the repo.
+
+```
+D:\> cd dev_dir
+D:\dev_dir> git@github.com:joved-git/z80.git
+```
 
 2. Open a Windows **Terminal**
 
