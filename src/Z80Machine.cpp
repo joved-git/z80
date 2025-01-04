@@ -1,6 +1,7 @@
 #include "../inc/Z80Machine.h"
 #include "../inc/instruction_length.h"
 #include "../inc/LabelDataset.h"
+#include "../inc/version.hpp"
 
 #include <list>
 
@@ -11356,7 +11357,7 @@ bool Z80Machine::analyse()
                             printf("x <dec>     convert <dec> to hexa.\n");
                             printf("d <hex>     convert <hex> to decimal.\n");
                             printf("b <hex>     convert <hex> to binary.\n");
-
+                            printf("v           about ARM-ASM.\n");
                             printf("q           quit me.\n");
                             printf("\n");
                             printf("<cmd>       execute the command.\n");
@@ -11380,6 +11381,7 @@ bool Z80Machine::analyse()
                             printf("x <dec>     convert <dec> to hexa.\n");
                             printf("d <hex>     convert <hex> to decimal.\n");
                             printf("b <hex>     convert <hex> to binary.\n");
+                            printf("v           about ARM-ASM.\n");
                             printf("q           quit me.\n");
                             printf("\n");
                             printf("<cmd>       execute the command.\n");
