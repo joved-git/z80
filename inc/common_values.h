@@ -105,6 +105,7 @@
 #define CMD_DISPLAY_MEMORY      'm'
 #define CMD_NEXT_INSTRUCTION    'n'
 #define CMD_LOAD_CODE           'l'
+#define CMD_ABOUT               'v'
 #define CMD_EXEC_MODE_TOGGLE    '!'
 
 #define ERR_NO_ERROR            (0)

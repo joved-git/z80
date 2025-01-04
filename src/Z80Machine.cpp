@@ -11356,10 +11356,12 @@ bool Z80Machine::analyse()
                             printf("x <dec>     convert <dec> to hexa.\n");
                             printf("d <hex>     convert <hex> to decimal.\n");
                             printf("b <hex>     convert <hex> to binary.\n");
+
                             printf("q           quit me.\n");
                             printf("\n");
                             printf("<cmd>       execute the command.\n");
                             printf("<code>      execute the code.\n");
+
                         }
                         else
                         {
@@ -11527,6 +11529,12 @@ bool Z80Machine::analyse()
                                 loadCode(filename);
                             }
                         }        
+                        break;
+
+                    case CMD_ABOUT:
+                        printf("\nZ80 ASM emulator. Ver: %s\n", VERSION);
+                        printf("\nVisit https://github.com/joved-git/z80\n");
+                        printf("Joved - 2024-2025\n");
                         break;
                 }
                 break;

@@ -1,3 +1,6 @@
+# 1.2.15
+Add a new command 'v' for About.
+
 # 1.2.14
 Change the prompt in exec mode, put the 'zee' at he end of the line.
 
