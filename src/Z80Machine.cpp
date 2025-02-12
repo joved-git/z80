@@ -10213,7 +10213,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
                     /* Extract the p and push it    */
                     val=((str_op1[1]-'0')*0x10 + (str_op1[2]-'0'))/7;
-                    PUSHBIT(retCode, val, 3);    /* Add the p-value as bits             */                
+                    PUSHBIT(retCode, val, 3);                       /* Add the p-value as bits             */                
                 }
             }
 
@@ -11357,7 +11357,7 @@ bool Z80Machine::analyse()
                             printf("x <dec>     convert <dec> to hexa.\n");
                             printf("d <hex>     convert <hex> to decimal.\n");
                             printf("b <hex>     convert <hex> to binary.\n");
-                            printf("v           about ARM-ASM.\n");
+                            printf("v           about Z80-ASM.\n");
                             printf("q           quit me.\n");
                             printf("\n");
                             printf("<cmd>       execute the command.\n");
@@ -11381,7 +11381,7 @@ bool Z80Machine::analyse()
                             printf("x <dec>     convert <dec> to hexa.\n");
                             printf("d <hex>     convert <hex> to decimal.\n");
                             printf("b <hex>     convert <hex> to binary.\n");
-                            printf("v           about ARM-ASM.\n");
+                            printf("v           about Z80-ASM.\n");
                             printf("q           quit me.\n");
                             printf("\n");
                             printf("<cmd>       execute the command.\n");
