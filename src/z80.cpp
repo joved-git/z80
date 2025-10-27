@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 
 		/* Handle the command	*/
 		machine.setEntry(command);
-		exit = machine.analyse();
+		exit = machine.analysis();
 
 		if (!exit)
 		{

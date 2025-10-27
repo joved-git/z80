@@ -1,9 +1,9 @@
 org #1234
 
-	ld a,#1
-	ld b,#CD
-	add a,b
+    ld a,#1
+    ld b,#CD
+    add a,b
 	
-	jp #1234
+    jp #1234
 
 end
