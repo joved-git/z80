@@ -557,7 +557,7 @@ typeOfEntry Z80Machine::findEntryType()
     return type;
 }
 
-/* Give a command to be analysed    */
+/* Give a command to be analyzed    */
 void Z80Machine::setEntry(char *pEntry)
 {
     mEntry=pEntry;
@@ -11309,8 +11309,8 @@ uint32_t Z80Machine::getNextInstruction(char *pInstr, uint8_t *pLen)
     return machineCode;
 }
 
-/* Analyse the command  */
-bool Z80Machine::analyse()
+/* Analyze the command  */
+bool Z80Machine::analysis()
 {
     typeOfEntry type=NOTHING;
     bool retValue=false;
@@ -11327,7 +11327,7 @@ bool Z80Machine::analyse()
 
     if (mCommandIsEntered)
     {
-        // printf(">>> analyse [%s] <<<\n", mEntry);
+        // printf(">>> analysis [%s] <<<\n", mEntry);
 
         switch(findEntryType())
         {

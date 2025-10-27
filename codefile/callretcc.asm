@@ -1,15 +1,15 @@
 org #1200
 
-	    ld a,#f0
-		ld b,#ef
+        ld a,#f0
+        ld b,#ef
 
-		call subrtn
-		ld a,#0
-		halt
+        call subrtn
+        ld a,#0
+        halt
 
 subrtn:	
 loop:   cp b
-		ret z
+        ret z
         inc B
         jr loop
 		

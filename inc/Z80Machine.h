@@ -74,13 +74,13 @@ public:
     Z80Machine();
     ~Z80Machine();
 
-    /// @brief  This method is used to enter the command that will be analysed.
+    /// @brief  This method is used to enter the command that will be analyzed.
     /// @param  The command that was entered in command line.  
     void setEntry(char *);
 
-    /// @brief  This method analyses is used to enter the command that will be analysed.
+    /// @brief  This method analyzes is used to enter the command that will be analyzed.
     /// @param  Nothing. 
-    bool analyse();
+    bool analysis();
 
     /// @brief  Display registers.
     /// @param  None.

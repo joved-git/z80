@@ -1,3 +1,8 @@
+# 1.2.16
+Change analyses() method to analysis().
+Replace all analyse text to analyze (close Issue #24).
+Remove all tabs into .asm files (close Issue #25)
+
 # 1.2.15
 Add a new command 'v' for About.
 
