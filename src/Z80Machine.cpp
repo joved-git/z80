@@ -11343,61 +11343,63 @@ bool Z80Machine::analysis()
                         if (mExecMode)
                         {
                             printf("\n");
-                            printf("!           toggle from Normal mode to Exec mode.\n");
-                            printf("a <code>    translate <code> to assembly langage.\n");
+                            printf("!           Toggle from Normal mode to Exec mode.\n");
+                            printf("a <code>    Translate <code> to assembly langage.\n");
                             printf("              Example: cb22 gives SLA D\n");
-                            printf("c <cmd>     translate <cmd> to machine code.\n");
+                            printf("c <cmd>     Translate <cmd> to machine code.\n");
                             printf("              Example: ld c,b gives 0x41\n");
-                            printf("R           display all registers.\n");
-                            printf("m <addr>    dump 16 bytes memory from <addr>.\n");
-                            printf("m (SP)      dump 16 bytes memory from (SP).\n");
-                            printf("m (PC)      dump 16 bytes memory from (PC).\n");
-                            printf("n           execute the next instruction (only in Exec mode).\n");
-                            printf("l <file>    load a file with codes or instructions.\n");
-                            printf("x <dec>     convert <dec> to hexa.\n");
-                            printf("d <hex>     convert <hex> to decimal.\n");
-                            printf("b <hex>     convert <hex> to binary.\n");
-                            printf("v           about Z80-ASM.\n");
-                            printf("q           quit me.\n");
+                            printf("R           Display all registers.\n");
+                            printf("m <addr>    Dump 16 bytes memory from <addr>.\n");
+                            printf("m (SP)      Dump 16 bytes memory from (SP).\n");
+                            printf("m (PC)      Dump 16 bytes memory from (PC).\n");
+                            printf("n           Execute the next instruction (only in Exec mode).\n");
+                            printf("l <file>    Load a file with codes or instructions.\n");
+                            printf("x <dec>     Convert <dec> to hexa.\n");
+                            printf("d <hex>     Convert <hex> to decimal.\n");
+                            printf("b <hex>     Convert <hex> to binary.\n");
+                            printf("e           Give some useful examples.\n");
+                            printf("v           About Z80-ASM.\n");
+                            printf("q           Quit me.\n");
                             printf("\n");
-                            printf("<cmd>       execute the command.\n");
-                            printf("<code>      execute the code.\n");
+                            printf("<cmd>       Execute the command.\n");
+                            printf("<code>      Execute the code.\n");
 
                         }
                         else
                         {
                             printf("\n");
-                            printf("!           toggle from Normal mode to Exec mode.\n");
-                            printf("a <code>    translate <code> to assembly langage.\n");
+                            printf("!           Toggle from Normal mode to Exec mode.\n");
+                            printf("a <code>    Translate <code> to assembly langage.\n");
                             printf("              Example: cb22 gives SLA D\n");
-                            printf("c <cmd>     translate <cmd> to machine code.\n");
+                            printf("c <cmd>     Translate <cmd> to machine code.\n");
                             printf("              Example: ld c,b gives 0x41\n");
-                            printf("r           display main registers.\n");
-                            printf("R           display all registers.\n");
-                            printf("m <addr>    dump 16 bytes memory from <addr>.\n");
-                            printf("m (SP)      dump 16 bytes memory from (SP).\n");
-                            printf("m (PC)      dump 16 bytes memory from (PC).\n");
-                            printf("l <file>    load a file with codes or instructions.\n");
-                            printf("x <dec>     convert <dec> to hexa.\n");
-                            printf("d <hex>     convert <hex> to decimal.\n");
-                            printf("b <hex>     convert <hex> to binary.\n");
-                            printf("v           about Z80-ASM.\n");
-                            printf("q           quit me.\n");
+                            printf("r           Display main registers.\n");
+                            printf("R           Display all registers.\n");
+                            printf("m <addr>    Dump 16 bytes memory from <addr>.\n");
+                            printf("m (SP)      Dump 16 bytes memory from (SP).\n");
+                            printf("m (PC)      Dump 16 bytes memory from (PC).\n");
+                            printf("l <file>    Load a file with codes or instructions.\n");
+                            printf("x <dec>     Convert <dec> to hexa.\n");
+                            printf("d <hex>     Convert <hex> to decimal.\n");
+                            printf("b <hex>     Convert <hex> to binary.\n");
+                            printf("e           Give some useful examples.\n");
+                            printf("v           About Z80-ASM.\n");
+                            printf("q           Quit me.\n");
                             printf("\n");
-                            printf("<cmd>       execute the command.\n");
-                            printf("<code>      execute the code.\n");
+                            printf("<cmd>       Execute the command.\n");
+                            printf("<code>      Execute the code.\n");
                         }
                         break;
             
                     case CMD_EXAMPLE:
                         printf("\n");
                         printf("0x32aaaa - LD (aaaa),A\n");
-                        printf("0x36nn   - LD (HL),n\n");
+                        printf("0x36nn   - LD (HL),nn\n");
                         printf("0x3Aaaaa - LD A,(aaaa)\n");
                         printf("00x46    - LD B,(HL)\n"); 
                         printf("00x4E    - LD C,(HL)\n"); 
-                        printf("00x70    - LD (HL), B\n");
-                        printf("00x71    - LD (HL), C\n\n");
+                        printf("00x70    - LD (HL),B\n");
+                        printf("00x71    - LD (HL),C\n\n");
 
                         break;
 
@@ -11446,11 +11448,11 @@ bool Z80Machine::analysis()
 
                         if (lenEff<lenValue)
                         {
-                            printf("\nNot an hexa number\n");
+                            printf("\n!!! Not an hex number.\n");
                         }
                         else
                         {
-                            printf("\n0x%s = %ud\n", mEntry, value);
+                            printf("\n%s (16) = %u (10)\n", mEntry, value);
                         }
                         
                         break;
@@ -11462,11 +11464,11 @@ bool Z80Machine::analysis()
 
                         if (valDec>0)
                         {
-                            printf("\n%sd = 0x%X\n", mEntry, valDec);
+                            printf("\n%s (10) = %X (16)\n", mEntry, valDec);
                         }
                         else
                         {
-                            printf("\nNot a decimal number\n");
+                            printf("\n!!! Not a decimal number.\n");
                         }
                         
                         break;
@@ -11479,11 +11481,11 @@ bool Z80Machine::analysis()
 
                         if (lenEff<lenValue)
                         {
-                            printf("\nNot a decimal number\n"); 
+                            printf("\n!!! Not a decimal number.\n"); 
                         }
                         else
                         {
-                            printf("\n0x%s = 0b%s\n", mEntry, byteToBinary((uint8_t) value));
+                            printf("\n%s (16) = %s (2)\n", mEntry, byteToBinary((uint8_t) value));
                         }
                         
                         break;

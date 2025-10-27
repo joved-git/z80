@@ -1,3 +1,7 @@
+# 1.2.17
+Change the 'h' manu. Add uppercase and add 'e' (examples) menu.
+Change the way the digits are visualized with 'x', 'b' and 'd' commands. Example: FC (16) = 11111100 (2).
+
 # 1.2.16
 Change analyses() method to analysis().
 Replace all analyse text to analyze (close Issue #24).
