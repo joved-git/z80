@@ -493,6 +493,7 @@ bool Z80Machine::isACode()
         code=false;
     }
 
+    /* Treat that 2 commands as exceptions */
     if (!strcmp(mEntry, "CCF") || !strcmp(mEntry, "DAA"))
     {
         code=false;
@@ -10211,9 +10212,9 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCode=CODE_RSTP;                              /* Prepare the RST p                    */
                     *pLen=ONE_BYTE;
 
-                    /* Extract the p and push it    */
-                    val=((str_op1[1]-'0')*0x10 + (str_op1[2]-'0'))/7;
-                    PUSHBIT(retCode, val, 3);                       /* Add the p-value as bits             */                
+                    val=(str_op1[1]-'0')*0x10 + (str_op1[2]-'0');   /* Extract the p and push it            */
+                       
+                    retCode+=val;                                   /* Add the p-value as bits              */
                 }
             }
 
@@ -10377,6 +10378,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
                     retCode=(retCode<<SIZE_1_BYTE)+toValue(str_op2+1, pLen, &lenEff);     /* Prepare the LD r,n   */
                     *pLen=TWO_BYTES;
+                    printf("LD r,n\n");
                 }
 
                 /* Check if it is a LD rr,nn, LD IX,nn or a LD IY,nn instruction    */
@@ -11553,7 +11555,7 @@ bool Z80Machine::analysis()
             case INSTRUCTION:
                 resetAllChangedRegister();
                 
-                machineCode=findMachineCode(mEntry, &lenValue);
+                machineCode=findMachineCode(mEntry, &lenValue);                     /* Search for the machine code      */
                 interpretCode(machineCode, lenValue, INTP_EXECUTE);
                 break;
         }
