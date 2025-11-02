@@ -1,3 +1,8 @@
+# 1.3.0
+Improve the detection of "LD (IX+d),n" and "LD (IY+d),n". 
+LD (IX+d),r or LD (IY+d),r, LD (IX+d),n or LD (IY+d),n are done.
+Improve the clean-ixn() function and check the result to determine if the operand is correct.
+
 # 1.2.18
 Correct the interpretation of RST commands. Close issue #28.
 

@@ -934,15 +934,13 @@ int8_t Z80Machine::clean_ixn(char *pOp)
     uint8_t retCode=ERR_NO_ERROR;
     char *posChar;
 
-    //printf("op_i=<%s>\n", pOp);
-
-    if (posChar=strchr(pOp, '#'))               /* Is there a '#' ? */ 
+    if ((posChar=strchr(pOp, '#')) && (pOp[3]=='+'))                /* Is there a '#' ? */ 
     {
         strcpy(pOp, posChar);
 
         pOp[strlen(pOp)-1]='\0';
         
-        if (strlen(pOp)>=3)                     /* Remove characters if needed  */
+        if (strlen(pOp)>=3)                                 /* Remove characters if needed  */
         {
             pOp[3]='\0';
         }
@@ -963,12 +961,12 @@ int8_t Z80Machine::clean_ixn(char *pOp)
             {
                 if (strlen(pOp)==2)
                 {
-                    pOp[3]='\0';            /* Add a zero before */
+                    pOp[3]='\0';                            /* Add a zero before */
                     pOp[2]=pOp[1];
                     pOp[1]='0';
                 }
             }
-        }              
+        }     
     }
     else
     {
@@ -3519,7 +3517,7 @@ uint8_t Z80Machine::interpretCode(uint32_t codeInHexa, uint8_t len, uint8_t pMod
             }
             break;
 
-        case CODE_DD_LDIXDR:                                        /* This is a LD (IX+d),r  */
+        case CODE_DD_LDIXDR:                                        /* This is a LD (IX+d),r    */
             ret=bitToRegister(op2, sop2);
             
             if (SIGN(op1))                                          /* Check if op2 is negative */
@@ -9556,11 +9554,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FDCB_RLCIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op1);
-                    retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the RLC (IX+d) or the RLC (IY+d)  */
+                    /* Clean and check the (IX+d) or (IY+d) for Op1 */
+                    if (!clean_ixn(str_op1))
+                    {
+                        retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the RLC (IX+d) or the RLC (IY+d)  */
 
-                    *pLen=FOUR_BYTES;
+                        *pLen=FOUR_BYTES;
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;                        /* Operand is not correct               */
+                    }
                 }
             }
 
@@ -9595,11 +9599,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FDCB_RRCIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op1);
-                    retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the RLC (IX+d) or the RLC (IY+d)  */
+                    /* Clean and check the (IX+d) or (IY+d) for Op1 */
+                    if (!clean_ixn(str_op1))
+                    {
+                        retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the RLC (IX+d) or the RLC (IY+d)  */
 
-                    *pLen=FOUR_BYTES;
+                        *pLen=FOUR_BYTES;
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
                 
             }
@@ -9636,11 +9646,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FDCB_RLIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op1);
-                    retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the RLC (IX+d) or the RLC (IY+d)  */
+                    /* Clean and check the (IX+d) or (IY+d) for Op1 */
+                    if (!clean_ixn(str_op1))
+                    {
+                        retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the RLC (IX+d) or the RLC (IY+d)  */
 
-                    *pLen=FOUR_BYTES;
+                        *pLen=FOUR_BYTES;
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
             }
 
@@ -9675,11 +9691,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FDCB_RRIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op1);
-                    retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the RLC (IX+d) or the RLC (IY+d)  */
+                    /* Clean and check the (IX+d) or (IY+d) for Op1 */
+                    if (!clean_ixn(str_op1))
+                    {
+                        retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the RLC (IX+d) or the RLC (IY+d)  */
 
-                    *pLen=FOUR_BYTES;
+                        *pLen=FOUR_BYTES;
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
             }
 
@@ -9714,11 +9736,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FDCB_SLAIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op1);
-                    retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the SLA (IX+d) or the SLA (IY+d)  */
+                    /* Clean and check the (IX+d) or (IY+d) for Op1 */
+                    if (!clean_ixn(str_op1))
+                    {
+                        retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the SLA (IX+d) or the SLA (IY+d)  */
 
-                    *pLen=FOUR_BYTES;
+                        *pLen=FOUR_BYTES;
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }            
             }
 
@@ -9753,11 +9781,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FDCB_SRAIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op1);
-                    retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the SRA (IX+d) or the SRA (IY+d)  */
+                    /* Clean and check the (IX+d) or (IY+d) for Op1 */
+                    if (!clean_ixn(str_op1))
+                    {
+                        retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the SRA (IX+d) or the SRA (IY+d)  */
 
-                    *pLen=FOUR_BYTES;
+                        *pLen=FOUR_BYTES;
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
                 
             }
@@ -9795,11 +9829,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         printf("THIS IS CODE_FDCB_SRLIYD\n");
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op1);
-                    retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the SRL (IX+d) or the SRA (IY+d)  */
+                    /* Clean and check the (IX+d) or (IY+d) for Op1 */
+                    if (!clean_ixn(str_op1))
+                    {
+                        retCode=retCode+(toValue(str_op1+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the SRL (IX+d) or the SRA (IY+d)  */
 
-                    *pLen=FOUR_BYTES;
+                        *pLen=FOUR_BYTES;
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
                 
             }
@@ -9859,12 +9899,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FD_INCIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op1);
-
-                    retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
-                    *pLen=THREE_BYTES;
-                    str_op1[0]='\0';
+                    /* Clean and check the (IX+d) or (IY+d) for Op1 */
+                    if (!clean_ixn(str_op1))
+                    {
+                        retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
+                        *pLen=THREE_BYTES;
+                        str_op1[0]='\0';
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
             }
 
@@ -9921,12 +9966,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FD_DECIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op1);
-
-                    retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
-                    *pLen=THREE_BYTES;
-                    str_op1[0]='\0';
+                    /* Clean and check the (IX+d) or (IY+d) for Op1 */
+                    if (!clean_ixn(str_op1))
+                    {
+                        retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
+                        *pLen=THREE_BYTES;
+                        str_op1[0]='\0';
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
             }
 
@@ -9956,12 +10006,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FD_ANDIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op1);
-
-                    retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
-                    *pLen=THREE_BYTES;
-                    str_op1[0]='\0';
+                    /* Clean and check the (IX+d) or (IY+d) for Op1 */
+                    if (!clean_ixn(str_op1))
+                    {
+                        retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
+                        *pLen=THREE_BYTES;
+                        str_op1[0]='\0';
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
 
                 /* Check if it is a AND n instruction    */
@@ -10008,12 +10063,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FD_ORIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op1);
-
-                    retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
-                    *pLen=THREE_BYTES;
-                    str_op1[0]='\0';
+                    /* Clean and check the (IX+d) or (IY+d) for Op1 */
+                    if (!clean_ixn(str_op1))
+                    {
+                        retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
+                        *pLen=THREE_BYTES;
+                        str_op1[0]='\0';
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
 
                 /* Check if it is a AND n instruction    */
@@ -10060,12 +10120,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FD_XORIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op1);
-
-                    retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
-                    *pLen=THREE_BYTES;
-                    str_op1[0]='\0';
+                    /* Clean and check the (IX+d) or (IY+d) for Op1 */
+                    if (!clean_ixn(str_op1))
+                    {
+                        retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
+                        *pLen=THREE_BYTES;
+                        str_op1[0]='\0';
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
 
                 /* Check if it is a AND n instruction    */
@@ -10112,12 +10177,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FD_CPIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op1);
-
-                    retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
-                    *pLen=THREE_BYTES;
-                    str_op1[0]='\0';
+                    /* Clean and check the (IX+d) or (IY+d) for Op1 */
+                    if (!clean_ixn(str_op1))
+                    {
+                        retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
+                        *pLen=THREE_BYTES;
+                        str_op1[0]='\0';
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
 
                 /* Check if it is a CP n instruction    */
@@ -10491,11 +10561,12 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     retCode=(retCode<<SIZE_2_BYTES) + ((word & FIRST_LOWEST_BYTE) << SIZE_1_BYTE) + ((word & SECOND_LOWEST_BYTE)>>SIZE_1_BYTE);     /* Prepare the LD rr,nn   */              
                 }
 
-                /* Check if it is a LD r,(IX+d) instruction    */
-                if (strlen(str_op1)==1 && ((strlen(str_op2)==7) || (strlen(str_op2)==8)) && (strstr(str_op2, "IX") || strstr(str_op2, "IY")))       
+                /* Check if it is a LD r,(IX+d) or LD r,(IY+d) instruction    */
+                if (strlen(str_op1)==1 && ((strlen(str_op2)==7) || (strlen(str_op2)==8)) && (strstr(str_op2, "IX") || strstr(str_op2, "IY")) && str_op2[3]=='+' && str_op2[4]=='#')       
                 {
                     /* Clean the (IX+d) or (IY+d) for Op2 and r for Op1 */
                     retCheck=clean_r(str_op1);
+                    //print("ret=%d", retCheck);
 
                     if (strstr(str_op2, "IX")) 
                     {
@@ -10506,17 +10577,24 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FD_LDRIYD;
                     }
 
-                    retCheck=clean_ixn(str_op2);
-                    
-                    PUSHBIT(retCode, registerToBit(str_op1), 3);                /* Add the first register as bits   */
+                    /* Clean and check the (IX+d) or (IY+d) for Op2 */
+                    if (!clean_ixn(str_op2))
+                    {
+                        PUSHBIT(retCode, registerToBit(str_op1), 3);                /* Add the first register as bits   */
 
-                    retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);     /* Prepare the LD r,(IX+d) or the LD r,(IY+d)  */
+                        retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);     /* Prepare the LD r,(IX+d) or the LD r,(IY+d)  */
 
-                    *pLen=THREE_BYTES;
+                        *pLen=THREE_BYTES;
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
+
                 }
 
                 /* Check if it is a LD (IX+d),r or LD (IY+d),r instruction   */
-                if (strlen(str_op2)==1 && ((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")))       
+                if (strlen(str_op2)==1 && ((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")) && str_op1[3]=='+' && str_op1[4]=='#' )       
                 {
                     /* Clean the  r for Op2 */
                     retCheck=clean_r(str_op2);
@@ -10531,18 +10609,22 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FD_LDIYDR;
                     }
 
+                    /* Clean and check the (IX+d) or (IY+d) for Op1 */
+                    if (!clean_ixn(str_op1))
+                    {
+                        PUSHBIT(retCode, registerToBit(str_op2), 0);                /* Add the register as bits   */
+                        retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);     /* Prepare the LD r,(IX+d) or the LD r,(IY+d)  */
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op1);
-
-                    PUSHBIT(retCode, registerToBit(str_op2), 0);                /* Add the register as bits   */
-                    retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);     /* Prepare the LD r,(IX+d) or the LD r,(IY+d)  */
-
-                    *pLen=THREE_BYTES;
+                        *pLen=THREE_BYTES;
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
 
                 /* Check if it is a LD (IX+d),n or LD (IY+d),n instruction   */
-                if (((strlen(str_op2)==2) || (strlen(str_op2)==3)) && strchr(str_op2, '#') && ((strlen(str_op1)==7) || (strlen(str_op1)==8)) && (strstr(str_op1, "IX") || strstr(str_op1, "IY")))       
+                if (((strlen(str_op2)==2) || (strlen(str_op2)==3)) && strchr(str_op2, '#') && str_op2[0]=='#' && ((strlen(str_op1)==7) || (strlen(str_op1)==8)) && str_op1[3]=='+' && str_op1[4]=='#' && (strstr(str_op1, "IX") || strstr(str_op1, "IY")))       
                 {
                     /* Clean the  n for Op2 */
                     retCheck=clean_n(str_op2);
@@ -10557,14 +10639,19 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FD_LDIYDN;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op1);
+                    /* Clean and check the (IX+d) or (IY+d) for Op1 */
+                    if (!clean_ixn(str_op1))
+                    {
+                        //PUSHBIT(retCode, registerToBit(str_op2), 0);                  /* Add the register as bits   */
+                        retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
+                        retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);         /* Prepare the LD r,(IX+d) or the LD r,(IY+d)  */
 
-                    //PUSHBIT(retCode, registerToBit(str_op2), 0);                /* Add the register as bits   */
-                    retCode=(retCode<<8)+toValue(str_op1+1, pLen, &lenEff);
-                    retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);     /* Prepare the LD r,(IX+d) or the LD r,(IY+d)  */
-
-                    *pLen=FOUR_BYTES;
+                        *pLen=FOUR_BYTES;
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
 
                 /* Check if it is a LD r,(HL) or a LD A,(BC) or a LD A,(DE) instruction    */
@@ -10710,7 +10797,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     PUSHBIT(retCode, registerToBit(str_op2), 0);    /* Add the second register as bits   */
                 }
 
-                /* Check if it is a ADD A,(IX+d) instruction    */
+                /* Check if it is a ADD A,(IX+d) or ADD A,(IY+d) instruction    */
                 if (!strcmp(str_op1, "A") && ((strlen(str_op2)==7) || (strlen(str_op2)==8)) && (strstr(str_op2, "IX") || strstr(str_op2, "IY")))       
                 {
                     if (strstr(str_op2, "IX"))
@@ -10723,12 +10810,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FD_ADDAIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op2);
-
-                    retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);
-                    *pLen=THREE_BYTES;
-                    str_op2[0]='\0';
+                    /* Clean and check the (IX+d) or (IY+d) for Op2 */
+                    if (!clean_ixn(str_op2))
+                    {
+                        retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);
+                        *pLen=THREE_BYTES;
+                        str_op2[0]='\0';
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
 
                 /* Check if it is a ADD A,n instruction    */
@@ -10796,7 +10888,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     *pLen=ONE_BYTE;
                 }
 
-                /* Check if it is a ADC A,(IX+d) instruction    */
+                /* Check if it is a ADC A,(IX+d) or ADC A,(IY+d) instruction    */
                 if (!strcmp(str_op1, "A") && ((strlen(str_op2)==7) || (strlen(str_op2)==8)) && (strstr(str_op2, "IX") || strstr(str_op2, "IY")))       
                 {
                     if (strstr(str_op2, "IX"))
@@ -10809,12 +10901,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FD_ADCAIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op2);
-
-                    retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);
-                    *pLen=THREE_BYTES;
-                    str_op2[0]='\0';
+                    /* Clean and check the (IX+d) or (IY+d) for Op2 */
+                    if (!clean_ixn(str_op2))
+                    {
+                        retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);
+                        *pLen=THREE_BYTES;
+                        str_op2[0]='\0';
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
 
                 /* Check if it is a ADC A,n instruction    */
@@ -10850,7 +10947,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     PUSHBIT(retCode, registerToBit(str_op2), 0);    /* Add the second register as bits   */
                 }
 
-                /* Check if it is a SUB A,(IX+d) instruction    */
+                /* Check if it is a SUB A,(IX+d) or SUB A,(IY+d) instruction    */
                 if (!strcmp(str_op1, "A") && ((strlen(str_op2)==7) || (strlen(str_op2)==8)) && (strstr(str_op2, "IX") || strstr(str_op2, "IY")))       
                 {
                     if (strstr(str_op2, "IX"))
@@ -10863,12 +10960,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FD_SUBAIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op2);
-
-                    retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);
-                    *pLen=THREE_BYTES;
-                    str_op2[0]='\0';
+                    /* Clean and check the (IX+d) or (IY+d) for Op2 */
+                    if (!clean_ixn(str_op2))
+                    {
+                        retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);
+                        *pLen=THREE_BYTES;
+                        str_op2[0]='\0';
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
 
                 /* Check if it is a SUB A,n instruction    */
@@ -10904,7 +11006,7 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                     PUSHBIT(retCode, registerToBit(str_op2), 0);    /* Add the second register as bits   */
                 }
 
-                /* Check if it is a SBC A,(IX+d) instruction    */
+                /* Check if it is a SBC A,(IX+d) or SBC A,(IY+d) instruction    */
                 if (!strcmp(str_op1, "A") && ((strlen(str_op2)==7) || (strlen(str_op2)==8)) && (strstr(str_op2, "IX") || strstr(str_op2, "IY")))       
                 {
                     if (strstr(str_op2, "IX"))
@@ -10917,12 +11019,17 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FD_SBCAIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op2);
-
-                    retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);
-                    *pLen=THREE_BYTES;
-                    str_op2[0]='\0';
+                    /* Clean and check the (IX+d) or (IY+d) for Op2 */
+                    if (!clean_ixn(str_op2))
+                    {
+                        retCode=(retCode<<8)+toValue(str_op2+1, pLen, &lenEff);
+                        *pLen=THREE_BYTES;
+                        str_op2[0]='\0';
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
 
                 /* Check if it is a SBC A,n instruction    */
@@ -11020,13 +11127,18 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FDCB_BITBIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op2);
-                    
-                    retCode=retCode+(toValue(str_op2+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the BIT b,(IX+d) or the RLC (IY+d)  */
-                    PUSHBIT(retCode, toValue(str_op1, pLen, &lenEff), 3);
+                    /* Clean and check the (IX+d) or (IY+d) for Op2 */
+                    if (!clean_ixn(str_op2))
+                    {
+                        retCode=retCode+(toValue(str_op2+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the BIT b,(IX+d) or the RLC (IY+d)  */
+                        PUSHBIT(retCode, toValue(str_op1, pLen, &lenEff), 3);
 
-                    *pLen=FOUR_BYTES;
+                        *pLen=FOUR_BYTES;
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
             }
 
@@ -11064,13 +11176,18 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FDCB_RESBIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op2);
-                    
-                    retCode=retCode+(toValue(str_op2+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the RES b,(IX+d) or the RLC (IY+d)  */
-                    PUSHBIT(retCode, toValue(str_op1, pLen, &lenEff), 3);
+                    /* Clean and check the (IX+d) or (IY+d) for Op2 */
+                    if (!clean_ixn(str_op2))
+                    {
+                        retCode=retCode+(toValue(str_op2+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the RES b,(IX+d) or the RLC (IY+d)  */
+                        PUSHBIT(retCode, toValue(str_op1, pLen, &lenEff), 3);
 
-                    *pLen=FOUR_BYTES;
+                        *pLen=FOUR_BYTES;
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
             }
 
@@ -11108,13 +11225,18 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
                         retCode=CODE_FDCB_SETBIYD;
                     }
 
-                    /* Clean the (IX+d) or (IY+d) for Op1 */
-                    retCheck=clean_ixn(str_op2);
-                    
-                    retCode=retCode+(toValue(str_op2+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the SET b,(IX+d) or the RLC (IY+d)  */
-                    PUSHBIT(retCode, toValue(str_op1, pLen, &lenEff), 3);
+                    /* Clean and check the (IX+d) or (IY+d) for Op2 */
+                    if (!clean_ixn(str_op2))
+                    {
+                        retCode=retCode+(toValue(str_op2+1, pLen, &lenEff)<<SIZE_1_BYTE);         /* Prepare the SET b,(IX+d) or the RLC (IY+d)  */
+                        PUSHBIT(retCode, toValue(str_op1, pLen, &lenEff), 3);
 
-                    *pLen=FOUR_BYTES;
+                        *pLen=FOUR_BYTES;
+                    }
+                    else
+                    {
+                        retCode=NOT_DECODED;
+                    }
                 }
             }
 
