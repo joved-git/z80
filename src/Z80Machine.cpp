@@ -11523,7 +11523,7 @@ bool Z80Machine::analysis()
                         printf("0x4E      - LD C,(HL)\n"); 
                         printf("0x70      - LD (HL),B\n");
                         printf("0x71      - LD (HL),C\n");
-                        printf("0xDD7Eii  - LD A,(IX+ii)\n\n");
+                        printf("0xDD7Edd  - LD A,(IX+dd)\n\n");
                         break;
 
                     /* Mode switching       */
