@@ -10448,7 +10448,6 @@ uint32_t Z80Machine::findMachineCode(char *pInstruction, uint8_t *pLen)
 
                     retCode=(retCode<<SIZE_1_BYTE)+toValue(str_op2+1, pLen, &lenEff);     /* Prepare the LD r,n   */
                     *pLen=TWO_BYTES;
-                    printf("LD r,n\n");
                 }
 
                 /* Check if it is a LD rr,nn, LD IX,nn or a LD IY,nn instruction    */
@@ -11517,14 +11516,14 @@ bool Z80Machine::analysis()
             
                     case CMD_EXAMPLE:
                         printf("\n");
-                        printf("0x32aaaa - LD (aaaa),A\n");
-                        printf("0x36nn   - LD (HL),nn\n");
-                        printf("0x3Aaaaa - LD A,(aaaa)\n");
-                        printf("00x46    - LD B,(HL)\n"); 
-                        printf("00x4E    - LD C,(HL)\n"); 
-                        printf("00x70    - LD (HL),B\n");
-                        printf("00x71    - LD (HL),C\n\n");
-
+                        printf("0x32aaaa  - LD (aaaa),A\n");
+                        printf("0x36nn    - LD (HL),nn\n");
+                        printf("0x3Aaaaa  - LD A,(aaaa)\n");
+                        printf("0x46      - LD B,(HL)\n"); 
+                        printf("0x4E      - LD C,(HL)\n"); 
+                        printf("0x70      - LD (HL),B\n");
+                        printf("0x71      - LD (HL),C\n");
+                        printf("0xDD7Eii  - LD A,(IX+ii)\n\n");
                         break;
 
                     /* Mode switching       */
@@ -11662,7 +11661,7 @@ bool Z80Machine::analysis()
                     case CMD_ABOUT:
                         printf("\nZ80 ASM emulator. Ver: %s\n", VERSION);
                         printf("\nVisit https://github.com/joved-git/z80\n");
-                        printf("Joved - 2024-2025\n");
+                        printf("Joved - 2024-2026\n");
                         break;
                 }
                 break;
