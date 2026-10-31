@@ -24,7 +24,7 @@
 #define SIGN(a)                 (a>>7)
 #define ZERO(a)                 (a==0?1:0)
 #define EVEN(a)                 (calcParity(a)) 
-#define ODD (a)                 (!EVEN(a))
+#define ODD(a)                  (!EVEN(a))
 #define BIT(a, n)               EXTRACT (a, n, 1)
 #define REVERT(a)               a=((a & FIRST_LOWEST_BYTE)<<8) | ((a & SECOND_LOWEST_BYTE)>>8);
 #define UPPER(a)                (a>>4)
@@ -45,7 +45,7 @@
 
 /* Natural instruction codes    */
 #define CODE_NO_INSTRUCTION (0b11001011)                // 0xDE
-#define CODE_NOP            (0b00000000)                // 0X00     // NOP
+#define CODE_NOP            (0b00000000)                // 0x00     // NOP
 #define CODE_LDBCA          (0b00000010)                // 0x02     // LD (BC),A
 #define CODE_RLCA           (0b00000111)                // 0x07     // RLCA
 #define CODE_EXAFAF         (0b00001000)                // 0x08     // EX AF,AF'
@@ -72,6 +72,7 @@
 #define CODE_JRCE           (0b00111000)                // 0x38     // JRCE
 #define CODE_LDANN          (0b00111010)                // 0x3A     // LD A,(nn)
 #define CODE_CCF            (0b00111111)                // 0x3F     // CCF
+#define CODE_HALT           (0b01110110)                // 0x76     // HALT
 #define CODE_ADDAHL         (0b10000110)                // 0x86     // ADD A,(HL)
 #define CODE_ADCAHL         (0b10001110)                // 0x8E     // ADC A,(HL)
 #define CODE_SUBAHL         (0b10010110)                // 0x96     // SUB A,(HL)
@@ -103,7 +104,6 @@
 #define CODE_LDRHL          (0b01000110)                            // LD r,(HL)
 #define CODE_LDHLR          (0b01110000)                            // LD (HL),r
 #define CODE_LDRN           (0b00000110)                            // LD r,n
-#define CODE_HALT           (0b01110110)                            // HALT
 #define CODE_LDRRNN         (0b00000001)                            // LD rr,nn
 #define CODE_INCR           (0b00000100)                            // INC r
 #define CODE_INCRR          (0b00000011)                            // INC rr

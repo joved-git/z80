@@ -11470,7 +11470,7 @@ bool Z80Machine::analysis()
                             printf("a <code>    Translate <code> to assembly langage.\n");
                             printf("              Example: cb22 gives SLA D\n");
                             printf("c <cmd>     Translate <cmd> to machine code.\n");
-                            printf("              Example: ld c,b gives 0x41\n");
+                            printf("              Example: ld b,c gives 0x41\n");
                             printf("R           Display all registers.\n");
                             printf("m <addr>    Dump 16 bytes memory from <addr>.\n");
                             printf("m (SP)      Dump 16 bytes memory from (SP).\n");
@@ -11495,7 +11495,7 @@ bool Z80Machine::analysis()
                             printf("a <code>    Translate <code> to assembly langage.\n");
                             printf("              Example: cb22 gives SLA D\n");
                             printf("c <cmd>     Translate <cmd> to machine code.\n");
-                            printf("              Example: ld c,b gives 0x41\n");
+                            printf("              Example: ld b,c gives 0x41\n");
                             printf("r           Display main registers.\n");
                             printf("R           Display all registers.\n");
                             printf("m <addr>    Dump 16 bytes memory from <addr>.\n");
