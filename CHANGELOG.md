@@ -1,3 +1,10 @@
+# 1.3.2
+Correct issues #36 and #37 (see github).
+
+# 1.3.1
+In the 'e' menu, change (IX+ii) to (IX+dd)
+Remove the 'ld r,n' message (issue #34) and update the 'e' menu
+
 # 1.3.0
 Improve the detection of "LD (IX+d),n" and "LD (IY+d),n". 
 LD (IX+d),r or LD (IY+d),r, LD (IX+d),n or LD (IY+d),n are done.
