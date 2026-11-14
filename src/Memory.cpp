@@ -64,9 +64,9 @@ void Memory::setAddress(uint16_t pAddress, uint16_t pValue)
 }
 
 /* This method initialize the memory.               */
-void Memory::memInit(uint16_t pStart, uint16_t pSize, uint8_t pValue)
+void Memory::memInit(uint16_t pStart, uint32_t pSize, uint8_t pValue)
 {
-    for (uint16_t addr=pStart; addr<pStart+pSize; addr++)
+    for (uint32_t addr=pStart; addr<pStart+pSize; addr++)
     {
         set8bitsValue(addr, pValue);
     }

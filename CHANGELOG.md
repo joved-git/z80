@@ -1,3 +1,6 @@
+# 1.3.3
+Change the memory size from 0xFFFF to 0x10000.
+
 # 1.3.2
 Correct issues #36 and #37 (see github).
 

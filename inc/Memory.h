@@ -7,8 +7,8 @@
 
 #include "../inc/opcode.h"
 
-#define MEM_SIZE                0xFFFF          /* The size of the memory                                   */
-#define MEM_BYTE_INIT           0xCC            /* The size of the memory                                   */
+#define MEM_SIZE                0x10000         /* The size of the memory                                   */
+#define MEM_BYTE_INIT           0xCC            /* The initial value of all the memory bytes                */
 
 class Memory
 {
@@ -54,7 +54,7 @@ public:
     /// @param  The number of byte(s) to be written.
     /// @param  The byte to be written.
     /// @return Nothing.
-    void memInit(uint16_t, uint16_t, uint8_t);
+    void memInit(uint16_t, uint32_t, uint8_t);
 
 private:
     uint8_t *mMemory;
