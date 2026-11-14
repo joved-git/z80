@@ -3,7 +3,7 @@
 Memory::Memory()
 {
     /* Create the memory    */
-    mMemory=(uint8_t *) malloc(MEM_SIZE*sizeof(uint8_t));
+    mMemory=(uint8_t *) malloc((MEM_SIZE)*sizeof(uint8_t));
 
     if (!mMemory) 
     {
@@ -12,7 +12,9 @@ Memory::Memory()
     else
     {
         /* Initialize memory with (MEM_BYTE_INIT)  */
-        memInit(0x0000, MEM_SIZE, MEM_BYTE_INIT);
+        printf("avant...");
+        memInit(0x0000, (uint32_t) MEM_SIZE, MEM_BYTE_INIT);
+        printf("apres...");
         //printf("Initialize memory with %02X\n", MEM_BYTE_INIT);
     }
 }
@@ -68,6 +70,6 @@ void Memory::memInit(uint16_t pStart, uint32_t pSize, uint8_t pValue)
 {
     for (uint32_t addr=pStart; addr<pStart+pSize; addr++)
     {
-        set8bitsValue(addr, pValue);
+        set8bitsValue((uint16_t) addr, pValue);
     }
 }
